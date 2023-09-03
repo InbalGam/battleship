@@ -27,8 +27,9 @@ authRouter.post('/register', async (req, res) => {
             return res.status(400).json({msg: 'Email already exist, choose a different email'});
         }
 
+        const hashedPassword = await passwordHash(password, 10);
         const timestamp = new Date(Date.now());
-        await pool.query('INSERT INTO users (username, nickname, password, created_at) VALUES ($1, $2, $3, $4) returning *', [username, nickname, password, timestamp]);
+        await pool.query('INSERT INTO users (username, nickname, password, created_at) VALUES ($1, $2, $3, $4) returning *', [username, nickname, hashedPassword, timestamp]);
         return res.status(201).json({msg: 'Success creating user'});
     } catch(e) {
         res.status(500);
