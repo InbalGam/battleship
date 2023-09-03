@@ -97,6 +97,10 @@ authRouter.get('/logout', function(req, res, next){
 authRouter.put('/profile', async (req, res, next) => { 
     const { nickname } = req.body;
 
+    if (!nickname) {
+        return res.status(400).json({msg: 'Nickname must be specified'});
+    }
+    
     try {
         const timestamp = new Date(Date.now());
         await pool.query('update users set nickname = $2, modified_at = $3 where id = $1;', [req.user.id, nickname, timestamp]);
