@@ -47,11 +47,11 @@ authRouter.get("/profile", async (req, res) => {
     try {
         const result = await pool.query('select * from users where id = $1', [req.user.id]);
         const userData = {
-            username: result.rows.username,
-            nickname: result.rows.nickname,
+            username: result.rows[0].username,
+            nickname: result.rows[0].nickname,
             user_score: {
-                wins: result.rows.wins,
-                loses: result.rows.loses
+                wins: result.rows[0].wins,
+                loses: result.rows[0].loses
             }
         }
         res.status(200).json(userData);
