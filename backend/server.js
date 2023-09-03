@@ -76,8 +76,8 @@ passport.use(new GoogleStrategy({
         // The Google account has not logged in to this app before.
         // Create a new user record and link it to the Google account.
         const timestamp = new Date(Date.now());
-        const user = await pool.query('INSERT INTO users (username, first_name, last_name, nickname, created_at) VALUES ($1, $2, $3, $4, $5) returning *', [profile.emails[0].value, profile.name.givenName, profile.name.familyName, profile.displayName, timestamp]);
-        await pool.query('INSERT INTO federated_credentials (user_id, provider, subject) VALUES ($1, $2, $3)', [user.rows[0].id, issuer, profile.id]); // TODO
+        const user = await pool.query('INSERT INTO users (username, nickname, created_at) VALUES ($1, $2, $3) returning *', [profile.emails[0].value, profile.displayName, timestamp]);
+        await pool.query('INSERT INTO federated_credentials (user_id, provider, subject) VALUES ($1, $2, $3)', [user.rows[0].id, issuer, profile.id]);
         return done(null, user.rows[0]);
       } else {
         // The Google account has previously logged in to the app.  Get the
