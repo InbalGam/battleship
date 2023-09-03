@@ -7,5 +7,5 @@ public/js/bundle.js.map
 .env
 
 # tests sql files
-tests/db.sql
-tests/delete_all.sql
+test/db.sql
+test/delete_all.sql
