@@ -34,13 +34,14 @@ gameRouter.post('/games', async (req, res) => {
         await pool.query('INSERT INTO games (user1, user2, dimension, state, created_at) VALUES ($1, $2, $3, $4, $5) returning *', [req.user.id, check.rows[0].id, dimension, 'invited', timestamp]);
         return res.status(201).json({msg: 'Game created'});
     } catch(e) {
-        res.status(500);
+        res.status(500).json({msg: 'Server error'});
     }
 });
 
 
 // Get all user games
 gameRouter.get('/games', async (req, res) => {
+    console.log('here1');
     let activeGames = [];
     let gameInvitations = [];
 
@@ -49,6 +50,7 @@ gameRouter.get('/games', async (req, res) => {
         if (userStatus.rows.length === 0) {
             return res.status(400).json({msg: 'User does not exists'});
         }
+        console.log('here2');
 
         const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
         from games g join shots s on g.id = s.game_id join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`, [req.user.id, 'user1_turn', 'user2_turn']);
@@ -56,9 +58,12 @@ gameRouter.get('/games', async (req, res) => {
             activeGames.push(...gamesShots.rows);
         }
 
+        console.log('here3');
+
         const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
         from games g join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`, [req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready']);
 
+        console.log('here4');
         otherGames.rows.map(game => {
             if (game.state === 'invited') {
                 gameInvitations.push({
@@ -71,7 +76,7 @@ gameRouter.get('/games', async (req, res) => {
 
         otherGames.rows.map(game => {
             if (game.state !== 'invited') {
-                activeGames.push(...{
+                activeGames.push({
                     game_id: game.id,
                     opponent: game.opponent,
                     board_dimension: game.dimension,
@@ -92,7 +97,8 @@ gameRouter.get('/games', async (req, res) => {
 
         return res.status(200).json(finalResults);
     } catch (e) {
-        res.status(500);
+        console.log(e);
+        res.status(500).json({msg: 'Server error'});
     }
 });
 
@@ -118,7 +124,7 @@ gameRouter.put('/games/:game_id', async (req, res) => {
         return res.status(200).json({msg: 'game accepted by opponent'});
 
     } catch(e) {
-        res.status(500);
+        res.status(500).json({msg: 'Server error'});
     };
 });
 
@@ -144,7 +150,7 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
         return res.status(200).json({msg: 'game deleted by opponent'});
 
     } catch(e) {
-        res.status(500);
+        res.status(500).json({msg: 'Server error'});
     };
 });
 
