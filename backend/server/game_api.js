@@ -12,6 +12,15 @@ gameRouter.use('/', (req, res, next) => {
 });
 
 
+gameRouter.use('/games/:game_id', async (req, res, next) => {
+    const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+    if (game.rows.length === 0) {
+        return res.status(400).json({msg: 'Game does not exist'});
+    }
+    next();
+});
+
+
 // Create a new game
 gameRouter.post('/games', async (req, res) => {
     const {opponent, dimension} = req.body;
@@ -106,9 +115,6 @@ gameRouter.get('/games', async (req, res) => {
 gameRouter.put('/games/:game_id', async (req, res) => {
     try {
         const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        if (game.rows.length === 0) {
-            return res.status(400).json({msg: 'Game does not exist'});
-        }
         const gameDetails = game.rows[0];
 
         if (req.user.id !== gameDetails.user2) {
@@ -132,9 +138,6 @@ gameRouter.put('/games/:game_id', async (req, res) => {
 gameRouter.delete('/games/:game_id', async (req, res) => {
     try {
         const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        if (game.rows.length === 0) {
-            return res.status(400).json({msg: 'Game does not exist'});
-        }
         const gameDetails = game.rows[0];
 
         if (req.user.id !== gameDetails.user2) {
@@ -178,9 +181,6 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
 
     try {
         const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        if (game.rows.length === 0) {
-            return res.status(400).json({msg: 'Game does not exist'});
-        }
         const gameDetails = game.rows[0];
 
         const gameShips = shipsAmount[gameDetails.dimension];
