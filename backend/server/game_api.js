@@ -13,7 +13,7 @@ gameRouter.use('/', (req, res, next) => {
 
 
 // Create a new game
-gameRouter.post('/games', async (req, res, next) => {
+gameRouter.post('/games', async (req, res) => {
     const {opponent, dimension} = req.body;
 
     if (dimension !== 10 && dimension !== 20) {
@@ -40,58 +40,54 @@ gameRouter.post('/games', async (req, res, next) => {
 
 
 // Get all user games
-gameRouter.get('/games', async (req, res, next) => {
+gameRouter.get('/games', async (req, res) => {
+    let activeGames = [];
+    let gameInvitations = [];
+
     try {
-        const gamesIds = await pool.query('select id from games where user1 = $1 or user2 = $1 and (g.state = "user1_turn" or g.state = "user2_turn") order by g.created_at', [req.user.id]);
-        const gamesShots = await pool.query('select game_id, user_id, count(hit) from shots where game_id = ANY ($1) and hit = true group by game_id, user_id', [gamesIds.rows]);
-        
-        // const gameStatus = gamesIds.map(gameId => {
-        //     let opponentSum = 0;
-        //     let playerSum = 0;
-        //     gamesShots.forEach(gameLine => {
-        //         if (gameLine.game_id === gameId) {
-        //             if (gameLine.user_id === req.user.id) {
-        //                 if (gameLine.hit) {
-        //                     playerSum += 1;
-        //                 }
-        //             } else {
-        //                 if (gameLine.hit) {
-        //                     opponentSum += 1;
-        //                 }
-        //             }
-        //         }
-        //     });
-        //     return {
-        //         game_id: gameId,
-        //         hits: playerSum,
-        //         bombed: opponentSum
-        //     }
-        // });
+        const userStatus = await pool.query('select wins, loses from users where id = $1', [req.user.id]);
 
+        const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
+        from games g join shots s on g.id = s.game_id join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`, [req.user.id, 'user1_turn', 'user2_turn']);
+        if (gamesShots.rows.length > 0) {
+            activeGames.push(...gamesShots.rows);
+        }
 
-        const results = await pool.query('select * from games where user1 = $1 or user2 = $1 and (state = "invited" or state = "accepted" or state = "user1_ready" or state = "user2_ready") order by created_at', [req.user.id]);
-        const gameInvitations = results.rows.map(game => {
+        const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
+        from games g join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`, [req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready']);
+
+        otherGames.rows.map(game => {
             if (game.state === 'invited') {
-                return {
+                gameInvitations.push({
                     game_id: game.id,
-                    opponent: game.user2,
+                    opponent: game.opponent,
                     board_dimension: game.dimension
-                };
+                });
             }
         });
 
-        const activeGames = results.rows.map(game => {
-            if (game.state === 'accepted' || game.state === 'user1_ready' || game.state === 'user2_ready') {
-                return {
+        otherGames.rows.map(game => {
+            if (game.state !== 'invited') {
+                activeGames.push(...{
                     game_id: game.id,
-                    opponent: game.user2,
+                    opponent: game.opponent,
                     board_dimension: game.dimension,
                     hits: 0,
                     bombed: 0
-                };
+                });
             }
         });
 
+        const finalResults = {
+            user_score: {
+                wins: userStatus.rows[0].wins,
+                loses: userStatus.rows[0].loses
+            },
+            invitations: gameInvitations,
+            active_games: activeGames
+        }
+
+        return res.status(200).json(finalResults);
     } catch (e) {
         res.status(500);
     }
