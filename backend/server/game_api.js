@@ -31,7 +31,7 @@ gameRouter.post('/games', async (req, res) => {
         }
 
         const timestamp = new Date(Date.now());
-        await pool.query('INSERT INTO games (user1, user2, dimension, state, created_at) VALUES ($1, $2, $3, $4, $5) returning *', [req.user.id, check.rows[0].id, dimension, 'invited', timestamp]);
+        await pool.query('insert into games (user1, user2, dimension, state, created_at) values ($1, $2, $3, $4, $5) returning *', [req.user.id, check.rows[0].id, dimension, 'invited', timestamp]);
         return res.status(201).json({msg: 'Game created'});
     } catch(e) {
         res.status(500).json({msg: 'Server error'});
@@ -97,7 +97,6 @@ gameRouter.get('/games', async (req, res) => {
 
         return res.status(200).json(finalResults);
     } catch (e) {
-        console.log(e);
         res.status(500).json({msg: 'Server error'});
     }
 });
@@ -154,6 +153,55 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
     };
 });
 
+
+// Placing ships
+const shipsAmount = {
+// ship size : amount of ships
+    10: {
+        5: 1,
+        4: 1,
+        3: 2,
+        2: 1
+    },
+    20: {
+        8: 1,
+        7: 1,
+        6: 2,
+        5: 2,
+        4: 3,
+        3: 4
+    }
+};
+
+gameRouter.post('/games/:game_id/place', async (req, res) => {
+    const { ship_size, start_row, start_col, end_row, end_col } = req.body;
+
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        if (game.rows.length === 0) {
+            return res.status(400).json({msg: 'Game does not exist'});
+        }
+        const gameDetails = game.rows[0];
+
+        const gameShips = shipsAmount[gameDetails.dimension];
+        let shipAmount = gameShips.ship_size;
+
+
+        const check = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+        if (check.rows.length === 0) {
+            await pool.query('insert into ships (game_id, user_id, size, start_row, start_col, end_row, end_col) values ($1, $2, $3, $4, $5, $6, $7)', [req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col]);
+            shipAmount = shipAmount - 1;
+            shipsAmount[gameDetails.dimension].ship_size = shipAmount;
+            return res.status(200).json({msg: `Placed a ship of size ${ship_size}, you have ${shipAmount} more of those to place`});
+        } else {
+            
+        }
+
+    } catch(e) {
+        res.status(500).json({msg: 'Server error'});
+    }
+
+});
 
 
 module.exports = gameRouter;
