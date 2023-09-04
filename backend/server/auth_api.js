@@ -32,7 +32,7 @@ authRouter.post('/register', async (req, res) => {
         await pool.query('INSERT INTO users (username, nickname, password, created_at) VALUES ($1, $2, $3, $4) returning *', [username, nickname, hashedPassword, timestamp]);
         return res.status(201).json({msg: 'Success creating user'});
     } catch(e) {
-        res.status(500);
+        res.status(500).json({msg: 'Server error'});
     }
 });
 
@@ -56,7 +56,7 @@ authRouter.get("/profile", async (req, res) => {
         }
         res.status(200).json(userData);
     } catch (e) {
-        res.status(500);
+        res.status(500).json({msg: 'Server error'});
     }
 });
 
@@ -106,7 +106,7 @@ authRouter.put('/profile', async (req, res, next) => {
         await pool.query('update users set nickname = $2, modified_at = $3 where id = $1;', [req.user.id, nickname, timestamp]);
         res.status(200).json({ msg: 'Updated user' });
     } catch(e) {
-        res.status(500);
+        res.status(500).json({msg: 'Server error'});
     }
 });
 
