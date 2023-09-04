@@ -117,5 +117,28 @@ gameRouter.put('/games/:game_id', async (req, res) => {
 });
 
 
+// delete a game
+gameRouter.delete('/games/:game_id', async (req, res) => {
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+
+        if (req.user.id !== gameDetails.user2) {
+            return res.status(401).json({msg: 'You are not the correct opponent player'});
+        }
+
+        if (gameDetails.state !== 'invited') {
+            return res.status(401).json({msg: 'Cannot delete an active game'});
+        }
+
+        await pool.query('delete from games where id = $1;', [req.params.game_id]);
+        return res.status(200).json({msg: 'game deleted by opponent'});
+
+    } catch(e) {
+        res.status(500);
+    };
+});
+
+
 
 module.exports = gameRouter;
