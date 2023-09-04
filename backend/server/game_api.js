@@ -46,6 +46,9 @@ gameRouter.get('/games', async (req, res) => {
 
     try {
         const userStatus = await pool.query('select wins, loses from users where id = $1', [req.user.id]);
+        if (userStatus.rows.length === 0) {
+            return res.status(400).json({msg: 'User does not exists'});
+        }
 
         const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
         from games g join shots s on g.id = s.game_id join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`, [req.user.id, 'user1_turn', 'user2_turn']);
