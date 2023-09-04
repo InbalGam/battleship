@@ -93,4 +93,29 @@ gameRouter.get('/games', async (req, res) => {
     }
 });
 
+
+// Update game- accept state
+gameRouter.put('/games/:game_id', async (req, res) => {
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+
+        if (req.user.id !== gameDetails.user2) {
+            return res.status(401).json({msg: 'You are not the correct opponent player'});
+        }
+
+        if (gameDetails.state !== 'invited') {
+            return res.status(401).json({msg: 'Cannot accept an active game'});
+        }
+
+        await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, 'accepted']);
+        return res.status(200).json({msg: 'game accepted by opponent'});
+
+    } catch(e) {
+        res.status(500);
+    };
+});
+
+
+
 module.exports = gameRouter;
