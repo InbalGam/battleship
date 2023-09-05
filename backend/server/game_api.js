@@ -158,24 +158,6 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
 
 
 // Placing ships
-const shipsAmount = {
-// ship size : amount of ships
-    10: {
-        5: 1,
-        4: 1,
-        3: 2,
-        2: 1
-    },
-    20: {
-        8: 1,
-        7: 1,
-        6: 2,
-        5: 2,
-        4: 3,
-        3: 4
-    }
-};
-
 function checkShipPlacement(ship_size, start_row, start_col, end_row, end_col, shipInDb) {
     if (shipInDb.start_row === shipInDb.end_row) {
         if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
@@ -220,6 +202,24 @@ async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_
 gameRouter.post('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
+    const shipsAmount = {
+        // ship size : amount of ships
+        10: {
+            5: 1,
+            4: 1,
+            3: 2,
+            2: 1
+        },
+        20: {
+            8: 1,
+            7: 1,
+            6: 2,
+            5: 2,
+            4: 3,
+            3: 4
+        }
+    };
+
     try {
         const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
         const gameDetails = game.rows[0];
@@ -236,8 +236,8 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
             placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails);
         }
 
-    } catch(e) {
-        res.status(500).json({msg: 'Server error'});
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
     }
 
 });
