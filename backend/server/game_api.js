@@ -176,6 +176,47 @@ const shipsAmount = {
     }
 };
 
+function checkShipPlacement(ship_size, start_row, start_col, end_row, end_col, shipInDb) {
+    if (shipInDb.start_row === shipInDb.end_row) {
+        if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+
+        if (start_row === (shipInDb.start_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+
+        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+    } else if (shipInDb.start_row !== shipInDb.end_row) {
+        if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+
+        if (start_col === (shipInDb.start_col + 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+
+        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+
+        if (start_row === (shipInDb.end_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
+            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
+        }
+    }
+};
+
+
+async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails) {
+    await pool.query('insert into ships (game_id, user_id, size, start_row, start_col, end_row, end_col) values ($1, $2, $3, $4, $5, $6, $7)', [game_id, user_id, ship_size, start_row, start_col, end_row, end_col]);
+    shipAmount = shipAmount - 1;
+    shipsAmount[gameDetails.dimension].ship_size = shipAmount;
+    return res.status(200).json({msg: `Placed a ship of size ${ship_size}, you have ${shipAmount} more of those to place`});
+};
+
+
 gameRouter.post('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
@@ -187,14 +228,12 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
         let shipAmount = gameShips.ship_size;
 
 
-        const check = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-        if (check.rows.length === 0) {
-            await pool.query('insert into ships (game_id, user_id, size, start_row, start_col, end_row, end_col) values ($1, $2, $3, $4, $5, $6, $7)', [req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col]);
-            shipAmount = shipAmount - 1;
-            shipsAmount[gameDetails.dimension].ship_size = shipAmount;
-            return res.status(200).json({msg: `Placed a ship of size ${ship_size}, you have ${shipAmount} more of those to place`});
+        const checkPlaced = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+        if (checkPlaced.rows.length === 0) {
+            placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails);
         } else {
-            
+            checkPlaced.rows.forEach(ship => checkShipPlacement(ship_size, start_row, start_col, end_row, end_col, ship));
+            placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails);
         }
 
     } catch(e) {
