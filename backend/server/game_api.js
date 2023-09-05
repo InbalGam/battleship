@@ -158,43 +158,71 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
 
 
 // Placing ships
-function checkShipPlacement(ship_size, start_row, start_col, end_row, end_col, shipInDb) {
-    if (shipInDb.start_row === shipInDb.end_row) {
-        if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
-
-        if (start_row === (shipInDb.start_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
-
-        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
-    } else if (shipInDb.start_row !== shipInDb.end_row) {
-        if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
-
-        if (start_col === (shipInDb.start_col + 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
-
-        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
-
-        if (start_row === (shipInDb.end_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return res.status(400).json({msg: 'Ship cannot be next to another ship'});
-        }
+const shipsAmount = {
+    // ship size : amount of ships
+    10: {
+        5: 1,
+        4: 1,
+        3: 2,
+        2: 1
+    },
+    20: {
+        8: 1,
+        7: 1,
+        6: 2,
+        5: 2,
+        4: 3,
+        3: 4
     }
 };
 
 
-async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails) {
+function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
+    if (shipInDb.start_row === shipInDb.end_row) {
+        if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
+            return 1;
+        }
+
+        if (start_row === (shipInDb.start_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
+            return 1;
+        }
+
+        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
+            return 1;
+        }
+
+        if (start_row < shipInDb.start_row && end_row > shipInDb.start_row && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))) {
+            return 1;
+        }
+    } else if (shipInDb.start_row !== shipInDb.end_row) {
+        if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
+            return 1;
+        }
+
+        if (start_col === (shipInDb.start_col + 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
+            return 1;
+        }
+
+        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
+            return 1;
+        }
+
+        if (start_row === (shipInDb.end_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
+            return 1;
+        }
+
+        if (start_col < shipInDb.start_col && end_col > shipInDb.start_col && (start_row >= (shipInDb.start_row - 1) && start_row <= (shipInDb.end_row + 1))) {
+            return 1;
+        }
+    }
+    return 0;
+};
+
+
+async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails, res) {
     await pool.query('insert into ships (game_id, user_id, size, start_row, start_col, end_row, end_col) values ($1, $2, $3, $4, $5, $6, $7)', [game_id, user_id, ship_size, start_row, start_col, end_row, end_col]);
     shipAmount = shipAmount - 1;
-    shipsAmount[gameDetails.dimension].ship_size = shipAmount;
+    shipsAmount[gameDetails.dimension][ship_size.toString()] = shipAmount;
     return res.status(200).json({msg: `Placed a ship of size ${ship_size}, you have ${shipAmount} more of those to place`});
 };
 
@@ -202,38 +230,56 @@ async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_
 gameRouter.post('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
-    const shipsAmount = {
-        // ship size : amount of ships
-        10: {
-            5: 1,
-            4: 1,
-            3: 2,
-            2: 1
-        },
-        20: {
-            8: 1,
-            7: 1,
-            6: 2,
-            5: 2,
-            4: 3,
-            3: 4
+    if (start_row === end_row) {
+        if ((end_col - start_col + 1) !== ship_size) {
+            return res.status(400).json({ msg: 'Ship is not in the correct size' });
         }
+    } else if (start_col === end_col) {
+        if ((end_row - start_row + 1) !== ship_size) {
+            return res.status(400).json({ msg: 'Ship is not in the correct size' });
+        }
+    } else {
+        return res.status(400).json({ msg: 'Ship is not valid' });
     };
 
     try {
         const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
         const gameDetails = game.rows[0];
 
-        const gameShips = shipsAmount[gameDetails.dimension];
-        let shipAmount = gameShips.ship_size;
+        if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
+            if (req.user.id !== gameDetails.user1 && req.user.id !== gameDetails.user2) {
+                return res.status(400).json({ msg: 'User is not a player in the game' });
+            }
+
+            if (start_row > gameDetails.dimension || start_col > gameDetails.dimension || end_col > gameDetails.dimension || end_row > gameDetails.dimension) {
+                return res.status(400).json({ msg: 'Ship is not inside board borders' });
+            };
+
+            if (start_row < 1 || start_col < 1 || end_col < 1 || end_row < 1) {
+                return res.status(400).json({ msg: 'Ship is not inside board borders' });
+            };
+
+            const gameShips = shipsAmount[gameDetails.dimension];
+            let shipAmount = gameShips[ship_size.toString()];
+
+            if (shipAmount === 0) {
+                return res.status(400).json({ msg: 'There are no more ships of this size to place' });
+            }
 
 
-        const checkPlaced = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-        if (checkPlaced.rows.length === 0) {
-            placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails);
+            const checkPlaced = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+            if (checkPlaced.rows.length === 0) {
+                placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails, res);
+            } else {
+                const shipPlacementResult = checkPlaced.rows.map(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship)).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+                if (shipPlacementResult > 0) {
+                    return res.status(400).json({ msg: 'Ship cannot be next to another ship' });
+                } else {
+                    placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails, res);
+                }
+            }
         } else {
-            checkPlaced.rows.forEach(ship => checkShipPlacement(ship_size, start_row, start_col, end_row, end_col, ship));
-            placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails);
+            return res.status(400).json({ msg: 'Game is not in correct state or user not correct user' });
         }
 
     } catch (e) {
