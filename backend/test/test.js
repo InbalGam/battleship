@@ -382,3 +382,75 @@ describe('Delete a game', function() {
         });
     });
 });
+
+
+describe('Placing ships in game', function() {
+    it('should not succeed - invalid ship size', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/place')
+            .send({ship_size: 5, start_row: 1, start_col: 1, end_row: 7, end_col: 1})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Ship is not in the correct size'});
+            });
+        });
+    });
+
+    it('should not succeed - invalid ship', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/place')
+            .send({ship_size: 5, start_row: 1, start_col: 1, end_row: 7, end_col: 4})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Ship is not valid'});
+            });
+        });
+    });
+
+    it('should not succeed - invalid game state', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/1/place')
+            .send({ship_size: 5, start_row: 1, start_col: 1, end_row: 5, end_col: 1})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Game is not in correct state or user not correct user'});
+            });
+        });
+    });
+
+    it('should succeed - place ship', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/place')
+            .send({ship_size: 4, start_row: 3, start_col: 2, end_row: 3, end_col: 5})
+            .expect(200)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Placed a ship of size 4, you have 0 more of those to place'});
+            });
+        });
+    });
+});
+
