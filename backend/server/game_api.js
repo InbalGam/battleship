@@ -289,4 +289,38 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
 });
 
 
+
+// Unplace a ship
+gameRouter.delete('/games/:game_id/place', async (req, res) => {
+    const { ship_size, start_row, start_col, end_row, end_col } = req.body;
+
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+
+        if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
+            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+            const check = userShips.rows.map(dbShip => {
+                if (dbShip.size === ship_size && dbShip.start_row === start_row && dbShip.start_col === start_col && dbShip.end_row === end_row && dbShip.end_col === end_col) {
+                    return true;
+                }
+            });
+            if (check.includes(true)) {
+                await pool.query('delete from ships where game_id = $1 and user_id = $2 and size = $3 and start_row = $4 and start_col = $5 and end_row = $6 and end_col = $7', 
+                [req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col]);
+                return res.status(200).json({msg: 'Ship deleted'});
+            } else {
+                return res.status(400).json({ msg: 'Ship was not placed cannot be unplaced' });
+            }
+        } else {
+            return res.status(400).json({ msg: 'Game is not in correct state or user not correct user' });
+        }
+
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
+    }
+
+});
+
+
 module.exports = gameRouter;
