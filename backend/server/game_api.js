@@ -20,6 +20,32 @@ gameRouter.use('/games/:game_id', async (req, res, next) => {
     next();
 });
 
+gameRouter.use('/games/:game_id', async (req, res, next) => {
+    const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+    if (game.rows[0].user1 !== req.user.id && game.rows[0].user2 !== req.user.id) {
+        return res.status(400).json({msg: 'User not part of game'});
+    }
+    next();
+});
+
+// Vars
+const shipsAmount = {
+    // ship size : amount of ships
+    10: {
+        5: 1,
+        4: 1,
+        3: 2,
+        2: 1
+    },
+    20: {
+        8: 1,
+        7: 1,
+        6: 2,
+        5: 2,
+        4: 3,
+        3: 4
+    }
+};
 
 // Create a new game
 gameRouter.post('/games', async (req, res) => {
@@ -158,25 +184,6 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
 
 
 // Placing ships
-const shipsAmount = {
-    // ship size : amount of ships
-    10: {
-        5: 1,
-        4: 1,
-        3: 2,
-        2: 1
-    },
-    20: {
-        8: 1,
-        7: 1,
-        6: 2,
-        5: 2,
-        4: 3,
-        3: 4
-    }
-};
-
-
 function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
     if (shipInDb.start_row === shipInDb.end_row) {
         if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
@@ -320,6 +327,43 @@ gameRouter.delete('/games/:game_id/place', async (req, res) => {
         res.status(500).json({ msg: 'Server error' });
     }
 
+});
+
+
+// Game state change to ready / turn
+gameRouter.post('/games/:game_id/ready', async (req,res) => {
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+
+        if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
+            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+
+            const shipAmountDimension = {
+                10: 5,
+                20: 13
+            }
+
+            if (shipAmountDimension[gameDetails.dimension] === userShips.rows.length) {
+                if (gameDetails.state === 'accepted' && gameDetails.user1 === req.user.id) {
+                    await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, 'user1_ready']);    
+                } else if (gameDetails.state === 'accepted' && gameDetails.user2 === req.user.id) {
+                    await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, 'user2_ready']);  
+                } else if (gameDetails.state === 'user1_ready' || gameDetails.state === 'user2_ready') {
+                    const gameState = ['user1_turn', 'user2_turn'];
+                    const randomChoose = Math.floor(Math.random() * 2);
+                    await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, gameState[randomChoose]]); 
+                }
+                return res.status(200).json({msg: 'game state updated'});
+            } else {
+                return res.status(400).json({ msg: 'Player did not finish placeing ships' });
+            }
+        } else {
+            return res.status(400).json({ msg: 'Game is not in correct state or user not correct user' });
+        }
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
+    }
 });
 
 
