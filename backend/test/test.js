@@ -436,6 +436,28 @@ describe('Placing ships in game', function() {
         });
     });
 
+    it('should not succeed - close ships', function () {
+        const agent = request.agent(app);
+        return agent
+            .post('/login')
+            .send({ username: 'inbal@gmail.com', password: 'dafsd444' }) // User exist
+            .redirects(1)
+            .then(() => {
+                return agent
+                    .post('/games/4/place')
+                    .send({ ship_size: 5, start_row: 1, start_col: 1, end_row: 5, end_col: 1 })
+                    .then(() => {
+                        return agent
+                            .post('/games/4/place')
+                            .send({ ship_size: 3, start_row: 1, start_col: 2, end_row: 3, end_col: 2 })
+                            .expect(400)
+                            .then((response) => {
+                                expect(response.body).to.be.deep.equal({ msg: 'Ship cannot be next to another ship' });
+                            });
+                    });
+            });
+    });
+
     it('should succeed - place ship', function() {
         const agent = request.agent(app);
         return agent
