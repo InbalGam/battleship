@@ -47,6 +47,11 @@ const shipsAmount = {
     }
 };
 
+const totalShipsSizes = {
+    10: 17,
+    20: 61
+}
+
 // Create a new game
 gameRouter.post('/games', async (req, res) => {
     const {opponent, dimension} = req.body;
@@ -85,7 +90,6 @@ gameRouter.get('/games', async (req, res) => {
         if (userStatus.rows.length === 0) {
             return res.status(400).json({msg: 'User does not exists'});
         }
-        console.log('here2');
 
         const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
         from games g join shots s on g.id = s.game_id join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`, [req.user.id, 'user1_turn', 'user2_turn']);
@@ -93,12 +97,10 @@ gameRouter.get('/games', async (req, res) => {
             activeGames.push(...gamesShots.rows);
         }
 
-        console.log('here3');
 
         const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
         from games g join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`, [req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready']);
 
-        console.log('here4');
         otherGames.rows.map(game => {
             if (game.state === 'invited') {
                 gameInvitations.push({
@@ -361,6 +363,63 @@ gameRouter.post('/games/:game_id/ready', async (req,res) => {
         } else {
             return res.status(400).json({ msg: 'Game is not in correct state or user not correct user' });
         }
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+
+// Player performs a shot
+async function performAShot(req, row, col, player, opponent, userTurn, userWinner, gameDimension) {
+    if (row > gameDimension || row < 1 || col > gameDimension || col < 1) {
+        return res.status(400).json({ msg: 'The shot is outside of the game board' });
+    }
+
+    const userGameShots = await pool.query('select * from shots where game_id = $1 and user_id = $2', [req.params.game_id, player]);
+    userGameShots.rows.forEach(shot => {
+        if (shot.row === row && shot.col === col) {
+            return res.status(400).json({ msg: 'This cell was already shot' });
+        }
+    });
+
+    const hitResults = await pool.query(`select sum(case when $3 >= start_row and $3 <= end_row and $4 >= start_col and $4 <= end_col then 1 else 0 end) as hits from ships where game_id = $1 and user_id = $2`,
+    [req.params.game_id, opponent, row, col]);
+
+
+    if (hitResults.rows[0] === 1) {
+        const timestamp = new Date(Date.now());
+        await pool.query('insert into shots (game_id, user_id, row, col, hit, performed_at) values ($1, $2, $3, $4, $5, $6)', [req.params.game_id, player, row, col, 'true', timestamp]);
+
+        const successfullShots = userGameShots.rows.filter(shot => shot.hit === true);
+        if (successfullShots.length === totalShipsSizes[gameDimension]) { // winner
+            await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, userWinner]);
+            return res.status(200).json({msg: 'Player performed a shot and won game'});
+        }
+    } else {
+        const timestamp = new Date(Date.now());
+        await pool.query('insert into shots (game_id, user_id, row, col, hit, performed_at) values ($1, $2, $3, $4, $5, $6)', [req.params.game_id, player, row, col, 'false', timestamp]);
+        await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, userTurn]);
+    }
+
+    return res.status(200).json({msg: 'Player performed a shot'});
+};
+
+gameRouter.post('/games/:game_id/shoot', async (req,res) => {
+    const { row, col } = req.body;
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+
+        if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_turn') {
+            performAShot(req, row, col, gameDetails.user1, gameDetails.user2, 'user2_turn', 'user1_won', gameDetails.dimension);
+
+        } else if (gameDetails.user2 === req.user.id && gameDetails.state === 'user2_turn') {
+            performAShot(req, row, col, gameDetails.user2, gameDetails.user1, 'user1_turn', 'user2_won', gameDetails.dimension);
+
+        } else {
+            return res.status(400).json({ msg: 'Game is not in correct state or user not correct user' });
+        }
+
     } catch (e) {
         res.status(500).json({ msg: 'Server error' });
     }
