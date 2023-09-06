@@ -476,3 +476,57 @@ describe('Placing ships in game', function() {
     });
 });
 
+describe('Unplace a ship', function() {
+    it('should not succeed - invalid game state', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .delete('/games/1/place')
+            .send({ship_size: 4, start_row: 3, start_col: 2, end_row: 3, end_col: 5})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Game is not in correct state or user not correct user'});
+            });
+        });
+    });
+
+
+    it('should not succeed - ship was not placed', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .delete('/games/4/place')
+            .send({ship_size: 5, start_row: 2, start_col: 1, end_row: 5, end_col: 1})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Ship was not placed cannot be unplaced'});
+            });
+        });
+    });
+
+
+    it('should unplace a ship', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .delete('/games/4/place')
+            .send({ship_size: 4, start_row: 3, start_col: 2, end_row: 3, end_col: 5})
+            .expect(200)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Ship deleted'});
+            });
+        });
+    });
+});
