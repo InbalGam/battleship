@@ -431,4 +431,24 @@ gameRouter.post('/games/:game_id/shoot', async (req,res) => {
 });
 
 
+// Chat api
+gameRouter.post('/games/:game_id/chat', async (req,res) => {
+    const { message } = req.body;
+
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+        if (gameDetails.user1 !== req.user.id && gameDetails.user2 !== req.user.id) {
+            return res.status(400).json({ msg: 'User is not a player in the game' });
+        };
+
+        const timestamp = new Date(Date.now());
+        await pool.query('insert into chat_messages (game_id, user_id, text, created_at) values ($1, $2, $3, $4)', [req.params.game_id, req.user.id, message, timestamp]);
+        return res.status(200).json({msg: 'sent message'});
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+
 module.exports = gameRouter;
