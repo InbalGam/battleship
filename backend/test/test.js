@@ -530,3 +530,55 @@ describe('Unplace a ship', function() {
         });
     });
 });
+
+describe('Game state change to ready', function() {
+    it('should not succeed - invalid game state', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/1/ready')
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Game is not in correct state or user not correct user'});
+            });
+        });
+    });
+
+
+    it('should not succeed - not finished placing ships', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/5/ready')
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Player did not finish placeing ships'});
+            });
+        });
+    });
+
+
+    it('should change game state', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/ready')
+            .expect(200)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'game state updated'});
+            });
+        });
+    });
+});
