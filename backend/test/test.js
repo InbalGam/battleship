@@ -444,11 +444,11 @@ describe('Placing ships in game', function() {
             .redirects(1)
             .then(() => {
                 return agent
-                    .post('/games/4/place')
+                    .post('/games/5/place')
                     .send({ ship_size: 5, start_row: 1, start_col: 1, end_row: 5, end_col: 1 })
                     .then(() => {
                         return agent
-                            .post('/games/4/place')
+                            .post('/games/5/place')
                             .send({ ship_size: 3, start_row: 1, start_col: 2, end_row: 3, end_col: 2 })
                             .expect(400)
                             .then((response) => {
@@ -582,3 +582,77 @@ describe('Game state change to ready', function() {
         });
     });
 });
+
+
+describe('Sending a message in chat', function() {
+    it('should not succeed - invalid player', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbalNEW@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/chat')
+            .send({message: 'hello'})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
+            });
+        });
+    });
+
+
+    it('should send message', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/chat')
+            .send({message: 'hi there'})
+            .expect(200)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'sent message'});
+            });
+        });
+    });
+});
+
+
+describe('Getting game chat messages', function() {
+    it('should not succeed - invalid player', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbalNEW@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/4/chat')
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
+            });
+        });
+    });
+
+
+    it('should send message', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/4/chat')
+            .expect(200)
+        });
+    });
+});
+
+
+// TODO - testing for a player making a shot - /games/:game_id/shoot
