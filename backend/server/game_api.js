@@ -456,4 +456,68 @@ gameRouter.get('/games/:game_id/chat', async (req,res) => {
 });
 
 
+// Getting game info
+gameRouter.get('/games/:game_id', async (req,res) => {
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        const gameDetails = game.rows[0];
+
+        if (gameDetails.state === 'invited') {
+            return res.status(400).json({ msg: 'Game is in state invited' });
+        };
+
+        let gameUser;
+        let gameOpponent;
+        if (gameDetails.user1 === req.user.id) {
+            gameUser = 'user1';
+            gameOpponent = gameDetails.user2;
+        } else {
+            gameUser = 'user2';
+            gameOpponent = gameDetails.user1;
+        };
+
+        const usersInformation = await pool.query('select * from users where id = $1', [gameOpponent]);
+
+        if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
+            const result = {
+                opponent: usersInformation.rows[0].nickname,
+                phase: 'waiting_for_other_player'
+            }
+        };
+
+        if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
+            const result = {
+                opponent: usersInformation.rows[0].nickname,
+                phase: 'finished',
+                i_won: true
+            }
+        } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
+            const result = {
+                opponent: usersInformation.rows[0].nickname,
+                phase: 'finished',
+                i_won: false
+            }
+        } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
+            const result = {
+                opponent: usersInformation.rows[0].nickname,
+                phase: 'finished',
+                i_won: false
+            }
+        } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
+            const result = {
+                opponent: usersInformation.rows[0].nickname,
+                phase: 'finished',
+                i_won: true
+            }
+        };
+
+
+
+        return res.status(200).json(result);
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+
 module.exports = gameRouter;
