@@ -571,7 +571,7 @@ describe('Game state change to ready', function() {
         const agent = request.agent(app);
         return agent
         .post('/login')
-        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .send({username: 'inbalgam@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(() => {
             return agent
