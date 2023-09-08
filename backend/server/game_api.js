@@ -81,7 +81,6 @@ gameRouter.post('/games', async (req, res) => {
 
 // Get all user games
 gameRouter.get('/games', async (req, res) => {
-    console.log('here1');
     let activeGames = [];
     let gameInvitations = [];
 
@@ -92,16 +91,18 @@ gameRouter.get('/games', async (req, res) => {
         }
         //problam with opponent nickname
         const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
-        from games g join shots s on g.id = s.game_id join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`, [req.user.id, 'user1_turn', 'user2_turn']);
+        from games g join shots s on g.id = s.game_id join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`,
+        [req.user.id, 'user1_turn', 'user2_turn']);
         if (gamesShots.rows.length > 0) {
             activeGames.push(...gamesShots.rows);
         }
 
         //problam with opponent nickname
         const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
-        from games g join users u on u.id = g.user2 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`, [req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready']);
+        from games g join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`,
+        [req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready']);
 
-        otherGames.rows.map(game => {
+        otherGames.rows.forEach(game => {
             if (game.state === 'invited') {
                 gameInvitations.push({
                     game_id: game.id,
@@ -111,7 +112,7 @@ gameRouter.get('/games', async (req, res) => {
             }
         });
 
-        otherGames.rows.map(game => {
+        otherGames.rows.forEach(game => {
             if (game.state !== 'invited') {
                 activeGames.push({
                     game_id: game.id,
