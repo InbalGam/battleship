@@ -730,5 +730,3 @@ describe('Getting game chat messages', function() {
     });
 });
 
-
-// TODO - testing for a player making a shot - /games/:game_id/shoot
