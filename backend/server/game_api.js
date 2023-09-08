@@ -436,9 +436,6 @@ gameRouter.post('/games/:game_id/chat', async (req,res) => {
     const { message } = req.body;
 
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
-
         const timestamp = new Date(Date.now());
         await pool.query('insert into chat_messages (game_id, user_id, text, created_at) values ($1, $2, $3, $4)', [req.params.game_id, req.user.id, message, timestamp]);
         return res.status(200).json({msg: 'sent message'});
