@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 const request = require('supertest');
+const {pool} = require('../server/db');
 
 const app = require('../server');
 const PORT = process.env.PORT || 4001;
@@ -578,6 +579,81 @@ describe('Game state change to ready', function() {
             .expect(200)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'game state updated'});
+            });
+        });
+    });
+});
+
+
+describe('Performing a shot', function() {
+    it('should not succeed - invalid player', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbalNEW@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games/4/shoot')
+            .send({row: 3, col: 4})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
+            });
+        });
+    });
+
+
+    it('should not succeed - cell was shot', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(async () => {
+            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            return agent
+            .post('/games/4/shoot')
+            .send({row: 2, col: 8})
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'This cell was already shot'});
+            });
+        });
+    });
+
+    it('should succeed - false hit', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(async () => {
+            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            return agent
+            .post('/games/4/shoot')
+            .send({row: 9, col: 8})
+            .expect(200)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Player performed a shot'});
+            });
+        });
+    });
+
+    it('should succeed - true hit', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(async () => {
+            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            return agent
+            .post('/games/4/shoot')
+            .send({row: 1, col: 10})
+            .expect(200)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Player performed a shot'});
             });
         });
     });
