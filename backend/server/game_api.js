@@ -458,6 +458,7 @@ gameRouter.get('/games/:game_id/chat', async (req,res) => {
 
 // Getting game info
 gameRouter.get('/games/:game_id', async (req,res) => {
+    let result = {};
     try {
         const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
         const gameDetails = game.rows[0];
@@ -479,32 +480,32 @@ gameRouter.get('/games/:game_id', async (req,res) => {
         const usersInformation = await pool.query('select * from users where id = $1', [gameOpponent]);
 
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
-            const result = {
+            result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'waiting_for_other_player'
             }
         };
 
         if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
-            const result = {
+            result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
                 i_won: true
             }
         } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-            const result = {
+            result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
                 i_won: false
             }
         } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-            const result = {
+            result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
                 i_won: false
             }
         } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-            const result = {
+            result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
                 i_won: true
