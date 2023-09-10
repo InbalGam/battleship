@@ -552,7 +552,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
                 } 
             } else {
                 const placedShips = userShips.rows.map(ship => {
-                    const shipIndex = allGameShips.indexOf(ship.size);
+                    const shipIndex = allGameShips.indexOf(ship.size.toString());
                     allGameShips.splice(shipIndex, 1);
                     return {
                         ship_size: ship.size,
