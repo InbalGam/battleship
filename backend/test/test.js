@@ -306,7 +306,7 @@ describe('Update a game', function() {
         .redirects(1)
         .then(() => {
             return agent
-            .put('/games/5')
+            .put('/games/8')
             .expect(200)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'game accepted by opponent'});
@@ -367,6 +367,26 @@ describe('Delete a game', function() {
         });
     });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+    // for creation of game for next test-
+    it('should post a new game', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .post('/games')
+            .send({opponent: 'inbalgam@gmail.com', dimension: 20})
+            .expect(201)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Game created'});
+            });
+        });
+    });
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
     it('should delete a game', function() {
         const agent = request.agent(app);
         return agent
@@ -375,7 +395,7 @@ describe('Delete a game', function() {
         .redirects(1)
         .then(() => {
             return agent
-            .delete('/games/6')
+            .delete('/games/9')
             .expect(200)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'game deleted by opponent'});
@@ -450,7 +470,7 @@ describe('Placing ships in game', function() {
                     .then(() => {
                         return agent
                             .post('/games/5/place')
-                            .send({ ship_size: 3, start_row: 1, start_col: 2, end_row: 3, end_col: 2 })
+                            .send({ ship_size: 4, start_row: 5, start_col: 2, end_row: 5, end_col: 5 })
                             .expect(400)
                             .then((response) => {
                                 expect(response.body).to.be.deep.equal({ msg: 'Ship cannot be next to another ship' });
@@ -467,8 +487,8 @@ describe('Placing ships in game', function() {
         .redirects(1)
         .then(() => {
             return agent
-            .post('/games/4/place')
-            .send({ship_size: 4, start_row: 3, start_col: 2, end_row: 3, end_col: 5})
+            .post('/games/5/place')
+            .send({ship_size: 4, start_row: 9, start_col: 2, end_row: 9, end_col: 5})
             .expect(200)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'Placed a ship of size 4'});
@@ -558,7 +578,7 @@ describe('Game state change to ready', function() {
         .redirects(1)
         .then(() => {
             return agent
-            .post('/games/5/ready')
+            .post('/games/4/ready')
             .expect(400)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'Player did not finish placeing ships'});
@@ -571,11 +591,11 @@ describe('Game state change to ready', function() {
         const agent = request.agent(app);
         return agent
         .post('/login')
-        .send({username: 'inbalgam@gmail.com', password: 'dafsd444'}) // User exist
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(() => {
             return agent
-            .post('/games/4/ready')
+            .post('/games/5/ready')
             .expect(200)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'game state updated'});
@@ -726,6 +746,108 @@ describe('Getting game chat messages', function() {
             return agent
             .get('/games/4/chat')
             .expect(200)
+        });
+    });
+});
+
+
+describe('Getting game info', function() {
+    it('should not succeed - invalid player', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbalNEW@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/4')
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
+            });
+        });
+    });
+
+    it('should not succeed - invalid game state', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/1')
+            .expect(400)
+            .then((response) => {
+                expect(response.body).to.be.deep.equal({msg: 'Game is in state invited'});
+            });
+        });
+    });
+
+
+    it('should succeed - user1_ready, waiting for others', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/7')
+            .expect(200)
+            .then((response) => {
+                expect(response.body.phase).to.be.deep.equal('waiting_for_other_player');
+            })
+        });
+    });
+
+
+    it('should succeed - user1_won, winner', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/6')
+            .expect(200)
+            .then((response) => {
+                expect(response.body.phase).to.be.deep.equal('finished');
+            })
+        });
+    });
+
+    it('should succeed - placing_pieces', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/8')
+            .expect(200)
+            .then((response) => {
+                expect(response.body.phase).to.be.deep.equal('placing_pieces');
+            })
+        });
+    });
+
+
+    it('should succeed - user1_turn, gamePlay', function() {
+        const agent = request.agent(app);
+        return agent
+        .post('/login')
+        .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
+        .redirects(1)
+        .then(() => {
+            return agent
+            .get('/games/2')
+            .expect(200)
+            .then((response) => {
+                expect(response.body.phase).to.be.deep.equal('gamePlay');
+            })
         });
     });
 });
