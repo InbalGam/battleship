@@ -531,7 +531,101 @@ gameRouter.get('/games/:game_id', async (req,res) => {
         };
 
 
+        // placing_pieces phase
+        if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
+            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
 
+            const gameShips = shipsAmount[gameDetails.dimension];
+            const allGameShips = []; // [5,4,3,3,2]
+            for (key in gameShips) {
+                for (let i = 0; i < gameShips[key]; i++) {
+                    allGameShips.push(key);
+                }
+            };
+
+            if (userShips.rows.length === 0) {
+                result = {
+                    opponent: usersInformation.rows[0].nickname,
+                    phase: 'placing_pieces',
+                    remaining_ships: allGameShips,
+                    placed_ships: []
+                } 
+            } else {
+                const placedShips = userShips.rows.map(ship => {
+                    const shipIndex = allGameShips.indexOf(ship.size);
+                    allGameShips.splice(shipIndex, 1);
+                    return {
+                        ship_size: ship.size,
+                        start_row: ship.start_row,
+                        start_col: ship.start_col,
+                        end_row: ship.end_row,
+                        end_col: ship.end_col
+                    }
+                });
+
+                result = {
+                    opponent: usersInformation.rows[0].nickname,
+                    phase: 'placing_pieces',
+                    remaining_ships: allGameShips,
+                    placed_ships: placedShips
+                } 
+            }
+        };
+
+        // gamePlay phase
+        if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
+            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+            const placedShips = userShips.rows.map(ship => {
+                return {
+                    ship_size: ship.size,
+                    start_row: ship.start_row,
+                    start_col: ship.start_col,
+                    end_row: ship.end_row,
+                    end_col: ship.end_col
+                }
+            });
+
+            let myTurn;
+            if (gameUser === 'user1' && gameDetails.state === 'user1_turn') {
+                myTurn = true;
+            } else if (gameUser === 'user2' && gameDetails.state === 'user1_turn') {
+                myTurn = false;
+            } else if (gameUser === 'user2' && gameDetails.state === 'user2_turn') {
+                myTurn = true;
+            } else if (gameUser === 'user1' && gameDetails.state === 'user2_turn') {
+                myTurn = false;
+            }
+
+            const gameShots = await pool.query('select row, col, hit, case when user_id = $2 then 1 else 0 end as opponent_shot from shots where game_id = $1', [req.params.game_id, gameOpponent]);
+            const shot_sent = [];
+            const shot_recieved = [];
+
+            gameShots.rows.forEach(shot => {
+                if (shot.opponent_shot === 1) {
+                    shot_recieved.push({
+                        row: shot.row,
+                        col: shot.col,
+                        hit: shot.hit
+                    });
+                } else {
+                    shot_sent.push({
+                        row: shot.row,
+                        col: shot.col,
+                        hit: shot.hit
+                    });
+                }
+            });
+
+            result = {
+                opponent: usersInformation.rows[0].nickname,
+                phase: 'gamePlay',
+                my_turn: myTurn,
+                placed_ships: placedShips,
+                shots_sent: shot_sent,
+                shots_recieved: shot_recieved
+            }
+
+        };
 
         return res.status(200).json(result);
     } catch (e) {
