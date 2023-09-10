@@ -228,11 +228,29 @@ function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
 };
 
 
-async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails, res) {
+async function checkShips(req, dimension, ship_size) {
+    const userShips = await pool.query('select size from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+    const gameShips = shipsAmount[dimension];
+    const placedShips = userShips.rows.map(ship => ship.size);
+
+    let count = 0;
+    for (let i = 0; i < placedShips.length; i++) {
+        if (ship_size === placedShips[i]) {
+            count += 1;
+        }
+    };
+
+    if (count < gameShips[ship_size]) {
+        return true; //'can place'
+    } else {
+        return false; //'cannot place'
+    };
+};
+
+
+async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, res) {
     await pool.query('insert into ships (game_id, user_id, size, start_row, start_col, end_row, end_col) values ($1, $2, $3, $4, $5, $6, $7)', [game_id, user_id, ship_size, start_row, start_col, end_row, end_col]);
-    shipAmount = shipAmount - 1;
-    shipsAmount[gameDetails.dimension][ship_size.toString()] = shipAmount;
-    return res.status(200).json({msg: `Placed a ship of size ${ship_size}, you have ${shipAmount} more of those to place`});
+    return res.status(200).json({msg: `Placed a ship of size ${ship_size}`});
 };
 
 
@@ -268,23 +286,21 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
                 return res.status(400).json({ msg: 'Ship is not inside board borders' });
             };
 
-            const gameShips = shipsAmount[gameDetails.dimension];
-            let shipAmount = gameShips[ship_size.toString()];
-
-            if (shipAmount === 0) {
+            const canPlace = await checkShips(req, gameDetails.dimension, ship_size);
+            if (!canPlace) {
                 return res.status(400).json({ msg: 'There are no more ships of this size to place' });
             }
 
 
-            const checkPlaced = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-            if (checkPlaced.rows.length === 0) {
-                placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails, res);
+            const ships = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+            if (ships.rows.length === 0) {
+                await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
             } else {
-                const shipPlacementResult = checkPlaced.rows.map(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship)).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+                const shipPlacementResult = ships.rows.map(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship)).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
                 if (shipPlacementResult > 0) {
                     return res.status(400).json({ msg: 'Ship cannot be next to another ship' });
                 } else {
-                    placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, shipAmount, shipsAmount, gameDetails, res);
+                    await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
                 }
             }
         } else {
@@ -470,15 +486,16 @@ gameRouter.get('/games/:game_id', async (req,res) => {
         let gameUser;
         let gameOpponent;
         if (gameDetails.user1 === req.user.id) {
-            gameUser = 'user1';
-            gameOpponent = gameDetails.user2;
+            gameUser = 'user1'; //string
+            gameOpponent = gameDetails.user2; //id
         } else {
-            gameUser = 'user2';
-            gameOpponent = gameDetails.user1;
+            gameUser = 'user2'; //string
+            gameOpponent = gameDetails.user1; //id
         };
 
         const usersInformation = await pool.query('select * from users where id = $1', [gameOpponent]);
 
+        // waiting_for_other_player phase
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
             result = {
                 opponent: usersInformation.rows[0].nickname,
@@ -486,6 +503,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
             }
         };
 
+        // winner phase
         if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
             result = {
                 opponent: usersInformation.rows[0].nickname,
@@ -511,6 +529,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
                 i_won: true
             }
         };
+
 
 
 
