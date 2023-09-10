@@ -471,7 +471,7 @@ describe('Placing ships in game', function() {
             .send({ship_size: 4, start_row: 3, start_col: 2, end_row: 3, end_col: 5})
             .expect(200)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Placed a ship of size 4, you have 0 more of those to place'});
+                expect(response.body).to.be.deep.equal({msg: 'Placed a ship of size 4'});
             });
         });
     });
