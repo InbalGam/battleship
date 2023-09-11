@@ -3,6 +3,8 @@ import Root from './Components/Root';
 import Home from "./Components/Home";
 import Login from "./Components/Login";
 import Register from "./Components/Register";
+import Logout from "./Components/Logout";
+
 
 function App() {
 
@@ -13,6 +15,7 @@ function App() {
       </Route>
       <Route path='login' element={ <Login/> } />
       <Route path='register' element={ <Register/> } />
+      <Route path='logout' element={ <Logout/> } />
     </Route>
   ));
 

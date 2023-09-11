@@ -26,6 +26,16 @@ async function register(username, password, nickname) {
     return response.status === 200;
 };
 
+async function logout() {
+    const url = `${baseURL}/logout`;
+    const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    return response;
+};
+
 // Game
 async function getGames() {
     const url = `${baseURL}/games`;
@@ -37,5 +47,5 @@ async function getGames() {
     return response;
 };
 
-export {login, register,
+export {login, register, logout,
         getGames};
