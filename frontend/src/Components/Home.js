@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { getGames } from "../Api";
 
+
 function Home() {
     const navigate = useNavigate();
 

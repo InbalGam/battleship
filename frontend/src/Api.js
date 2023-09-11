@@ -1,6 +1,18 @@
 import fetch from 'cross-fetch';
 import {baseURL} from './apiKey';
 
+// Authorization
+async function login(username, password) {
+    const url = `${baseURL}/login`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password})
+    });
+
+    return response.status === 200;
+};
 
 // Game
 async function getGames() {
@@ -13,4 +25,5 @@ async function getGames() {
     return response;
 };
 
-export {getGames};
+export {login, 
+        getGames};
