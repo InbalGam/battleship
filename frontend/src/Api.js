@@ -14,6 +14,18 @@ async function login(username, password) {
     return response.status === 200;
 };
 
+async function register(username, password, nickname) {
+    const url = `${baseURL}/register`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password, nickname})
+    });
+
+    return response.status === 200;
+};
+
 // Game
 async function getGames() {
     const url = `${baseURL}/games`;
@@ -25,5 +37,5 @@ async function getGames() {
     return response;
 };
 
-export {login, 
+export {login, register,
         getGames};

@@ -2,6 +2,7 @@ import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } 
 import Root from './Components/Root';
 import Home from "./Components/Home";
 import Login from "./Components/Login";
+import Register from "./Components/Register";
 
 function App() {
 
@@ -11,6 +12,7 @@ function App() {
       <Route path='/' element={ <Root /> } >
       </Route>
       <Route path='login' element={ <Login/> } />
+      <Route path='register' element={ <Register/> } />
     </Route>
   ));
 
