@@ -36,6 +36,29 @@ async function logout() {
     return response;
 };
 
+async function getProfile() {
+    const url = `${baseURL}/profile`;
+    const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    return response;
+};
+
+async function updateNickname(nickname) {
+    const url = `${baseURL}/profile`;
+    const response = await fetch(url, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nickname})
+    });
+
+    return response.status === 200;
+};
+
+
 // Game
 async function getGames() {
     const url = `${baseURL}/games`;
@@ -82,5 +105,5 @@ async function createNewGame(gameInfo) {
     return response.status === 201;
 };
 
-export {login, register, logout,
+export {login, register, logout, getProfile, updateNickname,
         getGames, acceptGame, deleteAGame, createNewGame};

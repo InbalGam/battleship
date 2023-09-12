@@ -6,6 +6,7 @@ import Register from "./Components/Register";
 import Logout from "./Components/Logout";
 import BoardGame from "./Components/BoardGame";
 import Games from "./Components/Games";
+import Profile from "./Components/Profile";
 import styles from './App.css';
 
 
@@ -17,6 +18,7 @@ function App() {
       <Route path='/' element={ <Root /> } >
         <Route path='board' element={ <BoardGame/> } />
         <Route path='games' element={ <Games/> } />
+        <Route path='profile' element={ <Profile/> } />
       </Route>
       <Route path='login' element={ <Login/> } />
       <Route path='register' element={ <Register/> } />

@@ -5,6 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import { NavLink } from 'react-router-dom';
 
 
 export default function ButtonAppBar() {
@@ -22,10 +23,10 @@ export default function ButtonAppBar() {
             
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Battleship
+          <NavLink to='/' className='navLinks'>Battleship</NavLink>
           </Typography>
-          <Button color="inherit">Profile</Button>
-          <Button color="inherit">Logout</Button>
+          <Button color="inherit"><NavLink to='/profile' className='navLinks'>Profile</NavLink></Button>
+          <Button color="inherit"><NavLink to='/logout' className='navLinks'>Logout</NavLink></Button>
         </Toolbar>
       </AppBar>
     </Box>
