@@ -44,7 +44,7 @@ function Login() {
         <div>
             <p className={'messages'}>{searchParams.get("logout") ? 'Succefully logged out' : ''}</p>
             <p className={'messages'}>{searchParams.get("register") ? 'Succefully registered, you can log in' : ''}</p>
-            <h1 className='loginH1'><GamesIcon /> Battleship</h1>
+            <h1 className='loginH1'>Battleship</h1>
             <form onSubmit={submitLogin} className={'loginForm'}>
                 <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={handleUsernameChange}/>
                 <TextField id="outlined-basic" label="Password" variant="outlined" value={password} onChange={handlePasswordChange}/>
