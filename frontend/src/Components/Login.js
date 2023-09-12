@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
-import GamesIcon from '@mui/icons-material/Games';
 import {baseURL} from '../apiKey';
 
 
