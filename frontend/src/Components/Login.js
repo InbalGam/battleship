@@ -47,7 +47,7 @@ function Login() {
             <h1 className='loginH1'>Battleship</h1>
             <form onSubmit={submitLogin} className={'loginForm'}>
                 <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={handleUsernameChange}/>
-                <TextField id="outlined-basic" label="Password" variant="outlined" value={password} onChange={handlePasswordChange}/>
+                <TextField id="outlined-basic" label="Password" type={"password"} variant="outlined" value={password} onChange={handlePasswordChange}/>
                 {isLoading ? <CircularProgress size={150} className='loader'/> : <button type="submit" value="Submit">Login</button>}
             </form>
             <div className={'authStatus'}>
