@@ -56,7 +56,7 @@ function GameCard(props) {
                             <Typography sx={{ fontSize: 24 }} gutterBottom >
                                 {props.game.opponent}
                             </Typography>
-                            <Typography variant="h5" component="div" >
+                            <Typography variant="h5" component="div" className='gameInfo'>
                                 {props.game.board_dimension} | {'1 shot per turn'} 
                                 {props.active ? <div><p className='gameHits' style={{color: 'green'}}>| {props.game.hits} hits</p> <p className='gameBombed' style={{color: 'red'}}>| {props.game.bombed} bombed </p></div> : ''}
                             </Typography>
