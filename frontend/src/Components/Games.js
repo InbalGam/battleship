@@ -1,4 +1,4 @@
-import { getGames } from "../Api";
+import { getGames, createNewGame } from "../Api";
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Fab from '@mui/material/Fab';
@@ -30,7 +30,6 @@ function Games() {
                 setUserGameInvitations(jsonData.invitations);
                 setUserActiveGames(jsonData.active_games);
                 setIsLoading(false);
-                console.log(jsonData);
             }
         } catch (e) {
             navigate('/error');
@@ -42,8 +41,6 @@ function Games() {
     }, []);
 
 
-    console.log(userGameInvitations);
-    console.log(userActiveGames);
     return (
         <div>
             <div className="upperDiv">
