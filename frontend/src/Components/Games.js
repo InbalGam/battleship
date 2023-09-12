@@ -1,9 +1,11 @@
-import { getGames, createNewGame } from "../Api";
+import { getGames } from "../Api";
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import GameCard from "./GameCard";
+import AddGame from "./AddGame";
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 function Games() {
@@ -11,8 +13,8 @@ function Games() {
     const [userGameInvitations, setUserGameInvitations] = useState([]);
     const [userActiveGames, setUserActiveGames] = useState([]);
     const navigate = useNavigate();
-    const [insertFailed, setInsertFailed] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [showForm, setShowForm] = useState(false);
 
     async function getUserGames() {
         setIsLoading(true);
@@ -41,39 +43,48 @@ function Games() {
     }, []);
 
 
+    function showFormFunc() {
+        setShowForm(!showForm);
+    };
+
+
     return (
         <div>
-            <div className="upperDiv">
-                <Fab variant="extended" color="primary" aria-label="add">
-                    <AddIcon sx={{ mr: 1 }} className="addGame"/> New Game
-                </Fab>
-                <div className="userScore">
-                    <h3>Your Score:</h3>
-                    <p>Wins: {userScore.wins}</p>
-                    <p>Loses: {userScore.loses}</p>
-                    <p>Total score: {userScore.wins - userScore.loses}</p>
-                </div>
-            </div>
-            <div className="invitationGames">
-                <h3>Invitations:</h3>
-                <ul>
-                    {userGameInvitations.map((game, ind) => 
-                        <li key={ind}>
-                            <GameCard invite={true} game={game} active={false} />
-                        </li>
-                    )}
-                </ul>
-            </div>
-            <div className="ongoingGames">
-                <h3>Ongoing games:</h3>
-                <ul>
-                    {userActiveGames.map((game, ind) => 
-                        <li key={ind}>
-                            <GameCard invite={false} game={game} active={true} />
-                        </li>
-                    )}
-                </ul>
-            </div>
+            {isLoading ? <CircularProgress size={150} className='loader' /> :
+                <div>
+                    <div className="upperDiv">
+                        <Fab variant="extended" color="primary" aria-label="add" onClick={showFormFunc}>
+                            <AddIcon sx={{ mr: 1 }} className="addGame" /> New Game
+                        </Fab>
+                        {showForm ? <AddGame setShowForm={setShowForm} setIsLoading={setIsLoading} getUserGames={getUserGames} /> : ''}
+                        <div className="userScore">
+                            <h3>Your Score:</h3>
+                            <p>Wins: {userScore.wins}</p>
+                            <p>Loses: {userScore.loses}</p>
+                            <p>Total score: {userScore.wins - userScore.loses}</p>
+                        </div>
+                    </div>
+                    <div className="invitationGames">
+                        <h3>Invitations:</h3>
+                        <ul>
+                            {userGameInvitations.map((game, ind) =>
+                                <li key={ind}>
+                                    <GameCard invite={true} game={game} active={false} />
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+                    <div className="ongoingGames">
+                        <h3>Ongoing games:</h3>
+                        <ul>
+                            {userActiveGames.map((game, ind) =>
+                                <li key={ind}>
+                                    <GameCard invite={false} game={game} active={true} />
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+                </div>}
         </div>
     );
 };

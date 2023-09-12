@@ -70,5 +70,17 @@ async function deleteAGame(gameId) {
     return response.status === 200;
 };
 
+async function createNewGame(gameInfo) {
+    const url = `${baseURL}/games`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(gameInfo)
+    });
+
+    return response.status === 201;
+};
+
 export {login, register, logout,
-        getGames, acceptGame, deleteAGame};
+        getGames, acceptGame, deleteAGame, createNewGame};
