@@ -5,6 +5,7 @@ import Login from "./Components/Login";
 import Register from "./Components/Register";
 import Logout from "./Components/Logout";
 import BoardGame from "./Components/BoardGame";
+import Games from "./Components/Games";
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       <Route exact path="/" element={<Home />} />
       <Route path='/' element={ <Root /> } >
         <Route path='board' element={ <BoardGame/> } />
+        <Route path='games' element={ <Games/> } />
       </Route>
       <Route path='login' element={ <Login/> } />
       <Route path='register' element={ <Register/> } />
