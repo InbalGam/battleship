@@ -8,8 +8,8 @@ import GameCard from "./GameCard";
 
 function Games() {
     const [userScore, setUserScore] = useState({});
-    const [userGameInvitations, setUserGameInvitations] = useState({});
-    const [userActiveGames, setUserActiveGames] = useState({});
+    const [userGameInvitations, setUserGameInvitations] = useState([]);
+    const [userActiveGames, setUserActiveGames] = useState([]);
     const navigate = useNavigate();
     const [insertFailed, setInsertFailed] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -27,14 +27,8 @@ function Games() {
                     wins: jsonData.user_score.wins,
                     loses: jsonData.user_score.loses
                 }));
-                setUserGameInvitations(prevState => ({
-                    ...prevState,
-                    invitations: jsonData.invitations
-                }));
-                setUserActiveGames(prevState => ({
-                    ...prevState,
-                    activeGames: jsonData.active_games
-                }));
+                setUserGameInvitations(jsonData.invitations);
+                setUserActiveGames(jsonData.active_games);
                 setIsLoading(false);
                 console.log(jsonData);
             }
@@ -48,6 +42,8 @@ function Games() {
     }, []);
 
 
+    console.log(userGameInvitations);
+    console.log(userActiveGames);
     return (
         <div>
             <div className="upperDiv">
@@ -62,11 +58,24 @@ function Games() {
                 </div>
             </div>
             <div className="invitationGames">
-                <p>Invitations:</p>
-                <GameCard />
+                <h3>Invitations:</h3>
+                <ul>
+                    {userGameInvitations.map((game, ind) => 
+                        <li key={ind}>
+                            <GameCard invite={true} game={game} active={false} />
+                        </li>
+                    )}
+                </ul>
             </div>
             <div className="ongoingGames">
-                <p>Ongoing games:</p>
+                <h3>Ongoing games:</h3>
+                <ul>
+                    {userActiveGames.map((game, ind) => 
+                        <li key={ind}>
+                            <GameCard invite={false} game={game} active={true} />
+                        </li>
+                    )}
+                </ul>
             </div>
         </div>
     );

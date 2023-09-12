@@ -47,5 +47,28 @@ async function getGames() {
     return response;
 };
 
+
+async function acceptGame(gameId) {
+    const url = `${baseURL}/games/${gameId}`;
+    const response = await fetch(url, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'}
+    });
+
+    return response.status === 200;
+};
+
+
+async function deleteAGame(gameId) {
+    const url = `${baseURL}/games/${gameId}`;
+    const response = await fetch(url, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+
+    return response.status === 200;
+};
+
 export {login, register, logout,
-        getGames};
+        getGames, acceptGame, deleteAGame};
