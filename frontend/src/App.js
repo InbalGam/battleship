@@ -6,6 +6,7 @@ import Register from "./Components/Register";
 import Logout from "./Components/Logout";
 import BoardGame from "./Components/BoardGame";
 import Games from "./Components/Games";
+import styles from './App.css';
 
 
 function App() {
