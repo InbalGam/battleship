@@ -106,7 +106,8 @@ gameRouter.get('/games', async (req, res) => {
                 gameInvitations.push({
                     game_id: game.id,
                     opponent: game.opponent,
-                    board_dimension: game.dimension
+                    board_dimension: game.dimension,
+                    createdByMe: game.user1 === req.user.id
                 });
             }
         });
