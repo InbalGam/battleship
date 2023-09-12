@@ -1,16 +1,12 @@
 import {  Outlet, NavLink } from "react-router-dom";
 import GamesIcon from '@mui/icons-material/Games';
+import AppBar from './AppBar';
 
 
 function Root() {
     return (
         <div>
-            <div className='nav-bar'>
-                <p><GamesIcon className="GameIcon"/> Battleship Game</p>
-                <div className='nav-links'>
-                    <NavLink to='/logout' className='logoutLink'>Log out</NavLink>
-                </div>
-            </div>
+            <AppBar />
             <Outlet />
         </div>
     );
