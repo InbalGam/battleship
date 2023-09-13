@@ -512,7 +512,8 @@ gameRouter.get('/games/:game_id', async (req,res) => {
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
             result = {
                 opponent: usersInformation.rows[0].nickname,
-                phase: 'waiting_for_other_player'
+                phase: 'waiting_for_other_player',
+                dimension: gameDetails.dimension
             }
         };
 
@@ -521,25 +522,29 @@ gameRouter.get('/games/:game_id', async (req,res) => {
             result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
-                i_won: true
+                i_won: true,
+                dimension: gameDetails.dimension
             }
         } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
             result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
-                i_won: false
+                i_won: false,
+                dimension: gameDetails.dimension
             }
         } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
             result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
-                i_won: false
+                i_won: false,
+                dimension: gameDetails.dimension
             }
         } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
             result = {
                 opponent: usersInformation.rows[0].nickname,
                 phase: 'finished',
-                i_won: true
+                i_won: true,
+                dimension: gameDetails.dimension
             }
         };
 
@@ -561,7 +566,8 @@ gameRouter.get('/games/:game_id', async (req,res) => {
                     opponent: usersInformation.rows[0].nickname,
                     phase: 'placing_pieces',
                     remaining_ships: allGameShips,
-                    placed_ships: []
+                    placed_ships: [],
+                    dimension: gameDetails.dimension
                 } 
             } else {
                 const placedShips = userShips.rows.map(ship => {
@@ -580,7 +586,8 @@ gameRouter.get('/games/:game_id', async (req,res) => {
                     opponent: usersInformation.rows[0].nickname,
                     phase: 'placing_pieces',
                     remaining_ships: allGameShips,
-                    placed_ships: placedShips
+                    placed_ships: placedShips,
+                    dimension: gameDetails.dimension
                 } 
             }
         };
@@ -635,7 +642,8 @@ gameRouter.get('/games/:game_id', async (req,res) => {
                 my_turn: myTurn,
                 placed_ships: placedShips,
                 shots_sent: shot_sent,
-                shots_recieved: shot_recieved
+                shots_recieved: shot_recieved,
+                dimension: gameDetails.dimension
             }
 
         };
