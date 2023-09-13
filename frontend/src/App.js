@@ -7,6 +7,7 @@ import Logout from "./Components/Logout";
 import BoardGame from "./Components/BoardGame";
 import Games from "./Components/Games";
 import Profile from "./Components/Profile";
+import Game from "./Components/Game";
 import styles from './App.css';
 
 
@@ -18,6 +19,7 @@ function App() {
       <Route path='/' element={ <Root /> } >
         <Route path='board' element={ <BoardGame/> } />
         <Route path='games' element={ <Games/> } />
+        <Route path='games/:game_id' element={ <Game/> } />
         <Route path='profile' element={ <Profile/> } />
       </Route>
       <Route path='login' element={ <Login/> } />

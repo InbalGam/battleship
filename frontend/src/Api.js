@@ -105,5 +105,16 @@ async function createNewGame(gameInfo) {
     return response.status === 201;
 };
 
+
+async function getGameInfo(gameId) {
+    const url = `${baseURL}/games/${gameId}`;
+    const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    return response;
+};
+
 export {login, register, logout, getProfile, updateNickname,
-        getGames, acceptGame, deleteAGame, createNewGame};
+        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo};
