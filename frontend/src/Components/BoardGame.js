@@ -34,7 +34,7 @@ function BoardGame(props) {
         display: 'flex',
         flexDirection: 'column',
         gap: '2rem',
-        marginLeft: '27rem',
+        marginLeft: '53rem',
         position: 'relative',
         bottom: '9rem',
         fontWeight: 'bold'
