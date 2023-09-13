@@ -5,27 +5,39 @@ const {pool} = require('./db');
 
 // Middlewares
 gameRouter.use('/', (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({msg: 'You need to login first'});
+    try {
+        if (!req.user) {
+            return res.status(401).json({ msg: 'You need to login first' });
+        }
+        next();
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
     }
-    next();
 });
 
 
 gameRouter.use('/games/:game_id', async (req, res, next) => {
-    const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-    if (game.rows.length === 0) {
-        return res.status(400).json({msg: 'Game does not exist'});
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        if (game.rows.length === 0) {
+            return res.status(400).json({ msg: 'Game does not exist' });
+        }
+        next();
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
     }
-    next();
 });
 
 gameRouter.use('/games/:game_id', async (req, res, next) => {
-    const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-    if (game.rows[0].user1 !== req.user.id && game.rows[0].user2 !== req.user.id) {
-        return res.status(400).json({msg: 'User not part of game'});
+    try {
+        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
+        if (game.rows[0].user1 !== req.user.id && game.rows[0].user2 !== req.user.id) {
+            return res.status(400).json({ msg: 'User not part of game' });
+        }
+        next();
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
     }
-    next();
 });
 
 // Vars
