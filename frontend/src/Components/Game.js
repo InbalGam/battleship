@@ -40,6 +40,8 @@ function Game() {
                 } else if (jsonData.phase === 'placing_pieces') {
                     setRemainingShips(jsonData.remaining_ships);
                     setPlacedShips(jsonData.placed_ships);
+                    console.log(jsonData.placed_ships);
+                    console.log(jsonData.remaining_ships);
                 } else if (jsonData.phase === 'gamePlay') {
                     setMyTurn(jsonData.my_turn);
                     setPlacedShips(jsonData.placed_ships);
