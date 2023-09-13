@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Fab from '@mui/material/Fab';
+import ShipsPlacement from './ShipsPlacement';
 
 
 function Game() {
@@ -19,6 +20,7 @@ function Game() {
     const [shotsSent, setShotsSent] = useState([]);
     const [shotsRecived, setShotsRecived] = useState([]);
     const [state, setState] = useState('');
+    const [dimension, setDimension] = useState(0);
 
     async function getTheGameInfo() {
         setIsLoading(true);
@@ -32,6 +34,7 @@ function Game() {
             } else {
                 setOpponent(jsonData.opponent);
                 setPhase(jsonData.phase);
+                setDimension(jsonData.dimension);
                 if (jsonData.phase === 'finished') {
                     setWinner(jsonData.i_won);
                 } else if (jsonData.phase === 'placing_pieces') {
@@ -73,6 +76,8 @@ function Game() {
             <div>
                  {winner ? <h3>You won</h3> : <h3>You Lost</h3>}
             </div> : ''}
+
+            {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} /> : ''}
         </div>
     );
 };

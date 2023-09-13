@@ -1,6 +1,5 @@
-function BoardGame() {
-    // example dimension 10
-    const boardDimension = Array.from(Array(10).keys());
+function BoardGame(props) {
+    const boardDimension = Array.from(Array(props.dimension).keys());
 
     function clickRowHandler(index) {
         console.log(index);
