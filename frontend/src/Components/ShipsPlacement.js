@@ -1,11 +1,12 @@
 import BoardGame from './BoardGame';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function ShipsPlacement(props) {
     const [choosenShipSize, setChoosenShipSize] = useState('');
     const [placedShipSize, setPlacedShipSize] = useState('');
+    const [coloredCells, setColoredCells] = useState([]);
 
     function handleChoosenShipChange(e, size) {
         console.log(size);
@@ -16,6 +17,29 @@ function ShipsPlacement(props) {
         console.log(size);
         setPlacedShipSize(size);
     };
+
+    function cellsToColor() {
+        let pairs = [];
+        props.placedShips.forEach(ship => {
+            // [row, col]
+            if (ship.start_row === ship.end_row) {
+                for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
+                    pairs.push([ship.start_row, (ship.start_col + i)]);
+                }
+            } else if (ship.start_col === ship.end_col) {
+                for (let i = 0; i <= (ship.end_row - ship.start_row); i++) {
+                    pairs.push([(ship.start_row + i), ship.start_col]);
+                }
+            };
+            return pairs;
+        });
+        setColoredCells(pairs);
+    };
+
+
+    useEffect(() => {
+        cellsToColor();
+    }, []);
 
     return (
         <div>
@@ -47,7 +71,7 @@ function ShipsPlacement(props) {
                     </ToggleButtonGroup>
                 </div>
             </div>
-            <BoardGame dimension={props.dimension} placedShips={props.placedShips} />
+            <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} />
         </div>
     );
 };

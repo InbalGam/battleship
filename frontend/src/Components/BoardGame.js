@@ -1,3 +1,6 @@
+import styles from './Styles/BoardGame.css';
+
+
 function BoardGame(props) {
     const boardDimension = Array.from(Array(props.dimension).keys());
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
@@ -47,6 +50,24 @@ function BoardGame(props) {
         bottom: '60rem'
     };
 
+    function print(rowInd, colInd) {
+        console.log([rowInd, colInd]);
+        console.log([(rowInd+1), (colInd+1)]);
+        console.log(checkSubset(props.coloredCells, [(rowInd+1), (colInd+1)]));
+    };
+
+    const checkSubset = (parentArray, subsetArray) => {
+        for (let i = 0; i < parentArray.length; i++) {
+            if ((parentArray[i][0] === subsetArray[0]) && (parentArray[i][1] === subsetArray[1])) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
+
+    console.log(props.coloredCells);
+
     return (
         <div className="BoardNumbered">
             <div style={numberedColumnStyle}>
@@ -57,12 +78,12 @@ function BoardGame(props) {
             </div>
             <div className="BoardGame" style={boardStyle}>
                 <ul className="board_rows">
-                    {boardDimension.map((row, ind) =>
-                        <li key={ind} onClick={() => clickRowHandler(row)}>
+                    {boardDimension.map((row, rowInd) =>
+                        <li key={rowInd} onClick={() => clickRowHandler(rowInd)}>
                             <ul className="board_columns" style={columnStyle}>
-                                {boardDimension.map((column, ind) =>
-                                    <li key={ind} onClick={() => clickColumnHandler(column)}>
-                                        <div className="gameDiv" style={divStyle}></div>
+                                {boardDimension.map((column, colInd) =>
+                                    <li key={colInd} onClick={() => clickColumnHandler(colInd)}>
+                                        <div style={divStyle} onClick={() => print(row, column)} className={checkSubset(props.coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}></div>
                                     </li>
                                 )}
                             </ul>
