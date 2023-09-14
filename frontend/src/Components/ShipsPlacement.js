@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Fab from '@mui/material/Fab';
 import { readyToPlay, deleteAShip, placeAShip } from '../Api';
 import { useNavigate } from 'react-router-dom';
@@ -15,10 +15,29 @@ function ShipsPlacement(props) {
     const [choosenShipInd, setChoosenShipInd] = useState('');
     const [deleteShipFail, setDeleteShipFail] = useState(false);
     const [placeShipFail, setPlaceShipFail] = useState('55');
-    const [coloredCells, setColoredCells] = useState([]);
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+
+
+    function cellsToColor() {
+        let pairs = [];
+        props.placedShips.forEach(ship => {
+            // [row, col]
+            if (ship.start_row === ship.end_row) {
+                for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
+                    pairs.push([ship.start_row, (ship.start_col + i)]);
+                }
+            } else if (ship.start_col === ship.end_col) {
+                for (let i = 0; i <= (ship.end_row - ship.start_row); i++) {
+                    pairs.push([(ship.start_row + i), ship.start_col]);
+                }
+            };
+            return pairs;
+        });
+        return pairs;
+    };
+    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
 
 
     function getNewShipData(rowColData) {
@@ -83,29 +102,7 @@ function ShipsPlacement(props) {
             navigate('/error');
         }
     };
-
-    function cellsToColor() {
-        let pairs = [];
-        props.placedShips.forEach(ship => {
-            // [row, col]
-            if (ship.start_row === ship.end_row) {
-                for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
-                    pairs.push([ship.start_row, (ship.start_col + i)]);
-                }
-            } else if (ship.start_col === ship.end_col) {
-                for (let i = 0; i <= (ship.end_row - ship.start_row); i++) {
-                    pairs.push([(ship.start_row + i), ship.start_col]);
-                }
-            };
-            return pairs;
-        });
-        setColoredCells(pairs);
-    };
-
-
-    useEffect(() => {
-        cellsToColor();
-    }, [props.placedShips]);
+    
 
     useEffect(() => {
         placeShip();
