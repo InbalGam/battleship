@@ -148,7 +148,7 @@ async function placeAShip(gameId, shipData) {
         body: JSON.stringify(shipData)
     });
 
-    return response.status === 200;
+    return response;//.status === 200;
 };
 
 export {login, register, logout, getProfile, updateNickname,

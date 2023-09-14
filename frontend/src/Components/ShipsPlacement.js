@@ -14,34 +14,53 @@ function ShipsPlacement(props) {
     const navigate = useNavigate();
     const [choosenShipInd, setChoosenShipInd] = useState('');
     const [deleteShipFail, setDeleteShipFail] = useState(false);
+    const [placeShipFail, setPlaceShipFail] = useState('55');
     const [coloredCells, setColoredCells] = useState([]);
     const [startGameFail, setStartGameFail] = useState(false);
-    //const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
+    const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
 
-    // async function placeShip() {
-    //     props.setIsLoading(true);
-    //     try {
-    //         const newShipData = {
-    //             ship_size: Number(props.remainingShips[choosenShipInd]),
-    //             start_row: shipRowCol.start[0],
-    //             start_col: shipRowCol.start[1],
-    //             end_row: shipRowCol.end[0],
-    //             end_col: shipRowCol.end[1]
-    //         }
-    //         const result = await placeAShip(props.game_id, newShipData);
-    //         if (result === true) {
-    //             props.getTheGameInfo();
-    //             props.setIsLoading(false);
-    //         } else {
-    //             setDeleteShipFail(true);
-    //             props.setIsLoading(false);
-    //         }
-    //     } catch(e) {
-    //         navigate('/error');
-    //     }
-    // };
+    function getNewShipData(rowColData) {
+        if (shipRowCol.start.length === 0) {
+            setShipRowCol(prev => ({
+                ...prev,
+                start: [(rowColData[0]), (rowColData[1])]
+            }));
+        } else {
+            setShipRowCol(prev => ({
+                ...prev,
+                end: [(rowColData[0]), (rowColData[1])]
+            }));
+        }
+    };
+
+
+    async function placeShip() {
+        if (shipRowCol.end.length !== 0) {
+            props.setIsLoading(true);
+            try {
+                const newShipData = {
+                    ship_size: Number(props.remainingShips[choosenShipInd]),
+                    start_row: shipRowCol.start[0],
+                    start_col: shipRowCol.start[1],
+                    end_row: shipRowCol.end[0],
+                    end_col: shipRowCol.end[1]
+                }
+                const result = await placeAShip(props.game_id, newShipData);
+                if (result.status === 200) {
+                    props.getTheGameInfo();
+                    props.setIsLoading(false);
+                } else {
+                    const jsonData = await result.json();
+                    setPlaceShipFail(jsonData.msg);
+                    props.setIsLoading(false);
+                }
+            } catch (e) {
+                navigate('/error');
+            }
+        }
+    };
 
     function handleChoosenShipChange(e, i) {
         console.log(i);
@@ -86,7 +105,11 @@ function ShipsPlacement(props) {
 
     useEffect(() => {
         cellsToColor();
-    }, [coloredCells]);
+    }, [props.placedShips]);
+
+    useEffect(() => {
+        placeShip();
+    }, [shipRowCol]);
 
 
     async function ready(e) {
@@ -137,12 +160,15 @@ function ShipsPlacement(props) {
                                 Start Game
                             </Fab>
                         </div> : ''}
-                    {deleteShipFail ? 'could not delete ship' : ''}
-                    {startGameFail ? 'Could not start game' : ''}
                 </div>
             </div>
+            <div className='error_msg'>
+                    {placeShipFail ? placeShipFail : ''}
+                    {deleteShipFail ? 'could not delete ship' : ''}
+                    {startGameFail ? 'Could not start game' : ''}
+            </div>
             <div className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} getNewShipData={getNewShipData} />
             </div>
         </div>
     );

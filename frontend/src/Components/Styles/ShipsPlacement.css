@@ -15,6 +15,10 @@
     margin-top: 1rem;
 }
 
+.error_msg {
+    grid-row-start: 4;
+}
+
 .main_board {
     grid-column-start: 2;
     grid-column-end: 4;
