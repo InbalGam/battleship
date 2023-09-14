@@ -5,14 +5,6 @@ function BoardGame(props) {
     const boardDimension = Array.from(Array(props.dimension).keys());
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
-    function clickRowHandler(index) {
-        console.log(index);
-    };
-
-    function clickColumnHandler(index) {
-        console.log(index);
-    };
-
     const divStyle = {
         width: '5rem',
         height: '5rem',
@@ -50,10 +42,9 @@ function BoardGame(props) {
         bottom: '60rem'
     };
 
-    function print(rowInd, colInd) {
+    function indexes(rowInd, colInd) {
         console.log([rowInd, colInd]);
         console.log([(rowInd+1), (colInd+1)]);
-        console.log(checkSubset(props.coloredCells, [(rowInd+1), (colInd+1)]));
     };
 
     const checkSubset = (parentArray, subsetArray) => {
@@ -76,11 +67,11 @@ function BoardGame(props) {
             <div className="BoardGame" style={boardStyle}>
                 <ul className="board_rows">
                     {boardDimension.map((row, rowInd) =>
-                        <li key={rowInd} onClick={() => clickRowHandler(rowInd)}>
+                        <li key={rowInd} >
                             <ul className="board_columns" style={columnStyle}>
                                 {boardDimension.map((column, colInd) =>
-                                    <li key={colInd} onClick={() => clickColumnHandler(colInd)}>
-                                        <div style={divStyle} onClick={() => print(row, column)} className={checkSubset(props.coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}></div>
+                                    <li key={colInd} >
+                                        <div style={divStyle} onClick={() => indexes(row, column)} className={checkSubset(props.coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}></div>
                                     </li>
                                 )}
                             </ul>
