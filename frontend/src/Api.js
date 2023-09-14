@@ -116,5 +116,16 @@ async function getGameInfo(gameId) {
     return response;
 };
 
+async function readyToPlay(gameId) {
+    const url = `${baseURL}/games/${gameId}/ready`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'}
+    });
+
+    return response.status === 200;
+};
+
 export {login, register, logout, getProfile, updateNickname,
-        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo};
+        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay};
