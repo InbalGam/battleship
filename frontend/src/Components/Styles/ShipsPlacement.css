@@ -1,0 +1,23 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: [row1-start] 15% [row1-end] 200px [third-line] 200px [fourth-line] 200px [fifth-line] 200px [sixth-line] 200px [last-line];
+}
+
+.ships_container {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin-left: 1rem;
+}
+
+.start_game_button {
+    grid-row-start: row3-start;
+    margin-top: 1rem;
+}
+
+.main_board {
+    grid-column-start: 2;
+    grid-column-end: 4;
+    grid-row-start: row1-end;
+    grid-row-end: 5;
+}
