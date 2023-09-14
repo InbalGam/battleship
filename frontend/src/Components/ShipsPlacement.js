@@ -5,7 +5,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useState, useEffect } from "react";
 import Fab from '@mui/material/Fab';
-import {readyToPlay} from '../Api';
+import { readyToPlay, deleteAShip } from '../Api';
 import { useNavigate } from 'react-router-dom';
 import styles from './Styles/ShipsPlacement.css';
 
@@ -13,7 +13,7 @@ import styles from './Styles/ShipsPlacement.css';
 function ShipsPlacement(props) {
     const navigate = useNavigate();
     const [choosenShipSize, setChoosenShipSize] = useState('');
-    const [placedShip, setPlacedShip] = useState('');
+    const [deleteShipFail, setDeleteShipFail] = useState(false);
     const [coloredCells, setColoredCells] = useState([]);
     const [startGameFail, setStartGameFail] = useState(false);
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
@@ -23,9 +23,21 @@ function ShipsPlacement(props) {
         setChoosenShipSize(size);
     };
 
-    function handlePlacedShipChange(e) {
-        console.log(e.target.value);
-        setPlacedShip(e.target.value);
+    async function deleteShip(e) {
+        e.preventDefault();
+        props.setIsLoading(true);
+        try {
+            const result = await deleteAShip(props.game_id, props.placedShips[e.target.value]);
+            if (result === true) {
+                props.getTheGameInfo();
+                props.setIsLoading(false);
+            } else {
+                setDeleteShipFail(true);
+                props.setIsLoading(false);
+            }
+        } catch(e) {
+            navigate('/error');
+        }
     };
 
     function cellsToColor() {
@@ -49,21 +61,24 @@ function ShipsPlacement(props) {
 
     useEffect(() => {
         cellsToColor();
-    }, []);
+    }, [coloredCells]);
 
 
-    async function ready() {
+    async function ready(e) {
+        e.preventDefault();
         props.setIsLoading(true);
         try {
             const result = await readyToPlay(props.game_id);
             if (result === true) {
-                navigate(`/games/${props.game_id}`);
+                props.getTheGameInfo();
                 props.setIsLoading(false);
             } else {
                 setStartGameFail(true);
                 props.setIsLoading(false);
             }
-        } catch(e) {}
+        } catch(e) {
+            navigate('/error');
+        }
     };
 
     return (
@@ -87,7 +102,7 @@ function ShipsPlacement(props) {
                     <ButtonGroup
                         orientation="vertical" >
                         {props.placedShips.map((ship, ind) =>
-                        <Button value={ind} aria-label="placed_ships_list" onClick={handlePlacedShipChange}>
+                        <Button value={ind} aria-label="placed_ships_list" onClick={deleteShip}>
                             {ship.ship_size} squares {alphabet[ship.start_row - 1] + ship.start_col} - {alphabet[ship.end_row - 1] + ship.end_col}
                         </Button>)}
                     </ButtonGroup>
@@ -97,6 +112,7 @@ function ShipsPlacement(props) {
                                 Start Game
                             </Fab>
                         </div> : ''}
+                    {deleteShipFail ? 'could not delete ship' : ''}
                     {startGameFail ? 'Could not start game' : ''}
                 </div>
             </div>
