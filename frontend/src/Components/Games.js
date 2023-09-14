@@ -69,7 +69,7 @@ function Games() {
                         <ul>
                             {userGameInvitations.map((game, ind) =>
                                 <li key={ind}>
-                                    <GameCard invite={true} game={game} active={false} />
+                                    <GameCard invite={true} game={game} active={false} getUserGames={getUserGames} />
                                 </li>
                             )}
                         </ul>

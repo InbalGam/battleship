@@ -19,6 +19,7 @@ function GameCard(props) {
         try {
             const result = await acceptGame(props.game.game_id);
             if (result === true) {
+                props.getUserGames();
                 navigate('/games');
                 setIsLoading(false);
             } else {
@@ -35,6 +36,7 @@ function GameCard(props) {
         try {
             const result = await deleteAGame(props.game.game_id);
             if (result === true) {
+                props.getUserGames();
                 navigate('/games');
                 setIsLoading(false);
             } else {
