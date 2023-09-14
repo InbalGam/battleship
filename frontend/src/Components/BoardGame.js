@@ -60,18 +60,15 @@ function BoardGame(props) {
         for (let i = 0; i < parentArray.length; i++) {
             if ((parentArray[i][0] === subsetArray[0]) && (parentArray[i][1] === subsetArray[1])) {
                 return true;
-            } else {
-                return false;
             }
-        }
+        };
+        return false;
     };
-
-    console.log(props.coloredCells);
 
     return (
         <div className="BoardNumbered">
             <div style={numberedColumnStyle}>
-                {boardDimension.map(col => <p>{col}</p>)}
+                {boardDimension.map(col => <p>{col+1}</p>)}
             </div>
             <div style={numberedRowStyle}>
                 {boardDimension.map(col => <p>{alphabet[col]}</p>)}
