@@ -40,6 +40,8 @@ function Game() {
                 } else if (jsonData.phase === 'placing_pieces') {
                     setRemainingShips(jsonData.remaining_ships);
                     setPlacedShips(jsonData.placed_ships);
+                    console.log(jsonData.remaining_ships);
+                    console.log(jsonData.placed_ships);
                 } else if (jsonData.phase === 'gamePlay') {
                     setMyTurn(jsonData.my_turn);
                     setPlacedShips(jsonData.placed_ships);
@@ -60,24 +62,27 @@ function Game() {
 
     return (
         <div>
-            {state === 'invited' ?
-            <div>
-                <p>Waiting for opponent to accept game</p> 
-                <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon/> </Fab>
-            </div> : ''}
+            {isLoading ? <CircularProgress size={150} className='loader' /> :
+                <div>
+                    {state === 'invited' ?
+                        <div>
+                            <p>Waiting for opponent to accept game</p>
+                            <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
+                        </div> : ''}
 
-            {phase === 'waiting_for_other_player' ?
-            <div>
-                <p>Waiting for {opponent} to finish placing ships</p> 
-                <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon/> </Fab>
-            </div> : ''}
+                    {phase === 'waiting_for_other_player' ?
+                        <div>
+                            <p>Waiting for {opponent} to finish placing ships</p>
+                            <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
+                        </div> : ''}
 
-            {phase === 'finished' ?
-            <div>
-                 {winner ? <h3>You won</h3> : <h3>You Lost</h3>}
-            </div> : ''}
+                    {phase === 'finished' ?
+                        <div>
+                            {winner ? <h3>You won</h3> : <h3>You Lost</h3>}
+                        </div> : ''}
 
-            {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} /> : ''}
+                    {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} /> : ''}
+                </div>}
         </div>
     );
 };
