@@ -5,22 +5,47 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useState, useEffect } from "react";
 import Fab from '@mui/material/Fab';
-import { readyToPlay, deleteAShip } from '../Api';
+import { readyToPlay, deleteAShip, placeAShip } from '../Api';
 import { useNavigate } from 'react-router-dom';
 import styles from './Styles/ShipsPlacement.css';
 
 
 function ShipsPlacement(props) {
     const navigate = useNavigate();
-    const [choosenShipSize, setChoosenShipSize] = useState('');
+    const [choosenShipInd, setChoosenShipInd] = useState('');
     const [deleteShipFail, setDeleteShipFail] = useState(false);
     const [coloredCells, setColoredCells] = useState([]);
     const [startGameFail, setStartGameFail] = useState(false);
+    //const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
-    function handleChoosenShipChange(e, size) {
-        console.log(size);
-        setChoosenShipSize(size);
+
+    // async function placeShip() {
+    //     props.setIsLoading(true);
+    //     try {
+    //         const newShipData = {
+    //             ship_size: Number(props.remainingShips[choosenShipInd]),
+    //             start_row: shipRowCol.start[0],
+    //             start_col: shipRowCol.start[1],
+    //             end_row: shipRowCol.end[0],
+    //             end_col: shipRowCol.end[1]
+    //         }
+    //         const result = await placeAShip(props.game_id, newShipData);
+    //         if (result === true) {
+    //             props.getTheGameInfo();
+    //             props.setIsLoading(false);
+    //         } else {
+    //             setDeleteShipFail(true);
+    //             props.setIsLoading(false);
+    //         }
+    //     } catch(e) {
+    //         navigate('/error');
+    //     }
+    // };
+
+    function handleChoosenShipChange(e, i) {
+        console.log(i);
+        setChoosenShipInd(i);
     };
 
     async function deleteShip(e) {
@@ -88,7 +113,7 @@ function ShipsPlacement(props) {
                     <h3>Remaining ships:</h3>
                     <ToggleButtonGroup
                         orientation="vertical"
-                        value={choosenShipSize}
+                        value={choosenShipInd}
                         exclusive
                         onChange={handleChoosenShipChange} >
                         {props.remainingShips.map((shipSize, ind) =>

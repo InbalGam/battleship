@@ -45,6 +45,21 @@ function BoardGame(props) {
     function indexes(rowInd, colInd) {
         console.log([rowInd, colInd]);
         console.log([(rowInd+1), (colInd+1)]);
+        // if (props.shipRowCol.start.length === 0) {
+        //     props.setShipRowCol(prev => ({
+        //         ...prev,
+        //         start: [(rowInd+1), (colInd+1)]
+        //     }));
+        // } else {
+        //     props.setShipRowCol(prev => ({
+        //         ...prev,
+        //         end: [(rowInd+1), (colInd+1)]
+        //     }));
+        // }
+
+        // if (props.shipRowCol.end.length !== 0) {
+        //     props.placeShip();
+        // }
     };
 
     const checkSubset = (parentArray, subsetArray) => {

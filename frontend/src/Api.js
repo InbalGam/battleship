@@ -139,5 +139,17 @@ async function deleteAShip(gameId, shipData) {
     return response.status === 200;
 };
 
+async function placeAShip(gameId, shipData) {
+    const url = `${baseURL}/games/${gameId}/place`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(shipData)
+    });
+
+    return response.status === 200;
+};
+
 export {login, register, logout, getProfile, updateNickname,
-        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip};
+        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip};
