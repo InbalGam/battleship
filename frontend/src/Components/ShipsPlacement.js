@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Fab from '@mui/material/Fab';
 import { readyToPlay, deleteAShip, placeAShip } from '../Api';
 import { useNavigate } from 'react-router-dom';
@@ -14,31 +14,11 @@ function ShipsPlacement(props) {
     const navigate = useNavigate();
     const [choosenShipInd, setChoosenShipInd] = useState('');
     const [deleteShipFail, setDeleteShipFail] = useState(false);
-    const [placeShipFail, setPlaceShipFail] = useState('55');
+    const [placeShipFail, setPlaceShipFail] = useState('');
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
     const [isLoading, setIsLoading] = useState(false);
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-
-
-    function cellsToColor() {
-        let pairs = [];
-        props.placedShips.forEach(ship => {
-            // [row, col]
-            if (ship.start_row === ship.end_row) {
-                for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
-                    pairs.push([ship.start_row, (ship.start_col + i)]);
-                }
-            } else if (ship.start_col === ship.end_col) {
-                for (let i = 0; i <= (ship.end_row - ship.start_row); i++) {
-                    pairs.push([(ship.start_row + i), ship.start_col]);
-                }
-            };
-            return pairs;
-        });
-        return pairs;
-    };
-    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
 
 
     function getIndexesData(rowColData) {
@@ -74,6 +54,8 @@ function ShipsPlacement(props) {
                 } else {
                     const jsonData = await result.json();
                     setPlaceShipFail(jsonData.msg);
+                    setShipRowCol({start: [], end: []});
+                    setChoosenShipInd('');
                     setIsLoading(false);
                 }
             } catch (e) {
@@ -83,7 +65,6 @@ function ShipsPlacement(props) {
     };
 
     function handleChoosenShipChange(e, i) {
-        console.log(i);
         setChoosenShipInd(i);
     };
 
@@ -166,7 +147,7 @@ function ShipsPlacement(props) {
                     {startGameFail ? 'Could not start game' : ''}
             </div>
             <div className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} getIndexesData={getIndexesData} clicked={true} isLoading={isLoading} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} isLoading={isLoading} />
             </div>
         </div>
     );
