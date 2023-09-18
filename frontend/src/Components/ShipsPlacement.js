@@ -17,6 +17,7 @@ function ShipsPlacement(props) {
     const [placeShipFail, setPlaceShipFail] = useState('55');
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
+    const [isLoading, setIsLoading] = useState(false);
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
 
@@ -40,7 +41,7 @@ function ShipsPlacement(props) {
     let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
 
 
-    function getNewShipData(rowColData) {
+    function getIndexesData(rowColData) {
         if (shipRowCol.start.length === 0) {
             setShipRowCol(prev => ({
                 ...prev,
@@ -57,7 +58,7 @@ function ShipsPlacement(props) {
 
     async function placeShip() {
         if (shipRowCol.end.length !== 0) {
-            props.setIsLoading(true);
+            setIsLoading(true);
             try {
                 const newShipData = {
                     ship_size: Number(props.remainingShips[choosenShipInd]),
@@ -69,11 +70,11 @@ function ShipsPlacement(props) {
                 const result = await placeAShip(props.game_id, newShipData);
                 if (result.status === 200) {
                     props.getTheGameInfo();
-                    props.setIsLoading(false);
+                    setIsLoading(false);
                 } else {
                     const jsonData = await result.json();
                     setPlaceShipFail(jsonData.msg);
-                    props.setIsLoading(false);
+                    setIsLoading(false);
                 }
             } catch (e) {
                 navigate('/error');
@@ -88,15 +89,15 @@ function ShipsPlacement(props) {
 
     async function deleteShip(e) {
         e.preventDefault();
-        props.setIsLoading(true);
+        setIsLoading(true);
         try {
             const result = await deleteAShip(props.game_id, props.placedShips[e.target.value]);
             if (result === true) {
                 props.getTheGameInfo();
-                props.setIsLoading(false);
+                setIsLoading(false);
             } else {
                 setDeleteShipFail(true);
-                props.setIsLoading(false);
+                setIsLoading(false);
             }
         } catch(e) {
             navigate('/error');
@@ -165,7 +166,7 @@ function ShipsPlacement(props) {
                     {startGameFail ? 'Could not start game' : ''}
             </div>
             <div className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} getNewShipData={getNewShipData} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} getIndexesData={getIndexesData} isLoading={isLoading} />
             </div>
         </div>
     );

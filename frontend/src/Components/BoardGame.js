@@ -1,4 +1,5 @@
 import styles from './Styles/BoardGame.css';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 function BoardGame(props) {
@@ -43,7 +44,7 @@ function BoardGame(props) {
     };
 
     function indexes(rowInd, colInd) {
-        props.getNewShipData([(rowInd+1), (colInd+1)]);
+        props.getIndexesData([(rowInd+1), (colInd+1)]);
     };
 
     const checkSubset = (parentArray, subsetArray) => {
@@ -63,6 +64,7 @@ function BoardGame(props) {
             <div style={numberedRowStyle}>
                 {boardDimension.map(col => <p>{alphabet[col]}</p>)}
             </div>
+            {props.isLoading ? <CircularProgress size={150} className='loader' /> :
             <div className="BoardGame" style={boardStyle}>
                 <ul className="board_rows">
                     {boardDimension.map((row, rowInd) =>
@@ -77,7 +79,7 @@ function BoardGame(props) {
                         </li>
                     )}
                 </ul>
-            </div>
+            </div>}
         </div>
     );
 };
