@@ -8,11 +8,9 @@ import styles from './Styles/GamePlay.css';
 function GamePlay(props) {
     const navigate = useNavigate();
     const [shotFail, setShotFail] = useState(false);
-    const [shotRowCol, setShotRowCol] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     async function getIndexesData(rowColData) {
-        setShotRowCol((prev) => [rowColData, ...prev]);
         setIsLoading(true);
         try {
             const result = await performShot(props.game_id, {row: rowColData[0], col: rowColData[1]});
