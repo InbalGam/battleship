@@ -1,0 +1,27 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: [row1-start] 15% [row1-end] 200px [third-line] 200px [fourth-line] 200px [fifth-line] 200px [sixth-line] 200px [last-line];
+}
+
+.player_board {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 3;
+    grid-row-end: 5;
+}
+
+.player_board h3 {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 1;
+}
+
+.opponent_board {
+    grid-column-start: 3;
+    grid-column-end: 5;
+    grid-row-start: 3;
+    grid-row-end: 5;
+    margin-right: 2rem;
+}
