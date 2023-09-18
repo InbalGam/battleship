@@ -39,11 +39,11 @@ function GamePlay(props) {
                     {notMyTurn ? 'not your turn to make a shot' : ''}
             </div>
             <div className='player_board'>
-                <h3>{'You'}</h3>
+                <h3 className={props.myTurn ? 'player_turn' : ''}>{'You'}</h3>
                 <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} isLoading={isLoading} clicked={true} getIndexesData={getIndexesData} />
             </div>
             <div className='opponent_board'>
-                <h3>{props.opponent}</h3>
+                <h3 className={props.myTurn ? '' : 'opponent_turn'}>{props.opponent}</h3>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} isLoading={isLoading} shots={props.shotsRecived} />
             </div>
         </div>
