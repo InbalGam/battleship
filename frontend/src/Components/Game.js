@@ -32,6 +32,7 @@ function Game() {
                 navigate('/login');
             } else if ((result.status === 400) && (jsonData.msg === 'Game is in state invited')) {
                 setState('invited');
+                setIsLoading(false);
             } else {
                 setOpponent(jsonData.opponent);
                 setPhase(jsonData.phase);
