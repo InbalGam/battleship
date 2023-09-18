@@ -62,8 +62,13 @@ function BoardGame(props) {
                 };
                 return pairs;
             });
-        } else if (props.shotsRecived) {
-            props.shotsRecived.forEach(shot => pairs.push([shot.row, shot.col]))
+        } else if (props.shotsSent) {
+             props.shotsSent.forEach(shot => {
+                if (shot.hit) {
+                    pairs.push([shot.row, shot.col])
+                }
+                return pairs;
+            })
         }
         return pairs;
     };
@@ -82,8 +87,8 @@ function BoardGame(props) {
     function checkX(cellsToX, cell) {
         if (props.shots) {
             for (let i = 0; i < cellsToX.length; i++) {
-                if (cell[0] === cellsToX[i].row && cell[1] === cellsToX[i].col) {
-                    return cellsToX[i].hit;
+                if ((cell[0] === cellsToX[i].row) && (cell[1] === cellsToX[i].col)) {
+                    return true;
                 }
             }
             
