@@ -26,6 +26,13 @@
     margin-right: 2rem;
 }
 
+.chat_container {
+    grid-column-start: 2;
+    grid-column-end: 5;
+    grid-row-start: 7;
+    grid-row-end: 10;
+}
+
 .player_turn {
     background-color: rgba(31, 63, 248, 0.2);
 }

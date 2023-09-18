@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { performShot } from '../Api';
 import styles from './Styles/GamePlay.css';
+import Chat from './Chat';
 
 
 function GamePlay(props) {
@@ -45,6 +46,9 @@ function GamePlay(props) {
             <div className='opponent_board'>
                 <h3 className={props.myTurn ? '' : 'opponent_turn'}>{props.opponent}</h3>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} isLoading={isLoading} shots={props.shotsRecived} />
+            </div>
+            <div className='chat_container'>
+                <Chat />
             </div>
         </div>
     );
