@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Fab from '@mui/material/Fab';
 import ShipsPlacement from './ShipsPlacement';
+import GamePlay from './GamePlay';
 
 
 function Game() {
@@ -82,6 +83,8 @@ function Game() {
                         </div> : ''}
 
                     {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} /> : ''}
+
+                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} myTurn={myTurn} opponent={opponent} shotsSent={shotsSent} shotsRecived={shotsRecived} /> : ''}
                 </div>}
         </div>
     );
