@@ -151,5 +151,18 @@ async function placeAShip(gameId, shipData) {
     return response;
 };
 
+async function performShot(gameId, shotData) {
+    const url = `${baseURL}/games/${gameId}/shoot`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(shotData)
+    });
+
+    return response.status === 200;
+};
+
 export {login, register, logout, getProfile, updateNickname,
-        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip};
+        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip,
+        performShot};

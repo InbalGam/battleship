@@ -1,5 +1,6 @@
 import styles from './Styles/BoardGame.css';
 import CircularProgress from '@mui/material/CircularProgress';
+import CloseIcon from '@mui/icons-material/Close';
 import { useMemo } from "react";
 
 
@@ -47,8 +48,8 @@ function BoardGame(props) {
 
     function cellsToColor() {
         let pairs = [];
-        if (props.cells) {
-            props.cells.forEach(ship => {
+        if (props.placedShips) {
+            props.placedShips.forEach(ship => {
                 // [row, col]
                 if (ship.start_row === ship.end_row) {
                     for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
@@ -64,7 +65,7 @@ function BoardGame(props) {
         }
         return pairs;
     };
-    let coloredCells = useMemo(() => cellsToColor(), [props.cells]);
+    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
 
 
     const checkSubset = (parentArray, subsetArray) => {
@@ -92,7 +93,9 @@ function BoardGame(props) {
                             <ul className="board_columns" style={columnStyle}>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
-                                        <div style={divStyle} onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}></div>
+                                        <div style={divStyle} onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
+                                            {/* {props.checkX(props.shots, [(rowInd+1), (colInd+1)]) ? <CloseIcon style={{color: 'red'}} className='Xcell'/> : ''} */}
+                                        </div>
                                     </li>
                                 )}
                             </ul>
