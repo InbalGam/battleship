@@ -8,10 +8,12 @@ import styles from './Styles/GamePlay.css';
 function GamePlay(props) {
     const navigate = useNavigate();
     const [shotFail, setShotFail] = useState(false);
+    const [notMyTurn, setNotMyTurn] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     async function getIndexesData(rowColData) {
-        setIsLoading(true);
+        if (props.myTurn) {
+            setIsLoading(true);
         try {
             const result = await performShot(props.game_id, {row: rowColData[0], col: rowColData[1]});
             if (result === true) {
@@ -24,6 +26,9 @@ function GamePlay(props) {
         } catch(e) {
             navigate('/error');
         }
+        } else {
+            setNotMyTurn(true);
+        }
     };
 
 
@@ -31,6 +36,7 @@ function GamePlay(props) {
         <div className='container'>
             <div className='error_msg'>
                     {shotFail ? 'could not make this shot' : ''}
+                    {notMyTurn ? 'not your turn to make a shot' : ''}
             </div>
             <div className='player_board'>
                 <h3>{'You'}</h3>
