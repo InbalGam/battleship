@@ -166,7 +166,7 @@ function ShipsPlacement(props) {
                     {startGameFail ? 'Could not start game' : ''}
             </div>
             <div className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} getIndexesData={getIndexesData} isLoading={isLoading} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} coloredCells={coloredCells} getIndexesData={getIndexesData} clicked={true} isLoading={isLoading} />
             </div>
         </div>
     );
