@@ -163,6 +163,31 @@ async function performShot(gameId, shotData) {
     return response.status === 200;
 };
 
+// Chat
+
+async function sendMsg(gameId, message) {
+    const url = `${baseURL}/games/${gameId}/chat`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(message)
+    });
+
+    return response.status === 200;
+};
+
+
+async function getMsgs(gameId) {
+    const url = `${baseURL}/games/${gameId}/chat`;
+    const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    return response;
+};
+
 export {login, register, logout, getProfile, updateNickname,
-        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip,
-        performShot};
+        getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip, performShot,
+        sendMsg, getMsgs};
