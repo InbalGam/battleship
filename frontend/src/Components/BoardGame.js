@@ -62,6 +62,8 @@ function BoardGame(props) {
                 };
                 return pairs;
             });
+        } else if (props.shotsRecived) {
+            props.shotsRecived.forEach(shot => pairs.push([shot.row, shot.col]))
         }
         return pairs;
     };
@@ -74,6 +76,18 @@ function BoardGame(props) {
                 return true;
             }
         };
+        return false;
+    };
+
+    function checkX(cellsToX, cell) {
+        if (props.shots) {
+            for (let i = 0; i < cellsToX.length; i++) {
+                if (cell[0] === cellsToX[i].row && cell[1] === cellsToX[i].col) {
+                    return cellsToX[i].hit;
+                }
+            }
+            
+        }
         return false;
     };
 
@@ -94,7 +108,7 @@ function BoardGame(props) {
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
                                         <div style={divStyle} onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
-                                            {/* {props.checkX(props.shots, [(rowInd+1), (colInd+1)]) ? <CloseIcon style={{color: 'red'}} className='Xcell'/> : ''} */}
+                                            {checkX(props.shots, [(rowInd+1), (colInd+1)]) ? <CloseIcon style={{color: 'red'}} className='Xcell'/> : ''}
                                         </div>
                                     </li>
                                 )}

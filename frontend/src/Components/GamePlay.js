@@ -28,14 +28,6 @@ function GamePlay(props) {
         }
     };
 
-    function checkX(cellsToX, cell) {
-        for (let i = 0; i < cellsToX.length; i++) {
-            if (cell[0] === cellsToX[i].row && cell[1] === cellsToX[i].col) {
-                return cellsToX[i].hit;
-            }
-        }
-        return false;
-    };
 
     return (
         <div className='container'>
@@ -44,11 +36,11 @@ function GamePlay(props) {
             </div>
             <div className='player_board'>
                 <h3>{'You'}</h3>
-                <BoardGame dimension={props.dimension} shots={props.shotsRecived} isLoading={isLoading} checkX={checkX} />
+                <BoardGame dimension={props.dimension} shotsRecived={props.shotsRecived} shots={props.shotsRecived} isLoading={isLoading} />
             </div>
             <div className='opponent_board'>
                 <h3>{props.opponent}</h3>
-                <BoardGame dimension={props.dimension} getIndexesData={getIndexesData} clicked={true} placedShips={props.placedShips} isLoading={isLoading} shots={props.shotsSent} checkX={checkX} />
+                <BoardGame dimension={props.dimension} getIndexesData={getIndexesData} clicked={true} placedShips={props.placedShips} isLoading={isLoading} shots={props.shotsSent} />
             </div>
         </div>
     );
