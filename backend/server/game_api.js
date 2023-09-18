@@ -275,11 +275,11 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
     if (start_row === end_row) {
-        if ((end_col - start_col + 1) !== ship_size) {
+        if ((Math.abs(end_col - start_col) + 1) !== ship_size) {
             return res.status(400).json({ msg: 'Ship is not in the correct size' });
         }
     } else if (start_col === end_col) {
-        if ((end_row - start_row + 1) !== ship_size) {
+        if ((Math.abs(end_row - start_row) + 1) !== ship_size) {
             return res.status(400).json({ msg: 'Ship is not in the correct size' });
         }
     } else {
