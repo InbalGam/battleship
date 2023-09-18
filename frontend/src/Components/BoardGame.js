@@ -47,8 +47,8 @@ function BoardGame(props) {
 
     function cellsToColor() {
         let pairs = [];
-        if (props.placedShips) {
-            props.placedShips.forEach(ship => {
+        if (props.cells) {
+            props.cells.forEach(ship => {
                 // [row, col]
                 if (ship.start_row === ship.end_row) {
                     for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
@@ -64,7 +64,7 @@ function BoardGame(props) {
         }
         return pairs;
     };
-    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
+    let coloredCells = useMemo(() => cellsToColor(), [props.cells]);
 
 
     const checkSubset = (parentArray, subsetArray) => {
