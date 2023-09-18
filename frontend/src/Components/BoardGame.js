@@ -1,5 +1,6 @@
 import styles from './Styles/BoardGame.css';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useMemo } from "react";
 
 
 function BoardGame(props) {
@@ -43,9 +44,28 @@ function BoardGame(props) {
         bottom: '60rem'
     };
 
-    function indexes(rowInd, colInd) {
-        props.getIndexesData([(rowInd+1), (colInd+1)]);
+
+    function cellsToColor() {
+        let pairs = [];
+        if (props.placedShips) {
+            props.placedShips.forEach(ship => {
+                // [row, col]
+                if (ship.start_row === ship.end_row) {
+                    for (let i = 0; i <= (ship.end_col - ship.start_col); i++) {
+                        pairs.push([ship.start_row, (ship.start_col + i)]);
+                    }
+                } else if (ship.start_col === ship.end_col) {
+                    for (let i = 0; i <= (ship.end_row - ship.start_row); i++) {
+                        pairs.push([(ship.start_row + i), ship.start_col]);
+                    }
+                };
+                return pairs;
+            });
+        }
+        return pairs;
     };
+    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
+
 
     const checkSubset = (parentArray, subsetArray) => {
         for (let i = 0; i < parentArray.length; i++) {
@@ -72,7 +92,7 @@ function BoardGame(props) {
                             <ul className="board_columns" style={columnStyle}>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
-                                        <div style={divStyle} onClick={() => indexes(row, column)} className={checkSubset(props.coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}></div>
+                                        <div style={divStyle} onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}></div>
                                     </li>
                                 )}
                             </ul>
