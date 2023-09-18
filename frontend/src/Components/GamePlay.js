@@ -15,18 +15,18 @@ function GamePlay(props) {
     async function getIndexesData(rowColData) {
         if (props.myTurn) {
             setIsLoading(true);
-        try {
-            const result = await performShot(props.game_id, {row: rowColData[0], col: rowColData[1]});
-            if (result === true) {
-                props.getTheGameInfo();
-                setIsLoading(false);
-            } else {
-                setShotFail(true);
-                setIsLoading(false);
+            try {
+                const result = await performShot(props.game_id, { row: rowColData[0], col: rowColData[1] });
+                if (result === true) {
+                    props.getTheGameInfo();
+                    setIsLoading(false);
+                } else {
+                    setShotFail(true);
+                    setIsLoading(false);
+                }
+            } catch (e) {
+                navigate('/error');
             }
-        } catch(e) {
-            navigate('/error');
-        }
         } else {
             setNotMyTurn(true);
         }
