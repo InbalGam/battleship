@@ -49,9 +49,9 @@ function Login() {
             <div className="login_register">
                 <h1 className='loginH1'>Battleship</h1>
                 <form onSubmit={submitLogin} className={'loginForm'}>
-                    <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={handleUsernameChange} className="textField" />
-                    <TextField id="outlined-basic" label="Password" type={"password"} variant="outlined" value={password} onChange={handlePasswordChange} className="textField" />
-                    {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="loginButton" >Login</button>}
+                    <TextField id="filled-basic" label="Username" variant="filled" value={username} onChange={handleUsernameChange} className="textField" />
+                    <TextField id="filled-basic" label="Password" type={"password"} variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
+                    {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton" >Login</button>}
                 </form>
                 <div className={'authStatus'}>
                     {authFailed ? 'Username or Password are incorrect, try again' : ''}

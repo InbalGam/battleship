@@ -33,7 +33,7 @@
     width: 50%;
 }
 
-.loginButton {
+.submitButton {
     background-color: rgb(35, 63, 104);
     color: white;
     border: 0.1rem white solid;
@@ -41,7 +41,7 @@
     padding: 0.5rem;
 }
 
-.loginButton:hover {
+.submitButton:hover {
     cursor: pointer;
     background-color: rgb(13, 22, 36);
 }
