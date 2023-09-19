@@ -17,7 +17,6 @@ function ShipsPlacement(props) {
     const [placeShipFail, setPlaceShipFail] = useState('');
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
-    const [isLoading, setIsLoading] = useState(false);
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
 
@@ -38,7 +37,7 @@ function ShipsPlacement(props) {
 
     async function placeShip() {
         if (shipRowCol.end.length !== 0) {
-            setIsLoading(true);
+            props.setIsLoading(true);
             try {
                 const newShipData = {
                     ship_size: Number(props.remainingShips[choosenShipInd]),
@@ -50,13 +49,13 @@ function ShipsPlacement(props) {
                 const result = await placeAShip(props.game_id, newShipData);
                 if (result.status === 200) {
                     props.getTheGameInfo();
-                    setIsLoading(false);
+                    props.setIsLoading(false);
                 } else {
                     const jsonData = await result.json();
                     setPlaceShipFail(jsonData.msg);
                     setShipRowCol({start: [], end: []});
                     setChoosenShipInd('');
-                    setIsLoading(false);
+                    props.setIsLoading(false);
                 }
             } catch (e) {
                 navigate('/error');
@@ -70,15 +69,15 @@ function ShipsPlacement(props) {
 
     async function deleteShip(e) {
         e.preventDefault();
-        setIsLoading(true);
+        props.setIsLoading(true);
         try {
             const result = await deleteAShip(props.game_id, props.placedShips[e.target.value]);
             if (result === true) {
                 props.getTheGameInfo();
-                setIsLoading(false);
+                props.setIsLoading(false);
             } else {
                 setDeleteShipFail(true);
-                setIsLoading(false);
+                props.setIsLoading(false);
             }
         } catch(e) {
             navigate('/error');
@@ -147,7 +146,7 @@ function ShipsPlacement(props) {
                     {startGameFail ? 'Could not start game' : ''}
             </div>
             <div className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} isLoading={isLoading} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} />
             </div>
         </div>
     );
