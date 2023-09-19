@@ -44,8 +44,6 @@ function Login() {
 
     return (
         <div className="login_container" aria-label='Photo by Krzysztof Kowalik'>
-            <p className={'messages'}>{searchParams.get("logout") ? 'Succefully logged out' : ''}</p>
-            <p className={'messages'}>{searchParams.get("register") ? 'Succefully registered, you can log in' : ''}</p>
             <div className="login_register">
                 <h1 className='loginH1'>Battleship</h1>
                 <form onSubmit={submitLogin} className={'loginForm'}>
@@ -53,13 +51,17 @@ function Login() {
                     <TextField id="filled-basic" label="Password" type={"password"} variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
                     {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton" >Login</button>}
                 </form>
+                <p className={'messages'}>{searchParams.get("logout") ? 'Succefully logged out' : ''}</p>
+                <p className={'messages'}>{searchParams.get("register") ? 'Succefully registered, you can log in' : ''}</p>
                 <div className={'authStatus'}>
                     {authFailed ? 'Username or Password are incorrect, try again' : ''}
                 </div>
                 <div className="otherLoginOptions">
-                    <Link to={`${baseURL}/login/google`} className={'loginGoogleLink'}><div className="google_login"><img src={googleImg} className="imgLogo"/> Login with Google</div></Link>
+                    <Link to={`${baseURL}/login/google`} className={'loginGoogleLink'}><div className="google_login"><img src={googleImg} className="imgLogo" /> Login with Google</div></Link>
                 </div>
-                <Link to='/register' className={'registrationLink'} >Register here</Link>
+                <div className={'registrationLink_container'}>
+                    <Link to='/register' className={'registrationLink'} >Register here</Link>
+                </div>
             </div>
         </div>
     );
