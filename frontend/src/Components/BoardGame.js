@@ -104,7 +104,6 @@ function BoardGame(props) {
             <div style={numberedRowStyle}>
                 {boardDimension.map(col => <p>{alphabet[col]}</p>)}
             </div>
-            {props.isLoading ? <CircularProgress size={150} className='loader' /> :
             <div className="BoardGame" style={boardStyle}>
                 <ul className="board_rows">
                     {boardDimension.map((row, rowInd) =>
@@ -121,7 +120,7 @@ function BoardGame(props) {
                         </li>
                     )}
                 </ul>
-            </div>}
+            </div>
         </div>
     );
 };
