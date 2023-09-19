@@ -26,15 +26,6 @@ function BoardGame(props) {
         fontWeight: 'bold'
     };
 
-    const numberedRowStyle = {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2rem',
-        marginLeft: '6rem',
-        bottom: '9rem',
-        fontWeight: 'bold'
-    };
-
     const boardStyle = {
         display: 'flex',
         justifyContent: 'center',
@@ -97,9 +88,6 @@ function BoardGame(props) {
             <div style={numberedColumnStyle}>
                 {boardDimension.map(col => <p>{col+1}</p>)}
             </div>
-            {/* <div style={numberedRowStyle}>
-                {boardDimension.map(col => <p>{alphabet[col]}</p>)}
-            </div> */}
             <div className="BoardGame" style={boardStyle}>
                 <ul className="board_rows">
                     {boardDimension.map((row, rowInd) =>
