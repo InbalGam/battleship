@@ -47,11 +47,11 @@ function GamePlay(props) {
                     </div>
                     <div className='opponent_board'>
                         <h3 className={props.myTurn ? 'player_turn' : ''}>{'You'}</h3>
-                        <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} isLoading={isLoading} clicked={true} getIndexesData={getIndexesData} />
+                        <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
                     </div>
                     <div className='player_board'>
                         <h3 className={props.myTurn ? '' : 'opponent_turn'}>{props.opponent}</h3>
-                        <BoardGame dimension={props.dimension} placedShips={props.placedShips} isLoading={isLoading} shots={props.shotsRecived} />
+                        <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
                     </div>
                     <div className='chat_container'>
                         <Chat />

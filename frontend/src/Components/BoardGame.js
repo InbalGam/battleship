@@ -1,5 +1,4 @@
 import styles from './Styles/BoardGame.css';
-import CircularProgress from '@mui/material/CircularProgress';
 import CloseIcon from '@mui/icons-material/Close';
 import { useMemo } from "react";
 
