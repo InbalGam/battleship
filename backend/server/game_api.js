@@ -480,7 +480,7 @@ gameRouter.post('/games/:game_id/chat', async (req,res) => {
 
 gameRouter.get('/games/:game_id/chat', async (req,res) => {
     try {
-        const gameChat = await pool.query('select u.nickname as from, cm.text as message, cm.created_at as date from chat_messages cm join users u on cm.user_id = u.id where cm.game_id = $1 order by cm.created_at', [req.params.game_id]);
+        const gameChat = await pool.query('select u.nickname as from, cm.text as message, cm.created_at as date from chat_messages cm join users u on cm.user_id = u.id where cm.game_id = $1 order by cm.created_at desc', [req.params.game_id]);
         
         return res.status(200).json(gameChat.rows);
     } catch (e) {
