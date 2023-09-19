@@ -22,7 +22,6 @@ function BoardGame(props) {
         display: 'flex',
         gap: '4.5rem',
         justifyContent: 'center',
-       // position: 'relative',
         bottom: '10rem',
         fontWeight: 'bold'
     };
@@ -32,13 +31,11 @@ function BoardGame(props) {
         flexDirection: 'column',
         gap: '2rem',
         marginLeft: '6rem',
-       // position: 'relative',
         bottom: '9rem',
         fontWeight: 'bold'
     };
 
     const boardStyle = {
-        //position: 'relative',
         display: 'flex',
         justifyContent: 'center',
         bottom: '60rem'
