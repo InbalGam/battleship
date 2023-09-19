@@ -91,3 +91,9 @@
 .registrationLink:hover {
     color:rgb(15, 33, 59);
 }
+
+.messages {
+    align-self: center;
+    color: white;
+    font-size: 1rem;
+}
