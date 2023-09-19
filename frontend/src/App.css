@@ -1,7 +1,8 @@
 body {
     font-family: 'Raleway', sans-serif !important;
     margin: 0;
-    box-sizing: border-box; 
+    box-sizing: border-box;
+    background-color: rgb(252, 245, 236);
 }
 
 ul {
