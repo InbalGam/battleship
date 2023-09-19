@@ -1,0 +1,29 @@
+.register_container {
+    background-image: url('./images/waves.jpg');
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
+}
+
+.registerMain {
+    width: 30%;
+    height: 100%;
+    background-color: rgb(44, 105, 197);
+    margin: auto;
+}
+
+.registerH {
+    position: relative;
+    color: white;
+    text-align: center;
+    top: 25%;
+}
+
+.registerForm {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: 28%;
+    gap: 2rem;
+}

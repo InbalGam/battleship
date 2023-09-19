@@ -4,6 +4,7 @@ import {validateEmail} from '../utils';
 import { useNavigate} from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
+import styles from './Styles/Register.css';
 
 
 function Register() {
@@ -59,17 +60,19 @@ function Register() {
 
     return (
         <div className="register_container">
-            <h2>Battleship</h2>
-            <form onSubmit={submitForm} className='registerForm'>
-                <TextField id="outlined-basic" label="Email" variant="outlined" value={username} onChange={handleUsernameChange}/>
-                {validUsername ? '' : msg}
-                <TextField id="outlined-basic" label="Password" variant="outlined" value={password} onChange={handlePasswordChange}/>
-                {(password.length >= 8) ? '' : msg}
-                <TextField id="outlined-basic" label="Nickname" variant="outlined" value={nickname} onChange={handleNicknameChange}/>
-                {(nickname.length >= 3) ? '' : msg}
-                {isLoading ? <CircularProgress size={150} className='loader'/> : <button type="submit" value="Submit" className="submitButton">Register</button>}
-                {registerAuth ? 'Could not register' : ''}
-            </form>
+            <div className="registerMain">
+                <h2 className='registerH'>Battleship</h2>
+                <form onSubmit={submitForm} className='registerForm'>
+                    <TextField id="filled-basic" label="Email" variant="filled" value={username} onChange={handleUsernameChange} className="textField" />
+                    {validUsername ? '' : msg}
+                    <TextField id="filled-basic" label="Password" variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
+                    {(password.length >= 8) ? '' : msg}
+                    <TextField id="filled-basic" label="Nickname" variant="filled" value={nickname} onChange={handleNicknameChange} className="textField" />
+                    {(nickname.length >= 3) ? '' : msg}
+                    {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton">Register</button>}
+                    {registerAuth ? 'Could not register' : ''}
+                </form>
+            </div>
         </div>
     );
 };
