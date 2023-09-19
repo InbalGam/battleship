@@ -432,6 +432,8 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
         const successfullShots = userGameShots.rows.filter(shot => shot.hit === true);
         if (successfullShots.length + 1 === totalShipsSizes[gameDimension]) { // check winner
             await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, userWinner]);
+            await pool.query('update users set wins = (wins + 1) where id = $1;', [player]);
+            await pool.query('update users set loses = (loses + 1) where id = $1;', [opponent]);
             return res.status(200).json({msg: 'Player performed a shot and won game'});
         }
     } else {
