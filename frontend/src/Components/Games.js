@@ -68,7 +68,7 @@ function Games() {
                         </div>
                     </div>
                     <div className="games_container">
-                        <div className="games">
+                        {userGameInvitations.length > 0 ? <div className="games">
                             <h3>Invitations:</h3>
                             <ul>
                                 {userGameInvitations.map((game, ind) =>
@@ -77,7 +77,7 @@ function Games() {
                                     </li>
                                 )}
                             </ul>
-                        </div>
+                        </div> : ''}
                         <div className="games">
                             <h3>Ongoing games:</h3>
                             <ul>
