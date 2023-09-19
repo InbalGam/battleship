@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import { NavLink } from 'react-router-dom';
+import styles from './Styles/AppBar.css';
 
 
 export default function ButtonAppBar() {
@@ -22,7 +23,7 @@ export default function ButtonAppBar() {
           >
             
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} className='mainLink'>
           <NavLink to='/' className='navLinks'>Battleship</NavLink>
           </Typography>
           <Button color="inherit"><NavLink to='/profile' className='navLinks'>Profile</NavLink></Button>
