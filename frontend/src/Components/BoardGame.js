@@ -22,7 +22,7 @@ function BoardGame(props) {
         display: 'flex',
         gap: '4.5rem',
         justifyContent: 'center',
-        position: 'relative',
+       // position: 'relative',
         bottom: '10rem',
         fontWeight: 'bold'
     };
@@ -32,13 +32,13 @@ function BoardGame(props) {
         flexDirection: 'column',
         gap: '2rem',
         marginLeft: '6rem',
-        position: 'relative',
+       // position: 'relative',
         bottom: '9rem',
         fontWeight: 'bold'
     };
 
     const boardStyle = {
-        position: 'relative',
+        //position: 'relative',
         display: 'flex',
         justifyContent: 'center',
         bottom: '60rem'
@@ -100,14 +100,15 @@ function BoardGame(props) {
             <div style={numberedColumnStyle}>
                 {boardDimension.map(col => <p>{col+1}</p>)}
             </div>
-            <div style={numberedRowStyle}>
+            {/* <div style={numberedRowStyle}>
                 {boardDimension.map(col => <p>{alphabet[col]}</p>)}
-            </div>
+            </div> */}
             <div className="BoardGame" style={boardStyle}>
                 <ul className="board_rows">
                     {boardDimension.map((row, rowInd) =>
                         <li key={rowInd} >
                             <ul className="board_columns" style={columnStyle}>
+                                <li className='row_name'>{alphabet[rowInd]}</li>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
                                         <div style={divStyle} onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>

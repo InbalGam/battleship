@@ -5,3 +5,7 @@
 .noColor {
     background-color: white;
 }
+
+.row_name {
+    width: 1rem;
+}
