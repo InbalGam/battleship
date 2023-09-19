@@ -38,7 +38,7 @@ function GamePlay(props) {
 
     return (
         <>
-            {isLoading ? <CircularProgress size={150} className='loader' /> :
+            {isLoading ? <CircularProgress size={150} className='loader' /> :''}
                 <div className='container'>
                     <Fab aria-label="refresh" onClick={props.getTheGameInfo}> <RefreshIcon /> </Fab>
                     <div className='error_msg'>
@@ -56,7 +56,7 @@ function GamePlay(props) {
                     <div className='chat_container'>
                         <Chat />
                     </div>
-                </div>}
+                </div>
         </>
     );
 };
