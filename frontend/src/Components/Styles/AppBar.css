@@ -1,0 +1,15 @@
+.navLinks {
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.navLinks:hover {
+    cursor: pointer;
+    color: beige;
+}
+
+.mainLink .navLinks {
+    font-size: 2rem;
+}
