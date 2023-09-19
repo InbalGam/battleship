@@ -51,10 +51,12 @@
     font-size: 1.5rem;
 }
 
-.games {
+.games ul {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 2rem;
 }
 
 .games li {
