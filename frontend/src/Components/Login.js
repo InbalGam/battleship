@@ -5,6 +5,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import {baseURL} from '../apiKey';
+import styles from './Styles/Login.css';
+import googleImg from './Styles/images/google.png';
 
 
 function Login() {
@@ -40,23 +42,25 @@ function Login() {
         }
     };
 
-    return(
-        <div>
+    return (
+        <div className="login_container" aria-label='Photo by Krzysztof Kowalik'>
             <p className={'messages'}>{searchParams.get("logout") ? 'Succefully logged out' : ''}</p>
             <p className={'messages'}>{searchParams.get("register") ? 'Succefully registered, you can log in' : ''}</p>
-            <h1 className='loginH1'>Battleship</h1>
-            <form onSubmit={submitLogin} className={'loginForm'}>
-                <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={handleUsernameChange}/>
-                <TextField id="outlined-basic" label="Password" type={"password"} variant="outlined" value={password} onChange={handlePasswordChange}/>
-                {isLoading ? <CircularProgress size={150} className='loader'/> : <button type="submit" value="Submit">Login</button>}
-            </form>
-            <div className={'authStatus'}>
-                {authFailed ? 'Username or Password are incorrect, try again' : ''}
+            <div className="login_register">
+                <h1 className='loginH1'>Battleship</h1>
+                <form onSubmit={submitLogin} className={'loginForm'}>
+                    <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={handleUsernameChange} className="textField" />
+                    <TextField id="outlined-basic" label="Password" type={"password"} variant="outlined" value={password} onChange={handlePasswordChange} className="textField" />
+                    {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="loginButton" >Login</button>}
+                </form>
+                <div className={'authStatus'}>
+                    {authFailed ? 'Username or Password are incorrect, try again' : ''}
+                </div>
+                <div className="otherLoginOptions">
+                    <Link to={`${baseURL}/login/google`} className={'loginGoogleLink'}><div className="google_login"><img src={googleImg} className="imgLogo"/> Login with Google</div></Link>
+                </div>
+                <Link to='/register' className={'registrationLink'} >Register here</Link>
             </div>
-            <div>
-                <Link to={`${baseURL}/login/google`} className={'loginGoogleLink'}>Sign in with Google</Link>
-            </div>
-            <Link to='/register' className={'registrationLink'} >Register here</Link>
         </div>
     );
 };

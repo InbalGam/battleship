@@ -1,0 +1,89 @@
+.login_container {
+    background-image: url('./images/waves.jpg');
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
+}
+
+.login_register {
+    width: 30%;
+    height: 100%;
+    background-color: rgb(44, 105, 197);
+    margin: auto;
+}
+
+.loginH1 {
+    position: relative;
+    color: white;
+    text-align: center;
+    top: 25%;
+}
+
+.loginForm {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: 28%;
+    gap: 2rem;
+}
+
+.textField {
+    background-color: white;
+    width: 50%;
+}
+
+.loginButton {
+    background-color: rgb(35, 63, 104);
+    color: white;
+    border: 0.1rem white solid;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+.loginButton:hover {
+    cursor: pointer;
+    background-color: rgb(13, 22, 36);
+}
+
+.otherLoginOptions {
+    position: relative;
+    top: 35%;
+    text-align: center;
+}
+
+.loginGoogleLink {
+    text-decoration: none;
+}
+
+.google_login {
+    background-color: white;
+    width: 40%;
+    margin-left: 30%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google_login:hover {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.imgLogo {
+    height: 2rem;
+    margin-right: 1rem;
+}
+
+.registrationLink {
+    position: relative;
+    top: 40%;
+    margin-left: 14rem;
+    color: white;
+    text-decoration: none;
+    font-size: larger;
+}
+
+.registrationLink:hover {
+    color:rgb(15, 33, 59);
+}
