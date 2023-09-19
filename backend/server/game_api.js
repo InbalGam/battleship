@@ -102,12 +102,15 @@ gameRouter.get('/games', async (req, res) => {
             return res.status(400).json({msg: 'User does not exists'});
         }
 
-        const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
-        from games g join shots s on g.id = s.game_id join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`,
+        const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when s.user_id = $1 and s.hit = true then 1 else 0 end) as hits,
+        sum(case when s.user_id <> $1 and s.hit = true then 1 else 0 end) as bombed from games g left join shots s on g.id = s.game_id join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 
+        where (user1 = $1 or user2 = $1) and (g.state = $2 or g.state = $3) group by 1,2,3`,
         [req.user.id, 'user1_turn', 'user2_turn']);
         if (gamesShots.rows.length > 0) {
             activeGames.push(...gamesShots.rows);
         }
+        console.log(gamesShots.rows);
+        console.log(activeGames);
 
         const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
         from games g join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`,
@@ -144,6 +147,7 @@ gameRouter.get('/games', async (req, res) => {
             invitations: gameInvitations,
             active_games: activeGames
         }
+        console.log(finalResults);
 
         return res.status(200).json(finalResults);
     } catch (e) {
