@@ -71,7 +71,7 @@ function BoardGame(props) {
         }
         return pairs;
     };
-    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips]);
+    let coloredCells = useMemo(() => cellsToColor(), [props.placedShips, props.shotsSent]);
 
 
     const checkSubset = (parentArray, subsetArray) => {
