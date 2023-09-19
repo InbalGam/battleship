@@ -19,6 +19,7 @@
 .loginH1 {
     color: white;
     text-align: center;
+    font-size: 3rem;
 }
 
 .loginForm {
@@ -39,6 +40,7 @@
     border: 0.1rem white solid;
     border-radius: 0.5rem;
     padding: 0.75rem;
+    font-size: 1rem;
 }
 
 .submitButton:hover {
