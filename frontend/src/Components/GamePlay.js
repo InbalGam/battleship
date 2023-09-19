@@ -13,19 +13,18 @@ function GamePlay(props) {
     const navigate = useNavigate();
     const [shotFail, setShotFail] = useState(false);
     const [notMyTurn, setNotMyTurn] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     async function getIndexesData(rowColData) {
         if (props.myTurn) {
-            setIsLoading(true);
+            props.setIsLoading(true);
             try {
                 const result = await performShot(props.game_id, { row: rowColData[0], col: rowColData[1] });
                 if (result === true) {
                     props.getTheGameInfo();
-                    setIsLoading(false);
+                    props.setIsLoading(false);
                 } else {
                     setShotFail(true);
-                    setIsLoading(false);
+                    props.setIsLoading(false);
                 }
             } catch (e) {
                 navigate('/error');
@@ -38,7 +37,6 @@ function GamePlay(props) {
 
     return (
         <>
-            {isLoading ? <CircularProgress size={150} className='loader' /> :''}
                 <div className='container'>
                     <Fab aria-label="refresh" onClick={props.getTheGameInfo}> <RefreshIcon /> </Fab>
                     <div className='error_msg'>
