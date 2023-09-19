@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import GameCard from "./GameCard";
 import AddGame from "./AddGame";
 import CircularProgress from '@mui/material/CircularProgress';
+import styles from './Styles/Games.css';
 
 
 function Games() {
@@ -53,14 +54,16 @@ function Games() {
             {isLoading ? <CircularProgress size={150} className='loader' /> :
                 <div>
                     <div className="upperDiv">
-                        <Fab variant="extended" color="primary" aria-label="add" onClick={showFormFunc}>
-                            <AddIcon sx={{ mr: 1 }} className="addGame" /> New Game
-                        </Fab>
-                        {showForm ? <AddGame setShowForm={setShowForm} setIsLoading={setIsLoading} getUserGames={getUserGames} /> : ''}
+                        <div className='new_game_form'>
+                            {showForm ? <AddGame setShowForm={setShowForm} setIsLoading={setIsLoading} getUserGames={getUserGames} /> : 
+                                <Fab variant="extended" color="primary" aria-label="add" onClick={showFormFunc} className='addGame' >
+                                    <AddIcon sx={{ mr: 1 }} className="addGame" /> New Game
+                                </Fab>}
+                        </div>
                         <div className="userScore">
                             <h3>Your Score:</h3>
-                            <p>Wins: {userScore.wins}</p>
-                            <p>Loses: {userScore.loses}</p>
+                            <p className='wins'>Wins: {userScore.wins}</p>
+                            <p className='loses'>Loses: {userScore.loses}</p>
                             <p>Total score: {userScore.wins - userScore.loses}</p>
                         </div>
                     </div>

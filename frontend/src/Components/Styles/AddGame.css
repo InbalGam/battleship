@@ -1,0 +1,32 @@
+.addGame_form {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(65, 117, 206);
+    border-radius: 0.5rem;
+}
+
+.closeGame {
+    position: relative;
+    align-self: flex-start;
+    background-color: rgb(35, 63, 104) !important;
+}
+
+.addGame_form_container {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.addGame_form .textField {
+    width: 90%;
+}
+
+.dimension_toggle {
+    color: white !important;
+}
+
+.label {
+    color: white;
+}

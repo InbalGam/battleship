@@ -1,0 +1,42 @@
+.upperDiv {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.addGame {
+    border-radius: 0.5rem !important;
+}
+
+.userScore {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: rgb(245, 236, 220);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.userScore h3 {
+    margin-bottom: 0.5rem;
+}
+
+.userScore p {
+    margin: 0.5rem;
+    font-weight: bold;
+}
+
+.wins {
+    color: rgb(73, 194, 99);
+}
+
+.loses {
+    color: rgb(202, 50, 50);
+}
+
+.new_game_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
