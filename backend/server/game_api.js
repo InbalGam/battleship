@@ -109,8 +109,6 @@ gameRouter.get('/games', async (req, res) => {
         if (gamesShots.rows.length > 0) {
             activeGames.push(...gamesShots.rows);
         }
-        console.log(gamesShots.rows);
-        console.log(activeGames);
 
         const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
         from games g join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`,
@@ -147,7 +145,6 @@ gameRouter.get('/games', async (req, res) => {
             invitations: gameInvitations,
             active_games: activeGames
         }
-        console.log(finalResults);
 
         return res.status(200).json(finalResults);
     } catch (e) {
@@ -433,7 +430,7 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
         await pool.query('insert into shots (game_id, user_id, row, col, hit, performed_at) values ($1, $2, $3, $4, $5, $6)', [req.params.game_id, player, row, col, 'true', timestamp]);
 
         const successfullShots = userGameShots.rows.filter(shot => shot.hit === true);
-        if (successfullShots.length === totalShipsSizes[gameDimension]) { // winner
+        if (successfullShots.length + 1 === totalShipsSizes[gameDimension]) { // check winner
             await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, userWinner]);
             return res.status(200).json({msg: 'Player performed a shot and won game'});
         }
