@@ -55,7 +55,7 @@ function Games() {
                 <div>
                     <div className="upperDiv">
                         <div className='new_game_form'>
-                            {showForm ? <AddGame setShowForm={setShowForm} setIsLoading={setIsLoading} getUserGames={getUserGames} /> : 
+                            {showForm ? <AddGame setShowForm={setShowForm} setIsLoading={setIsLoading} getUserGames={getUserGames} /> :
                                 <Fab variant="extended" color="primary" aria-label="add" onClick={showFormFunc} className='addGame' >
                                     <AddIcon sx={{ mr: 1 }} className="addGame" /> New Game
                                 </Fab>}
@@ -67,25 +67,27 @@ function Games() {
                             <p>Total score: {userScore.wins - userScore.loses}</p>
                         </div>
                     </div>
-                    <div className="invitationGames">
-                        <h3>Invitations:</h3>
-                        <ul>
-                            {userGameInvitations.map((game, ind) =>
-                                <li key={ind}>
-                                    <GameCard invite={true} game={game} active={false} getUserGames={getUserGames} />
-                                </li>
-                            )}
-                        </ul>
-                    </div>
-                    <div className="ongoingGames">
-                        <h3>Ongoing games:</h3>
-                        <ul>
-                            {userActiveGames.map((game, ind) =>
-                                <li key={ind}>
-                                    <GameCard invite={false} game={game} active={true} />
-                                </li>
-                            )}
-                        </ul>
+                    <div className="games_container">
+                        <div className="games">
+                            <h3>Invitations:</h3>
+                            <ul>
+                                {userGameInvitations.map((game, ind) =>
+                                    <li key={ind}>
+                                        <GameCard invite={true} game={game} active={false} getUserGames={getUserGames} />
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
+                        <div className="games">
+                            <h3>Ongoing games:</h3>
+                            <ul>
+                                {userActiveGames.map((game, ind) =>
+                                    <li key={ind}>
+                                        <GameCard invite={false} game={game} active={true} />
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
                     </div>
                 </div>}
         </div>
