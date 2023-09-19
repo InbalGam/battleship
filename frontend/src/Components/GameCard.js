@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from "react";
 import { acceptGame, deleteAGame } from '../Api';
 import CircularProgress from '@mui/material/CircularProgress';
+import styles from './Styles/GameCard.css';
 
 
 function GameCard(props) {
@@ -58,15 +59,18 @@ function GameCard(props) {
                             <Typography sx={{ fontSize: 24 }} gutterBottom >
                                 {props.game.opponent}
                             </Typography>
-                            <Typography variant="h5" component="div" className='gameInfo'>
-                                {props.game.board_dimension+'X'+props.game.board_dimension } | {'1 shot per turn'}
-                                {props.active ? <div><p className='gameHits' style={{color: 'green'}}>| {props.game.hits} hits</p> <p className='gameBombed' style={{color: 'red'}}>| {props.game.bombed} bombed </p></div> : ''}
-                            </Typography>
                         </CardContent>
                     </Link>
                     <CardActions>
                         {props.invite ? (props.game.createdByMe ? '' : <Button size="small" onClick={onClickAccept} className='gameCardActionButtons'>Accept</Button>) : ''}
                         {props.invite ? (props.game.createdByMe ? '' : <Button size="small" onClick={onClickDelete} className='gameCardActionButtons'>Delete</Button>) : ''}
+                        <div className='gameInfo'>{props.game.board_dimension+'X'+props.game.board_dimension }</div>
+                        <div className='gameInfo'>{'1 shot per turn'}</div>
+                        {props.active ? 
+                            <>
+                                <div className='gameInfo'><p className='gameHits' style={{color: 'rgb(73, 194, 99)'}}> {props.game.hits} hits</p></div>
+                                <div className='gameInfo'><p className='gameBombed' style={{color: 'rgb(227, 121, 121)'}}> {props.game.bombed} bombed </p></div>
+                            </> : ''}
                     </CardActions>
                 </Card>}
             {authFailed ? 'could not update game' : ''}
