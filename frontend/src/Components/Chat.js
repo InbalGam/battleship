@@ -2,9 +2,9 @@ import { sendMsg, getMsgs } from '../Api';
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import Fab from '@mui/material/Fab';
-import TextField from '@mui/material/TextField';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CircularProgress from '@mui/material/CircularProgress';
+import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 
 
 function Chat() {
@@ -62,7 +62,7 @@ function Chat() {
         <div>
             {isLoading ? <CircularProgress size={150} className='loader' /> :
                 <div>
-                    <TextField id="outlined-basic" label="Post a new message to chat" variant="outlined" value={newMsg} onChange={handleNewMsgChange} />
+                    <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} style={{width: '320px', borderRadius: '12px 12px 0 12px'}} />
                     <Fab variant="extended" color="primary" aria-label="add" onClick={submitMsg}> Send </Fab>
                     <Fab aria-label="refresh" onClick={getChatMsgs}> <RefreshIcon /> </Fab>
                     {failedMsg ? 'could not send message' : ''}
