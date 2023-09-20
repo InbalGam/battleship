@@ -11,6 +11,9 @@ function BoardGame(props) {
         width: '5rem',
         height: '5rem',
         border: '1px solid black',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     };
 
     const columnStyle = {
