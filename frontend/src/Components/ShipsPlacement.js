@@ -8,6 +8,7 @@ import Fab from '@mui/material/Fab';
 import { readyToPlay, deleteAShip, placeAShip } from '../Api';
 import { useNavigate } from 'react-router-dom';
 import styles from './Styles/ShipsPlacement.css';
+import Alert from '@mui/material/Alert';
 
 
 function ShipsPlacement(props) {
@@ -141,9 +142,9 @@ function ShipsPlacement(props) {
                 </div>
             </div>
             <div className='error_msg'>
-                    {placeShipFail ? placeShipFail : ''}
-                    {deleteShipFail ? 'could not delete ship' : ''}
-                    {startGameFail ? 'Could not start game' : ''}
+                    {placeShipFail ? <Alert severity="warning">{placeShipFail}</Alert> : ''}
+                    {deleteShipFail ? <Alert severity="warning">Could not delete ship</Alert> : ''}
+                    {startGameFail ? <Alert severity="warning">Could not start game</Alert> : ''}
             </div>
             <div className='main_board'>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} />

@@ -7,6 +7,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import CloseIcon from '@mui/icons-material/Close';
 import Fab from '@mui/material/Fab';
 import styles from './Styles/AddGame.css';
+import Alert from '@mui/material/Alert';
 
 
 function AddGame(props) {
@@ -71,7 +72,7 @@ function AddGame(props) {
                 </ToggleButton>
             </ToggleButtonGroup>
             <button type="submit" className="submitButton">Invite</button>
-            {insertFailed ? 'could not create game' : ''}
+            {insertFailed ? <Alert severity="warning">Could not create game</Alert> : ''}
             </div>
         </form>
     );

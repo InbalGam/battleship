@@ -8,6 +8,7 @@ import { useState } from "react";
 import { acceptGame, deleteAGame } from '../Api';
 import CircularProgress from '@mui/material/CircularProgress';
 import styles from './Styles/GameCard.css';
+import Alert from '@mui/material/Alert';
 
 
 function GameCard(props) {
@@ -73,7 +74,7 @@ function GameCard(props) {
                             </> : ''}
                     </CardActions>
                 </Card>}
-            {authFailed ? 'could not update game' : ''}
+            {authFailed ? <Alert severity="warning">Could not update game</Alert> : ''}
         </>
     );
 };

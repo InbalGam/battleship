@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
 
 function Profile() {
@@ -87,7 +88,7 @@ function Profile() {
                         <p>loses: {user.loses}</p>
                         <p>total: {user.wins - user.loses}</p>
                     </div>
-                    {updateFailed ? 'could not update nickname' : ''}
+                    {updateFailed ? <Alert severity="warning">Could not update nickname</Alert> : ''}
                 </div>}
         </div>
     );

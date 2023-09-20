@@ -5,6 +5,7 @@ import { useNavigate} from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
 import styles from './Styles/Register.css';
+import Alert from '@mui/material/Alert';
 
 
 function Register() {
@@ -64,13 +65,13 @@ function Register() {
                 <h2 className='registerH'>Battleship</h2>
                 <form onSubmit={submitForm} className='registerForm'>
                     <TextField id="filled-basic" label="Email" variant="filled" value={username} onChange={handleUsernameChange} className="textField" />
-                    {validUsername ? '' : msg}
+                    {validUsername ? '' : <Alert severity="warning">{msg}</Alert>}
                     <TextField id="filled-basic" label="Password" variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
-                    {(password.length >= 8) ? '' : msg}
+                    {(password.length >= 8) ? '' : <Alert severity="warning">{msg}</Alert>}
                     <TextField id="filled-basic" label="Nickname" variant="filled" value={nickname} onChange={handleNicknameChange} className="textField" />
-                    {(nickname.length >= 3) ? '' : msg}
+                    {(nickname.length >= 3) ? '' : <Alert severity="warning">{msg}</Alert>}
                     {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton">Register</button>}
-                    {registerAuth ? 'Could not register' : ''}
+                    {registerAuth ? <Alert severity="warning">Could not register</Alert> : ''}
                 </form>
             </div>
         </div>

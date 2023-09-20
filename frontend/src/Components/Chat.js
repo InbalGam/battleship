@@ -5,6 +5,7 @@ import Fab from '@mui/material/Fab';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CircularProgress from '@mui/material/CircularProgress';
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import Alert from '@mui/material/Alert';
 
 
 function Chat() {
@@ -65,7 +66,7 @@ function Chat() {
                     <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} style={{width: '320px', borderRadius: '12px 12px 0 12px'}} />
                     <Fab variant="extended" color="primary" aria-label="add" onClick={submitMsg}> Send </Fab>
                     <Fab aria-label="refresh" onClick={getChatMsgs}> <RefreshIcon /> </Fab>
-                    {failedMsg ? 'could not send message' : ''}
+                    {failedMsg ? <Alert severity="warning">Could not send message</Alert> : ''}
                     <ul>
                         {msgs.map((msg, ind) =>
                             <li key={ind}>

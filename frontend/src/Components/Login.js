@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import {baseURL} from '../apiKey';
 import styles from './Styles/Login.css';
 import googleImg from './Styles/images/google.png';
+import Alert from '@mui/material/Alert';
 
 
 function Login() {
@@ -51,8 +52,8 @@ function Login() {
                     <TextField id="filled-basic" label="Password" type={"password"} variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
                     {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton" >Login</button>}
                 </form>
-                <p className={'messages'}>{searchParams.get("logout") ? 'Succefully logged out' : ''}</p>
-                <p className={'messages'}>{searchParams.get("register") ? 'Succefully registered, you can log in' : ''}</p>
+                <p className={'messages'}>{searchParams.get("logout") ? <Alert severity="success">Succefully logged out</Alert> : ''}</p>
+                <p className={'messages'}>{searchParams.get("register") ? <Alert severity="success">Succefully registered, you can log in</Alert> : ''}</p>
                 <div className={'authStatus'}>
                     {authFailed ? 'Username or Password are incorrect, try again' : ''}
                 </div>
