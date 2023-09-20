@@ -7,14 +7,14 @@ function BoardGame(props) {
     const boardDimension = Array.from(Array(props.dimension).keys());
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
-    const divStyle = {
-        width: '5rem',
-        height: '5rem',
-        border: '1px solid black',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    };
+    // const divStyle = {
+    //     width: '5rem',
+    //     height: '5rem',
+    //     border: '1px solid black',
+    //     display: 'flex',
+    //     alignItems: 'center',
+    //     justifyContent: 'center'
+    // };
 
     const columnStyle = {
         display: 'flex'
@@ -99,7 +99,7 @@ function BoardGame(props) {
                                 <li className='row_name'>{alphabet[rowInd]}</li>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
-                                        <div style={divStyle} onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
+                                        <div onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
                                             {checkX(props.shots, [(rowInd+1), (colInd+1)]) ? <CloseIcon style={{color: 'red'}} className='Xcell'/> : ''}
                                         </div>
                                     </li>
