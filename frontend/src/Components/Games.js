@@ -52,7 +52,7 @@ function Games() {
     return (
         <div>
             {isLoading ? <CircularProgress size={150} className='loader' /> :
-                <div>
+                <div className="main">
                     <div className="upperDiv">
                         <div className='new_game_form'>
                             {showForm ? <AddGame setShowForm={setShowForm} setIsLoading={setIsLoading} getUserGames={getUserGames} /> :
