@@ -18,10 +18,38 @@
     justify-content: center;
 }
 
+.numberedColumnStyle {
+    margin-left: 5rem;
+    display: flex;
+    gap: 4.5rem;
+    justify-content: center;
+    bottom: 10rem;
+    font-weight: bold;
+}
+
+.numberedColumnStyle p {
+    margin: 0;
+}
+
+.columnStyle {
+    display: flex;
+}
+
+.boardStyle {
+    display: flex;
+    justify-content: center;
+    bottom: 60rem;
+}
+
+.board_rows {
+    padding: 0;
+}
+
 .row_name {
     width: 1rem;
     align-self: center;
     margin-right: 1rem;
+    font-weight: bold;
 }
 
 .Xcell {
@@ -38,10 +66,14 @@
         width: 4rem;
         height: 4rem;
     }
+
+    .numberedColumnStyle {
+        gap: 3.5rem;
+    }
 }
 
 
-@media only screen and (max-width: 650px) {
+@media only screen and (max-width: 750px) {
     .color {
         width: 3rem;
         height: 3rem;
@@ -51,9 +83,13 @@
         width: 3rem;
         height: 3rem;
     }
+
+    .numberedColumnStyle {
+        gap: 2.5rem;
+    }
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 600px) {
     .color {
         width: 2rem;
         height: 2rem;
@@ -62,5 +98,26 @@
     .noColor {
         width: 2rem;
         height: 2rem;
+    }
+
+    .numberedColumnStyle {
+        gap: 1.5rem;
+    }
+}
+
+
+@media only screen and (max-width: 430px) {
+    .color {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .noColor {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .numberedColumnStyle {
+        gap: 1.05rem;
     }
 }

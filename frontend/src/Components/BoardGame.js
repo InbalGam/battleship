@@ -7,34 +7,6 @@ function BoardGame(props) {
     const boardDimension = Array.from(Array(props.dimension).keys());
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
-    // const divStyle = {
-    //     width: '5rem',
-    //     height: '5rem',
-    //     border: '1px solid black',
-    //     display: 'flex',
-    //     alignItems: 'center',
-    //     justifyContent: 'center'
-    // };
-
-    const columnStyle = {
-        display: 'flex'
-    };
-
-    const numberedColumnStyle = {
-        marginLeft: '5rem',
-        display: 'flex',
-        gap: '4.5rem',
-        justifyContent: 'center',
-        bottom: '10rem',
-        fontWeight: 'bold'
-    };
-
-    const boardStyle = {
-        display: 'flex',
-        justifyContent: 'center',
-        bottom: '60rem'
-    };
-
 
     function cellsToColor() {
         let pairs = [];
@@ -88,14 +60,14 @@ function BoardGame(props) {
 
     return (
         <div className="BoardNumbered">
-            <div style={numberedColumnStyle}>
+            <div className='numberedColumnStyle'>
                 {boardDimension.map(col => <p>{col+1}</p>)}
             </div>
-            <div className="BoardGame" style={boardStyle}>
+            <div className="boardStyle">
                 <ul className="board_rows">
                     {boardDimension.map((row, rowInd) =>
                         <li key={rowInd} >
-                            <ul className="board_columns" style={columnStyle}>
+                            <ul className='columnStyle'>
                                 <li className='row_name'>{alphabet[rowInd]}</li>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >

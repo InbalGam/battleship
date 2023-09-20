@@ -113,7 +113,7 @@ function ShipsPlacement(props) {
 
     return (
         <Grid container justifyContent="center" spacing={2}>
-            <Grid item xs={4} className='ships'>
+            <Grid item xs={'auto'} className='ships'>
                 <div>
                     <h3>Remaining ships:</h3>
                     <ToggleButtonGroup
@@ -143,15 +143,15 @@ function ShipsPlacement(props) {
                             </Fab>
                         </div> : ''}
                 </div>
+                <div className='error_msg'>
+                    {placeShipFail ? <Alert severity="warning">{placeShipFail}</Alert> : ''}
+                    {deleteShipFail ? <Alert severity="warning">Could not delete ship</Alert> : ''}
+                    {startGameFail ? <Alert severity="warning">Could not start game</Alert> : ''}
+                </div>
             </Grid>
             <Grid item xs={'auto'} className='main_board'>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} />
                 {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
-            </Grid>
-            <Grid item xs={2} className='error_msg'>
-                {placeShipFail ? <Alert severity="warning">{placeShipFail}</Alert> : ''}
-                {deleteShipFail ? <Alert severity="warning">Could not delete ship</Alert> : ''}
-                {startGameFail ? <Alert severity="warning">Could not start game</Alert> : ''}
             </Grid>
         </Grid>
     );
