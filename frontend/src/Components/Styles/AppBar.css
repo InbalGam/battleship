@@ -13,3 +13,9 @@
 .mainLink .navLinks {
     font-size: 2rem;
 }
+
+@media only screen and (max-width: 550px) {
+    .mainLink .navLinks {
+        font-size: 1.5rem;
+    }
+}
