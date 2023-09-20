@@ -48,19 +48,23 @@ function GamePlay(props) {
                 {shotFail ? <Alert severity="warning" className='alert'>Could not make this shot</Alert> : ''}
                 {notMyTurn ? <Alert severity="warning" className='alert'>Not your turn to make a shot</Alert> : ''}
             </Grid>
-            <Grid item xs={6} className='player_names_container'>
-                <div className={props.myTurn ? 'player_turn' : ''}><Avatar className='player_avatar' >You</Avatar></div>
+            <Grid container item xs={'auto'}>
+                <Grid item xs={12} className='player_names_container'>
+                    <div className={props.myTurn ? 'player_turn' : ''}><Avatar className='player_avatar' >You</Avatar></div>
+                </Grid>
+                <Grid item xs={12} className='player_names_container'>
+                    <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
+                    {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
+                </Grid>
             </Grid>
-            <Grid item xs={6} className='player_names_container'>
+            <Grid container item xs={'auto'}>
+                <Grid item xs={12} className='player_names_container'>
                 <div className={props.myTurn ? '' : 'opponent_turn'}><Avatar className='opponent_avatar' >{props.opponent[0]}</Avatar></div>
-            </Grid>
-            <Grid item xs={6}>
-                <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
-                {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
-            </Grid>
-            <Grid item xs={6}>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
-                {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
+                </Grid>
+                <Grid item xs={12} className='player_names_container'>
+                    <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
+                    {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
+                </Grid>
             </Grid>
             <Grid item xs={12} className='game_chat'>
                 <Chat />
