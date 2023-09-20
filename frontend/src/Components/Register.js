@@ -20,7 +20,7 @@ function Register() {
 
     function handleUsernameChange(e) {
         setUsername(e.target.value);
-        setValidUsername(validateEmail(username));
+        setValidUsername(validateEmail(e.target.value));
     };
 
     function handlePasswordChange(e) {
@@ -67,9 +67,9 @@ function Register() {
                     <TextField id="filled-basic" label="Email" variant="filled" value={username} onChange={handleUsernameChange} className="textField" />
                     {validUsername ? '' : <Alert severity="warning">{msg}</Alert>}
                     <TextField id="filled-basic" label="Password" variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
-                    {(password.length >= 8) ? '' : <Alert severity="warning">{msg}</Alert>}
+                    {msg && (password.length < 8) ? <Alert severity="warning">{msg}</Alert> : ''}
                     <TextField id="filled-basic" label="Nickname" variant="filled" value={nickname} onChange={handleNicknameChange} className="textField" />
-                    {(nickname.length >= 3) ? '' : <Alert severity="warning">{msg}</Alert>}
+                    {msg && (nickname.length < 3) ? <Alert severity="warning">{msg}</Alert> : ''}
                     {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton">Register</button>}
                     {registerAuth ? <Alert severity="warning">Could not register</Alert> : ''}
                 </form>
