@@ -87,6 +87,10 @@
     .numberedColumnStyle {
         gap: 2.5rem;
     }
+
+    .Xcell {
+        font-size: 80px !important;
+    }
 }
 
 @media only screen and (max-width: 600px) {
@@ -102,6 +106,10 @@
 
     .numberedColumnStyle {
         gap: 1.5rem;
+    }
+
+    .Xcell {
+        font-size: 50px !important;
     }
 }
 
@@ -119,5 +127,9 @@
 
     .numberedColumnStyle {
         gap: 1.05rem;
+    }
+
+    .Xcell {
+        font-size: 40px !important;
     }
 }
