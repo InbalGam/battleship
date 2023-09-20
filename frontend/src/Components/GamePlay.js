@@ -6,28 +6,29 @@ import styles from './Styles/GamePlay.css';
 import Chat from './Chat';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Fab from '@mui/material/Fab';
-import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
 import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 function GamePlay(props) {
     const navigate = useNavigate();
     const [shotFail, setShotFail] = useState(false);
     const [notMyTurn, setNotMyTurn] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     async function getIndexesData(rowColData) {
         if (props.myTurn) {
-            props.setIsLoading(true);
+            setIsLoading(true);
             try {
                 const result = await performShot(props.game_id, { row: rowColData[0], col: rowColData[1] });
                 if (result === true) {
                     props.getTheGameInfo();
-                    props.setIsLoading(false);
+                    setIsLoading(false);
                 } else {
                     setShotFail(true);
-                    props.setIsLoading(false);
+                    setIsLoading(false);
                 }
             } catch (e) {
                 navigate('/error');
@@ -55,9 +56,11 @@ function GamePlay(props) {
             </Grid>
             <Grid item xs={6}>
                 <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
+                {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
             </Grid>
             <Grid item xs={6}>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
+                {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
             </Grid>
             <Grid item xs={12} className='game_chat'>
                 <Chat />

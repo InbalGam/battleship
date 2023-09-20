@@ -83,9 +83,9 @@ function Game() {
                             {winner ? <div className='winner'><h3>You won</h3> <CelebrationIcon/></div> : <h3>You Lost</h3>}
                         </div> : ''}
 
-                    {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} /> : ''}
+                    {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} /> : ''}
 
-                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} myTurn={myTurn} opponent={opponent} shotsSent={shotsSent} shotsRecived={shotsRecived} /> : ''}
+                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} myTurn={myTurn} opponent={opponent} shotsSent={shotsSent} shotsRecived={shotsRecived} /> : ''}
                 </div>}
         </div>
     );
