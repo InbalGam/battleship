@@ -15,7 +15,6 @@ function Register() {
     const [validUsername, setValidUsername] = useState(true);
     const [registerAuth, setRegisterAuth] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [msg, setMsg] = useState('');
     const navigate = useNavigate();
 
     function handleUsernameChange(e) {
@@ -40,7 +39,6 @@ function Register() {
                 setIsLoading(true);
                 const result = await register(username, password, nickname);
                 const jsonData = await result.json();
-                setMsg(jsonData.msg);
                 if (result.status === 201) {
                     setUsername('');
                     setPassword('');
@@ -65,11 +63,11 @@ function Register() {
                 <h2 className='registerH'>Battleship</h2>
                 <form onSubmit={submitForm} className='registerForm'>
                     <TextField id="filled-basic" label="Email" variant="filled" value={username} onChange={handleUsernameChange} className="textField" />
-                    {validUsername ? '' : <Alert severity="warning">{msg}</Alert>}
-                    <TextField id="filled-basic" label="Password" variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
-                    {msg && (password.length < 8) ? <Alert severity="warning">{msg}</Alert> : ''}
+                    {username && !validUsername ? <Alert severity="warning">Not a valid email</Alert> : ''}
+                    <TextField id="filled-basic" type='password' label="Password" variant="filled" value={password} onChange={handlePasswordChange} className="textField" />
+                    {password && (password.length < 8) ? <Alert severity="warning">Password is less than 8 characters</Alert> : ''}
                     <TextField id="filled-basic" label="Nickname" variant="filled" value={nickname} onChange={handleNicknameChange} className="textField" />
-                    {msg && (nickname.length < 3) ? <Alert severity="warning">{msg}</Alert> : ''}
+                    {nickname && (nickname.length < 3) ? <Alert severity="warning">Nickname is less than 3 characters</Alert> : ''}
                     {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton">Register</button>}
                     {registerAuth ? <Alert severity="warning">Could not register</Alert> : ''}
                 </form>
