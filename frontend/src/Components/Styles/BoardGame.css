@@ -8,4 +8,6 @@
 
 .row_name {
     width: 1rem;
+    align-self: center;
+    margin-right: 1rem;
 }

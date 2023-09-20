@@ -1,42 +1,46 @@
-.container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: [row1-start] 15% [row1-end] 200px [third-line] 200px [fourth-line] 200px [fifth-line] 200px [sixth-line] 200px [last-line];
+.alert {
+    width: 18%;
+    margin-top: 1rem;
 }
 
-.player_board {
-    grid-column-start: 3;
-    grid-column-end: 5;
-    grid-row-start: 3;
-    grid-row-end: 5;
-    margin-right: 2rem;
+.refreshButton {
+    margin-top: 1rem !important;
+    margin-left: 1rem !important;
 }
 
-.player_board h3 {
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: 1;
-    grid-row-end: 1;
-}
-
-.opponent_board {
-    grid-column-start: 1;
-    grid-column-end: 3;
-    grid-row-start: 3;
-    grid-row-end: 5;
-}
-
-.chat_container {
-    grid-column-start: 2;
-    grid-column-end: 5;
-    grid-row-start: 7;
-    grid-row-end: 10;
+.player_names_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .player_turn {
     background-color: rgba(31, 63, 248, 0.2);
+    width: 10%;
 }
 
 .opponent_turn {
-    background-color: rgb(172, 169, 169, 0.2);
+    background-color: rgb(172, 169, 169, 0.4);
+    width: 15%;
+}
+
+.opponent_turn h3 {
+    text-align: center;
+}
+
+.player_avatar {
+    background-color: rgb(238, 138, 16) !important;
+    margin: auto;
+}
+
+.opponent_avatar {
+    background-color: rgb(16, 68, 238) !important;
+    margin: auto;
+}
+
+.game_chat {
+    text-align: center;
+    margin-top: 2rem !important;
 }
