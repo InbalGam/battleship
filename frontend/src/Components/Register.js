@@ -15,6 +15,7 @@ function Register() {
     const [validUsername, setValidUsername] = useState(true);
     const [registerAuth, setRegisterAuth] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [msg, setMsg] = useState('');
     const navigate = useNavigate();
 
     function handleUsernameChange(e) {
@@ -48,9 +49,11 @@ function Register() {
                     setIsLoading(false);
                 } else {
                     setRegisterAuth(true);
+                    setMsg(jsonData.msg);
                     setIsLoading(false);
                 }
             } catch (e) {
+                console.log(e);
                 navigate('/error');
             }
         }
@@ -70,6 +73,7 @@ function Register() {
                     {nickname && (nickname.length < 3) ? <Alert severity="warning">Nickname is less than 3 characters</Alert> : ''}
                     {isLoading ? <CircularProgress size={150} className='loader' /> : <button type="submit" value="Submit" className="submitButton">Register</button>}
                     {registerAuth ? <Alert severity="warning">Could not register</Alert> : ''}
+                    {msg ? <Alert severity="warning">{msg}</Alert> : ''}
                 </form>
             </div>
         </div>

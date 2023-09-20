@@ -23,7 +23,7 @@ async function register(username, password, nickname) {
         body: JSON.stringify({username, password, nickname})
     });
 
-    return response.status === 200;
+    return response;
 };
 
 async function logout() {
