@@ -9,12 +9,13 @@ import { readyToPlay, deleteAShip, placeAShip } from '../Api';
 import { useNavigate } from 'react-router-dom';
 import styles from './Styles/ShipsPlacement.css';
 import Alert from '@mui/material/Alert';
+import Grid from '@mui/material/Grid';
 
 
 function ShipsPlacement(props) {
     const navigate = useNavigate();
     const [choosenShipInd, setChoosenShipInd] = useState('');
-    const [deleteShipFail, setDeleteShipFail] = useState(false);
+    const [deleteShipFail, setDeleteShipFail] = useState(true);
     const [placeShipFail, setPlaceShipFail] = useState('');
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
@@ -109,8 +110,8 @@ function ShipsPlacement(props) {
     };
 
     return (
-        <div className='container'>
-            <div className='ships_container'>
+        <Grid container justifyContent="center" spacing={2}>
+            <Grid item xs={4} className='ships'>
                 <div>
                     <h3>Remaining ships:</h3>
                     <ToggleButtonGroup
@@ -119,9 +120,9 @@ function ShipsPlacement(props) {
                         exclusive
                         onChange={handleChoosenShipChange} >
                         {props.remainingShips.map((shipSize, ind) =>
-                        <ToggleButton value={ind} aria-label="remaining_ships_list">
-                            {shipSize} squares
-                        </ToggleButton>)}
+                            <ToggleButton value={ind} aria-label="remaining_ships_list">
+                                {shipSize} squares
+                            </ToggleButton>)}
                     </ToggleButtonGroup>
                 </div>
                 <div>
@@ -129,27 +130,27 @@ function ShipsPlacement(props) {
                     <ButtonGroup
                         orientation="vertical" >
                         {props.placedShips.map((ship, ind) =>
-                        <Button value={ind} aria-label="placed_ships_list" onClick={deleteShip}>
-                            {ship.ship_size} squares {alphabet[ship.start_row - 1] + ship.start_col} - {alphabet[ship.end_row - 1] + ship.end_col}
-                        </Button>)}
+                            <Button value={ind} aria-label="placed_ships_list" onClick={deleteShip}>
+                                {ship.ship_size} squares {alphabet[ship.start_row - 1] + ship.start_col} - {alphabet[ship.end_row - 1] + ship.end_col}
+                            </Button>)}
                     </ButtonGroup>
-                    {props.remainingShips.length === 0 ? 
+                    {props.remainingShips.length === 0 ?
                         <div className='start_game_button'>
                             <Fab variant="extended" color="primary" aria-label="add" onClick={ready} >
                                 Start Game
                             </Fab>
                         </div> : ''}
                 </div>
-            </div>
-            <div className='error_msg'>
-                    {placeShipFail ? <Alert severity="warning">{placeShipFail}</Alert> : ''}
-                    {deleteShipFail ? <Alert severity="warning">Could not delete ship</Alert> : ''}
-                    {startGameFail ? <Alert severity="warning">Could not start game</Alert> : ''}
-            </div>
-            <div className='main_board'>
+            </Grid>
+            <Grid item xs={7} className='main_board'>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} />
-            </div>
-        </div>
+            </Grid>
+            <Grid item xs={2} className='error_msg'>
+                {placeShipFail ? <Alert severity="warning">{placeShipFail}</Alert> : ''}
+                {deleteShipFail ? <Alert severity="warning">Could not delete ship</Alert> : ''}
+                {startGameFail ? <Alert severity="warning">Could not start game</Alert> : ''}
+            </Grid>
+        </Grid>
     );
 };
 
