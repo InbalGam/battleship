@@ -7,6 +7,7 @@
     max-width: 25rem;
     border: 0.25rem solid white;
     border-radius: 10%;
+    padding: 1.5rem;
 }
 
 .enter_msg {
@@ -38,16 +39,32 @@
     margin-left: 1rem;
 }
 
+.chat_messages_container {
+    max-height: 400px;
+    overflow-y: scroll;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .chat_messages_container li {
     display: flex;
-    margin-top: 1rem;
     min-width: 90%;
     max-width: 25rem;
     align-items: center;
-    padding: 1rem;
 }
 
 .msgAuthor {
     font-size: 1.5rem;
     margin-right: 1rem;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.msgs_loader {
+    margin-top: 1rem;
+    align-self: center;
+    top: 90%;
+    left: 50%;
+    z-index: 9999999;
+    transform: translate(-50%, -50%);
 }

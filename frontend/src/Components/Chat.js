@@ -61,7 +61,7 @@ function Chat() {
 
     return (
         <div>
-            {isLoading ? <CircularProgress size={150} className='loader' /> :
+            
                 <div className='chat'>
                     <div className='enter_msg'>
                         <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} style={{width: '320px', borderRadius: '12px 12px 0 12px', padding: '12px'}} className='textArea'/>
@@ -69,14 +69,15 @@ function Chat() {
                         <Fab aria-label="refresh" onClick={getChatMsgs} className='chatRefresh'> <RefreshIcon /> </Fab>
                         {failedMsg ? <Alert severity="warning" className='chat_alert'>Could not send message</Alert> : ''}
                     </div>
+                    {isLoading ? <CircularProgress size={80} className='msgs_loader' /> :
                     <ul className='chat_messages_container'>
                         {msgs.map((msg, ind) =>
                             <li key={ind}>
                                 <p className='msgAuthor'>{msg.from}:</p>
                                 <p className='message'>{msg.message}</p>
                             </li>)}
-                    </ul>
-                </div>}
+                    </ul>}
+                </div>
         </div>
     );
 };
