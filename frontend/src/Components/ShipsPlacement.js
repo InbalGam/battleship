@@ -15,7 +15,7 @@ import Grid from '@mui/material/Grid';
 function ShipsPlacement(props) {
     const navigate = useNavigate();
     const [choosenShipInd, setChoosenShipInd] = useState('');
-    const [deleteShipFail, setDeleteShipFail] = useState(true);
+    const [deleteShipFail, setDeleteShipFail] = useState(false);
     const [placeShipFail, setPlaceShipFail] = useState('');
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
