@@ -47,7 +47,6 @@ function Chat() {
         try {
             const result = await getMsgs(game_id);
             const jsonData = await result.json();
-            console.log(jsonData);
             setMsgs(jsonData);
             setIsLoading(false);
         } catch(e) {

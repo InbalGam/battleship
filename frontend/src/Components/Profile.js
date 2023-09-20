@@ -34,7 +34,6 @@ function Profile() {
                 navigate('/login');
             } else {
                 const jsonData = await result.json();
-                console.log(jsonData);
                 setUser(prevState => ({
                     ...prevState,
                     username: jsonData.username,
