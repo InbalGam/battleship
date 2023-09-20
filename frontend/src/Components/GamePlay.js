@@ -7,6 +7,9 @@ import Chat from './Chat';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Fab from '@mui/material/Fab';
 import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import Avatar from '@mui/material/Avatar';
+import Alert from '@mui/material/Alert';
 
 
 function GamePlay(props) {
@@ -36,26 +39,30 @@ function GamePlay(props) {
 
 
     return (
-        <>
-                <div className='container'>
-                    <Fab aria-label="refresh" onClick={props.getTheGameInfo}> <RefreshIcon /> </Fab>
-                    <div className='error_msg'>
-                        {shotFail ? 'could not make this shot' : ''}
-                        {notMyTurn ? 'not your turn to make a shot' : ''}
-                    </div>
-                    <div className='opponent_board'>
-                        <h3 className={props.myTurn ? 'player_turn' : ''}>{'You'}</h3>
-                        <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
-                    </div>
-                    <div className='player_board'>
-                        <h3 className={props.myTurn ? '' : 'opponent_turn'}>{props.opponent}</h3>
-                        <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
-                    </div>
-                    <div className='chat_container'>
-                        <Chat />
-                    </div>
-                </div>
-        </>
+        <Grid container spacing={2}>
+            <Grid item xs={12}>
+                <Fab aria-label="refresh" onClick={props.getTheGameInfo}> <RefreshIcon /> </Fab>
+            </Grid>
+            <Grid item xs={12}>
+                {shotFail ? <Alert severity="warning" className='alert'>Could not make this shot</Alert> : ''}
+                {notMyTurn ? <Alert severity="warning" className='alert'>Not your turn to make a shot</Alert> : ''}
+            </Grid>
+            <Grid item xs={6}>
+                <h3 className={props.myTurn ? 'player_turn' : ''}><Avatar className='player_avatar' >You</Avatar></h3>
+            </Grid>
+            <Grid item xs={6}>
+                <h3 className={props.myTurn ? '' : 'opponent_turn'}><Avatar className='opponent_avatar' >{props.opponent[0]}</Avatar></h3>
+            </Grid>
+            <Grid item xs={6}>
+                <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
+            </Grid>
+            <Grid item xs={6}>
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
+            </Grid>
+            <Grid item xs={12}>
+                <Chat />
+            </Grid>
+        </Grid>
     );
 };
 
