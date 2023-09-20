@@ -1,8 +1,9 @@
 .upperDiv {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
     margin-top: 0.5rem;
+    padding: 5rem;
 }
 
 .addGame {
@@ -61,4 +62,30 @@
 
 .games li {
     margin-top: 1.5rem;
+}
+
+@media only screen and (max-width: 500px) {
+    .upperDiv {
+        flex-direction: column;
+    }
+
+    .userScore {
+        margin-top: 1rem;
+    }
+
+    .games ul {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media only screen and (max-width: 430px) {
+    .games ul {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .games_container {
+        margin-left: 1rem;
+    }
 }
