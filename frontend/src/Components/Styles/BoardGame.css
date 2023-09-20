@@ -18,6 +18,14 @@
     justify-content: center;
 }
 
+.color:hover {
+    cursor: pointer;
+}
+
+.noColor:hover {
+    cursor: pointer;
+}
+
 .numberedColumnStyle {
     margin-left: 5rem;
     display: flex;

@@ -64,7 +64,7 @@ function Chat() {
             
                 <div className='chat'>
                     <div className='enter_msg'>
-                        <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} style={{width: '320px', borderRadius: '12px 12px 0 12px', padding: '12px'}} className='textArea'/>
+                        <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} className='textArea'/>
                         <Fab variant="extended" color="primary" aria-label="add" onClick={submitMsg} className='sendMsg'> Send </Fab>
                         <Fab aria-label="refresh" onClick={getChatMsgs} className='chatRefresh'> <RefreshIcon /> </Fab>
                         {failedMsg ? <Alert severity="warning" className='chat_alert'>Could not send message</Alert> : ''}

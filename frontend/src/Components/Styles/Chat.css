@@ -4,7 +4,7 @@
     align-items: center;
     margin: auto;
     min-width: 30%;
-    max-width: 25rem;
+    max-width: 50rem;
     border: 0.25rem solid white;
     border-radius: 10%;
     padding: 1.5rem;
@@ -14,10 +14,14 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    width: 100%;
 }
 
 .textArea {
     margin-top: 1rem;
+    border-radius: 12px 12px 0 12px;
+    padding: 1rem;
+    width: 100%;
 }
 
 .chat ul {
