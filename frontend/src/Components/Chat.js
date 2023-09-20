@@ -6,6 +6,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CircularProgress from '@mui/material/CircularProgress';
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import Alert from '@mui/material/Alert';
+import styles from './Styles/Chat.css';
 
 
 function Chat() {
@@ -62,18 +63,18 @@ function Chat() {
     return (
         <div>
             {isLoading ? <CircularProgress size={150} className='loader' /> :
-                <div>
-                    <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} style={{width: '320px', borderRadius: '12px 12px 0 12px'}} />
-                    <Fab variant="extended" color="primary" aria-label="add" onClick={submitMsg}> Send </Fab>
-                    <Fab aria-label="refresh" onClick={getChatMsgs}> <RefreshIcon /> </Fab>
-                    {failedMsg ? <Alert severity="warning">Could not send message</Alert> : ''}
-                    <ul>
+                <div className='chat'>
+                    <div className='enter_msg'>
+                        <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} style={{width: '320px', borderRadius: '12px 12px 0 12px', padding: '12px'}} className='textArea'/>
+                        <Fab variant="extended" color="primary" aria-label="add" onClick={submitMsg} className='sendMsg'> Send </Fab>
+                        <Fab aria-label="refresh" onClick={getChatMsgs} className='chatRefresh'> <RefreshIcon /> </Fab>
+                        {failedMsg ? <Alert severity="warning" className='chat_alert'>Could not send message</Alert> : ''}
+                    </div>
+                    <ul className='chat_messages_container'>
                         {msgs.map((msg, ind) =>
                             <li key={ind}>
-                                <div>
-                                    <p className='msgAuthor'>{msg.from}</p>
-                                    <p className='message'>{msg.message}</p>
-                                </div>
+                                <p className='msgAuthor'>{msg.from}:</p>
+                                <p className='message'>{msg.message}</p>
                             </li>)}
                     </ul>
                 </div>}
