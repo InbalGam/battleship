@@ -6,6 +6,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import Fab from '@mui/material/Fab';
 import ShipsPlacement from './ShipsPlacement';
 import GamePlay from './GamePlay';
+import styles from './Styles/Game.css';
+import CelebrationIcon from '@mui/icons-material/Celebration';
 
 
 function Game() {
@@ -67,20 +69,20 @@ function Game() {
             {isLoading ? <CircularProgress size={150} className='loader' /> :
                 <div>
                     {state === 'invited' ?
-                        <div>
+                        <div className='game_not_started'>
                             <p>Waiting for opponent to accept game</p>
                             <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
                         </div> : ''}
 
                     {phase === 'waiting_for_other_player' ?
-                        <div>
+                        <div className='game_not_started'>
                             <p>Waiting for {opponent} to finish placing ships</p>
                             <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
                         </div> : ''}
 
                     {phase === 'finished' ?
-                        <div>
-                            {winner ? <h3>You won</h3> : <h3>You Lost</h3>}
+                        <div className='winning'>
+                            {winner ? <div className='winner'><h3>You won</h3> <CelebrationIcon/></div> : <h3>You Lost</h3>}
                         </div> : ''}
 
                     {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} /> : ''}

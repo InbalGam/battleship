@@ -1,0 +1,28 @@
+.game_not_started {
+    display: flex;
+    gap: 1rem;
+    min-width: 30%;
+    max-width: 25rem;
+    margin: auto;
+    align-items: center;
+}
+
+.game_not_started p {
+    font-size: 2rem;
+}
+
+.winning {
+    min-width: 30%;
+    max-width: 25rem;
+    margin: auto;
+}
+
+.winning .winner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.winning h3 {
+    font-size: 2rem;
+}
