@@ -1,7 +1,7 @@
 const express = require('express');
 const gameRouter = express.Router();
 const db = require('./db');
-const {shipsAmount, totalShipsSizes} = require('./ships');
+const {shipsAmount, totalShipsSizes, checkShipPlacement} = require('./ships');
 
 
 // Middlewares
@@ -153,9 +153,7 @@ gameRouter.get('/games', async (req, res) => {
     }
 });
 
-
-// Update game- accept state
-gameRouter.put('/games/:game_id', async (req, res) => {
+const verifyAcceptDecline = async (req, res, next) => {
     try {
         const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
@@ -165,9 +163,17 @@ gameRouter.put('/games/:game_id', async (req, res) => {
         }
 
         if (gameDetails.state !== 'invited') {
-            return res.status(401).json({msg: 'Cannot accept an active game'});
+            return res.status(401).json({msg: 'Cannot accept or delete an active game'});
         }
+        next();
+    } catch(e) {
+        res.status(500).json({msg: 'Server error'});
+    };
+};
 
+// Update game- accept state
+gameRouter.put('/games/:game_id', verifyAcceptDecline, async (req, res) => {
+    try {
         await db.updateGameState(req.params.game_id, 'accepted');
         return res.status(200).json({msg: 'game accepted by opponent'});
 
@@ -178,19 +184,8 @@ gameRouter.put('/games/:game_id', async (req, res) => {
 
 
 // delete a game
-gameRouter.delete('/games/:game_id', async (req, res) => {
+gameRouter.delete('/games/:game_id', verifyAcceptDecline, async (req, res) => {
     try {
-        const game = await db.getGameById(req.params.game_id);
-        const gameDetails = game[0];
-
-        if (req.user.id !== gameDetails.user2) {
-            return res.status(401).json({msg: 'You are not the correct opponent player'});
-        }
-
-        if (gameDetails.state !== 'invited') {
-            return res.status(401).json({msg: 'Cannot delete an active game'});
-        }
-
         await db.deleteGame(req.params.game_id);
         return res.status(200).json({msg: 'game deleted by opponent'});
 
@@ -201,52 +196,6 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
 
 
 // Placing ships
-function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
-    if (shipInDb.start_row === shipInDb.end_row) {
-        if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
-            return 1;
-        }
-
-        if (start_row === (shipInDb.start_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return 1;
-        }
-
-        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return 1;
-        }
-
-        if (start_row < shipInDb.start_row && end_row > shipInDb.start_row && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))) {
-            return 1;
-        }
-
-        if (start_row < shipInDb.start_row && end_row > shipInDb.start_row && (end_col >= (shipInDb.start_col - 1) && end_col <= (shipInDb.end_col + 1))) {
-            return 1;
-        }
-    } else if (shipInDb.start_row !== shipInDb.end_row) {
-        if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return 1;
-        }
-
-        if (start_col === (shipInDb.start_col + 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return 1;
-        }
-
-        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return 1;
-        }
-
-        if (start_row === (shipInDb.end_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return 1;
-        }
-
-        if (start_col < shipInDb.start_col && end_col > shipInDb.start_col && (start_row >= (shipInDb.start_row - 1) && start_row <= (shipInDb.end_row + 1))) {
-            return 1;
-        }
-    }
-    return 0;
-};
-
-
 async function checkShips(req, dimension, ship_size) {
     const userShips = await db.getShipsSizes(req.params.game_id, req.user.id);
     const gameShips = shipsAmount[dimension];
