@@ -293,7 +293,7 @@ describe('Update a game', function() {
             .put('/games/4')
             .expect(401)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Cannot accept an active game'});
+                expect(response.body).to.be.deep.equal({msg: 'Cannot accept or delete an active game'});
             });
         });
     });
@@ -362,7 +362,7 @@ describe('Delete a game', function() {
             .delete('/games/4')
             .expect(401)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Cannot delete an active game'});
+                expect(response.body).to.be.deep.equal({msg: 'Cannot accept or delete an active game'});
             });
         });
     });
@@ -435,7 +435,7 @@ describe('Placing ships in game', function() {
             .send({ship_size: 5, start_row: 1, start_col: 1, end_row: 7, end_col: 4})
             .expect(400)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Ship is not valid'});
+                expect(response.body).to.be.deep.equal({msg: 'Ship is not in the correct size'});
             });
         });
     });

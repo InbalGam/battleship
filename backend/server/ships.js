@@ -22,6 +22,11 @@ const totalShipsSizes = {
     20: 61
 }
 
+const shipAmountDimension = {
+    10: 5,
+    20: 13
+}
+
 
 function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
     if (shipInDb.start_row === shipInDb.end_row) {
@@ -69,5 +74,5 @@ function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
 };
 
 module.exports = {
-    shipsAmount, totalShipsSizes, checkShipPlacement
+    shipsAmount, totalShipsSizes, shipAmountDimension, checkShipPlacement
 };

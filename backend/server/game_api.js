@@ -1,7 +1,8 @@
 const express = require('express');
 const gameRouter = express.Router();
 const db = require('./db');
-const {shipsAmount, totalShipsSizes, checkShipPlacement} = require('./ships');
+const {shipsAmount, totalShipsSizes, shipAmountDimension, checkShipPlacement} = require('./ships');
+const {waitingForPlayer, winnerPhase, placingPieces, gamePlay} = require('./phasesFuncs');
 
 
 // Middlewares
@@ -196,19 +197,14 @@ gameRouter.delete('/games/:game_id', verifyAcceptDecline, async (req, res) => {
 
 
 // Placing ships
-async function checkShips(req, dimension, ship_size) {
+async function verifyRemainingShipsOfSize(req, dimension, ship_size) {
     const userShips = await db.getShipsSizes(req.params.game_id, req.user.id);
     const gameShips = shipsAmount[dimension];
-    const placedShips = userShips.map(ship => ship.size);
+    const placedShips = userShips.map(ship => ship.size);  
 
-    let count = 0;
-    for (let i = 0; i < placedShips.length; i++) {
-        if (ship_size === placedShips[i]) {
-            count += 1;
-        }
-    };
+    const amountFromShip = placedShips.filter(plShip => plShip === ship_size).length;
 
-    if (count < gameShips[ship_size]) {
+    if ( amountFromShip < gameShips[ship_size]) {
         return true; //'can place'
     } else {
         return false; //'cannot place'
@@ -222,19 +218,28 @@ async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_
 };
 
 
-gameRouter.post('/games/:game_id/place', async (req, res) => {
-    const { ship_size, start_row, start_col, end_row, end_col } = req.body;
-
+function checkShipIsValid(ship_size, start_row, end_row, start_col, end_col) {
     if (start_row === end_row) {
         if ((Math.abs(end_col - start_col) + 1) !== ship_size) {
-            return res.status(400).json({ msg: 'Ship is not in the correct size' });
+            return false;
         }
     } else if (start_col === end_col) {
         if ((Math.abs(end_row - start_row) + 1) !== ship_size) {
-            return res.status(400).json({ msg: 'Ship is not in the correct size' });
+            return false;
         }
     } else {
-        return res.status(400).json({ msg: 'Ship is not valid' });
+        return false;
+    };
+
+    return true;
+};
+
+
+gameRouter.post('/games/:game_id/place', async (req, res) => {
+    const { ship_size, start_row, start_col, end_row, end_col } = req.body;
+
+    if (!checkShipIsValid(ship_size, start_row, end_row, start_col, end_col)) {
+        return res.status(400).json({ msg: 'Ship is not in the correct size' });
     };
 
     try {
@@ -254,7 +259,7 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
                 return res.status(400).json({ msg: 'Ship is not inside board borders' });
             };
 
-            const canPlace = await checkShips(req, gameDetails.dimension, ship_size);
+            const canPlace = await verifyRemainingShipsOfSize(req, gameDetails.dimension, ship_size);
             if (!canPlace) {
                 return res.status(400).json({ msg: 'There are no more ships of this size to place' });
             }
@@ -264,8 +269,8 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
             if (ships.length === 0) {
                 await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
             } else {
-                const shipPlacementResult = ships.map(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship)).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-                if (shipPlacementResult > 0) {
+                const isShipClose = ships.some(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship) === 1);
+                if (isShipClose) {
                     return res.status(400).json({ msg: 'Ship cannot be next to another ship' });
                 } else {
                     await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
@@ -294,12 +299,8 @@ gameRouter.delete('/games/:game_id/place', async (req, res) => {
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
             const userShips = await db.getShipsData(req.params.game_id, req.user.id);
-            const check = userShips.map(dbShip => {
-                if (dbShip.size === ship_size && dbShip.start_row === start_row && dbShip.start_col === start_col && dbShip.end_row === end_row && dbShip.end_col === end_col) {
-                    return true;
-                }
-            });
-            if (check.includes(true)) {
+            const check = userShips.some(dbShip => dbShip.size === ship_size && dbShip.start_row === start_row && dbShip.start_col === start_col && dbShip.end_row === end_row && dbShip.end_col === end_col);
+            if (check) {
                 await db.deleteAShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col);
                 return res.status(200).json({msg: 'Ship deleted'});
             } else {
@@ -324,11 +325,6 @@ gameRouter.post('/games/:game_id/ready', async (req,res) => {
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
             const userShips = await db.getShipsData(req.params.game_id, req.user.id);
-
-            const shipAmountDimension = {
-                10: 5,
-                20: 13
-            }
 
             if (shipAmountDimension[gameDetails.dimension] === userShips.length) {
                 if (gameDetails.state === 'accepted' && gameDetails.user1 === req.user.id) {
@@ -360,15 +356,9 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
     }
 
     const userGameShots = await db.getUserShots(req.params.game_id, player);
-    const checkWasShot = userGameShots.map(shot => {
-        if (shot.row === row && shot.col === col) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
-    if (checkWasShot > 0) {
+    const checkWasShot = userGameShots.some(shot => shot.row === row && shot.col === col);
+    if (checkWasShot) {
         return res.status(400).json({ msg: 'This cell was already shot' });
     };
 
@@ -442,7 +432,7 @@ gameRouter.get('/games/:game_id/chat', async (req,res) => {
 
 // Getting game info
 gameRouter.get('/games/:game_id', async (req,res) => {
-    let result = {};
+    let result;
     try {
         const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
@@ -463,144 +453,18 @@ gameRouter.get('/games/:game_id', async (req,res) => {
 
         const usersInformation = await db.getUser(gameOpponent);
 
-        // waiting_for_other_player phase
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
-            result = {
-                opponent: usersInformation[0].nickname,
-                phase: 'waiting_for_other_player',
-                dimension: gameDetails.dimension
-            }
-        };
-
+        // waiting_for_other_player phase
+            result = waitingForPlayer(gameDetails, usersInformation);
+        } else if (gameDetails.state === 'user1_won' || gameDetails.state === 'user2_won') {
         // winner phase
-        if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
-            result = {
-                opponent: usersInformation[0].nickname,
-                phase: 'finished',
-                i_won: true,
-                dimension: gameDetails.dimension
-            }
-        } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-            result = {
-                opponent: usersInformation[0].nickname,
-                phase: 'finished',
-                i_won: false,
-                dimension: gameDetails.dimension
-            }
-        } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-            result = {
-                opponent: usersInformation[0].nickname,
-                phase: 'finished',
-                i_won: false,
-                dimension: gameDetails.dimension
-            }
-        } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-            result = {
-                opponent: usersInformation[0].nickname,
-                phase: 'finished',
-                i_won: true,
-                dimension: gameDetails.dimension
-            }
-        };
-
-
+            result = winnerPhase(gameDetails, gameUser, usersInformation);
+        } else if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
         // placing_pieces phase
-        if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
-
-            const gameShips = shipsAmount[gameDetails.dimension];
-            const allGameShips = []; // [5,4,3,3,2]
-            for (key in gameShips) {
-                for (let i = 0; i < gameShips[key]; i++) {
-                    allGameShips.push(key);
-                }
-            };
-
-            if (userShips.length === 0) {
-                result = {
-                    opponent: usersInformation[0].nickname,
-                    phase: 'placing_pieces',
-                    remaining_ships: allGameShips,
-                    placed_ships: [],
-                    dimension: gameDetails.dimension
-                } 
-            } else {
-                const placedShips = userShips.map(ship => {
-                    const shipIndex = allGameShips.indexOf(ship.size.toString());
-                    allGameShips.splice(shipIndex, 1);
-                    return {
-                        ship_size: ship.size,
-                        start_row: ship.start_row,
-                        start_col: ship.start_col,
-                        end_row: ship.end_row,
-                        end_col: ship.end_col
-                    }
-                });
-
-                result = {
-                    opponent: usersInformation[0].nickname,
-                    phase: 'placing_pieces',
-                    remaining_ships: allGameShips,
-                    placed_ships: placedShips,
-                    dimension: gameDetails.dimension
-                } 
-            }
-        };
-
+            result = await placingPieces(gameDetails, req, shipsAmount[gameDetails.dimension], usersInformation);
+        } else if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
         // gamePlay phase
-        if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
-            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
-            const placedShips = userShips.map(ship => {
-                return {
-                    ship_size: ship.size,
-                    start_row: ship.start_row,
-                    start_col: ship.start_col,
-                    end_row: ship.end_row,
-                    end_col: ship.end_col
-                }
-            });
-
-            let myTurn;
-            if (gameUser === 'user1' && gameDetails.state === 'user1_turn') {
-                myTurn = true;
-            } else if (gameUser === 'user2' && gameDetails.state === 'user1_turn') {
-                myTurn = false;
-            } else if (gameUser === 'user2' && gameDetails.state === 'user2_turn') {
-                myTurn = true;
-            } else if (gameUser === 'user1' && gameDetails.state === 'user2_turn') {
-                myTurn = false;
-            }
-
-            const gameShots = await db.getGameShots(req.params.game_id, gameOpponent);
-            const shot_sent = [];
-            const shot_recieved = [];
-
-            gameShots.forEach(shot => {
-                if (shot.opponent_shot === 1) {
-                    shot_recieved.push({
-                        row: shot.row,
-                        col: shot.col,
-                        hit: shot.hit
-                    });
-                } else {
-                    shot_sent.push({
-                        row: shot.row,
-                        col: shot.col,
-                        hit: shot.hit
-                    });
-                }
-            });
-
-            result = {
-                opponent: usersInformation[0].nickname,
-                phase: 'gamePlay',
-                my_turn: myTurn,
-                placed_ships: placedShips,
-                shots_sent: shot_sent,
-                shots_recieved: shot_recieved,
-                dimension: gameDetails.dimension
-            }
-
+            result = await gamePlay(gameDetails, req, gameUser, gameOpponent, usersInformation);
         };
 
         return res.status(200).json(result);
