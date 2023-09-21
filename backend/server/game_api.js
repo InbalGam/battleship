@@ -22,15 +22,7 @@ gameRouter.use('/games/:game_id', async (req, res, next) => {
         if (game.length === 0) {
             return res.status(400).json({ msg: 'Game does not exist' });
         }
-        next();
-    } catch (e) {
-        res.status(500).json({ msg: 'Server error' });
-    }
-});
 
-gameRouter.use('/games/:game_id', async (req, res, next) => {
-    try {
-        const game = await db.getGameById(req.params.game_id);
         if (game[0].user1 !== req.user.id && game[0].user2 !== req.user.id) {
             return res.status(400).json({ msg: 'User not part of game' });
         }
