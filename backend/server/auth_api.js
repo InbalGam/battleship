@@ -42,25 +42,6 @@ authRouter.get("/login", (req, res) => {
 });
 
 
-// Get user profile page
-authRouter.get("/profile", async (req, res) => {
-    try {
-        const result = await db.getUser(req.user.id);
-        const userData = {
-            username: result[0].username,
-            nickname: result[0].nickname,
-            user_score: {
-                wins: result[0].wins,
-                loses: result[0].loses
-            }
-        }
-        res.status(200).json(userData);
-    } catch (e) {
-        res.status(500).json({msg: 'Server error'});
-    }
-});
-
-
 authRouter.post("/login",
     passport.authenticate("local", { failureRedirect: "/login" }),
     (req, res) => {
@@ -91,23 +72,5 @@ authRouter.get('/logout', function(req, res, next){
     });
 });
 
-
-
-// Update user profile page
-authRouter.put('/profile', async (req, res, next) => { 
-    const { nickname } = req.body;
-
-    if (!nickname) {
-        return res.status(400).json({msg: 'Nickname must be specified'});
-    }
-    
-    try {
-        const timestamp = new Date(Date.now());
-        await db.updateUsername(req.user.id, nickname, timestamp);
-        res.status(200).json({ msg: 'Updated user' });
-    } catch(e) {
-        res.status(500).json({msg: 'Server error'});
-    }
-});
 
 module.exports = authRouter;

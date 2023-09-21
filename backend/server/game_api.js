@@ -4,7 +4,7 @@ const db = require('./db');
 
 
 // Middlewares
-gameRouter.use('/', (req, res, next) => {
+gameRouter.use(['/', '/profile'], (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({ msg: 'You need to login first' });
@@ -63,6 +63,43 @@ const totalShipsSizes = {
     10: 17,
     20: 61
 }
+
+// Get user profile page
+gameRouter.get("/profile", async (req, res) => {
+    try {
+        const result = await db.getUser(req.user.id);
+        const userData = {
+            username: result[0].username,
+            nickname: result[0].nickname,
+            user_score: {
+                wins: result[0].wins,
+                loses: result[0].loses
+            }
+        }
+        res.status(200).json(userData);
+    } catch (e) {
+        res.status(500).json({msg: 'Server error'});
+    }
+});
+
+// Update user profile page
+gameRouter.put('/profile', async (req, res, next) => { 
+    const { nickname } = req.body;
+
+    if (!nickname) {
+        return res.status(400).json({msg: 'Nickname must be specified'});
+    }
+    
+    try {
+        const timestamp = new Date(Date.now());
+        await db.updateUsername(req.user.id, nickname, timestamp);
+        res.status(200).json({ msg: 'Updated user' });
+    } catch(e) {
+        res.status(500).json({msg: 'Server error'});
+    }
+});
+
+
 
 // Create a new game
 gameRouter.post('/games', async (req, res) => {
