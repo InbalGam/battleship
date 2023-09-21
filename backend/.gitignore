@@ -5,3 +5,7 @@ public/js/bundle.js.map
 
 # Environment Variables
 .env
+
+# tests sql files
+test/db.sql
+test/delete_all.sql
