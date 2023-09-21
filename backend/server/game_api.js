@@ -1,6 +1,7 @@
 const express = require('express');
 const gameRouter = express.Router();
 const db = require('./db');
+const {shipsAmount, totalShipsSizes} = require('./ships');
 
 
 // Middlewares
@@ -31,30 +32,6 @@ gameRouter.use('/games/:game_id', async (req, res, next) => {
         res.status(500).json({ msg: 'Server error' });
     }
 });
-
-// Vars
-const shipsAmount = {
-    // ship size : amount of ships
-    10: {
-        5: 1,
-        4: 1,
-        3: 2,
-        2: 1
-    },
-    20: {
-        8: 1,
-        7: 1,
-        6: 2,
-        5: 2,
-        4: 3,
-        3: 4
-    }
-};
-
-const totalShipsSizes = {
-    10: 17,
-    20: 61
-}
 
 // Get user profile page
 gameRouter.get("/profile", async (req, res) => {
