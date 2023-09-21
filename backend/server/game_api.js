@@ -18,7 +18,7 @@ gameRouter.use('/', (req, res, next) => {
 
 gameRouter.use('/games/:game_id', async (req, res, next) => {
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         if (game.length === 0) {
             return res.status(400).json({ msg: 'Game does not exist' });
         }
@@ -30,7 +30,7 @@ gameRouter.use('/games/:game_id', async (req, res, next) => {
 
 gameRouter.use('/games/:game_id', async (req, res, next) => {
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         if (game[0].user1 !== req.user.id && game[0].user2 !== req.user.id) {
             return res.status(400).json({ msg: 'User not part of game' });
         }
@@ -77,13 +77,13 @@ gameRouter.post('/games', async (req, res) => {
     }
 
     try {
-        const check = await pool.query('select * from users where username = $1', [opponent]);
-        if (check.rows.length === 0) {
+        const check = await db.getUsername(opponent);
+        if (check.length === 0) {
             return res.status(400).json({msg: 'User does not exists'});
         }
 
         const timestamp = new Date(Date.now());
-        db.createGame(req.user.id, check.rows[0].id, dimension, 'invited', timestamp);
+        await db.createGame(req.user.id, check[0].id, dimension, 'invited', timestamp);
         return res.status(201).json({msg: 'Game created'});
     } catch(e) {
         res.status(500).json({msg: 'Server error'});
@@ -97,17 +97,17 @@ gameRouter.get('/games', async (req, res) => {
     let gameInvitations = [];
 
     try {
-        const userScore = db.getUserScore(req.user.id);
+        const userScore = await db.getUserScore(req.user.id);
         if (userScore.length === 0) {
             return res.status(400).json({msg: 'User does not exists'});
         }
 
-        const gamesShots = db.getActiveGameData(req.user.id, 'user1_turn', 'user2_turn');
+        const gamesShots = await db.getActiveGameData(req.user.id, 'user1_turn', 'user2_turn');
         if (gamesShots.length > 0) {
             activeGames.push(...gamesShots);
         }
 
-        const otherGames = db.getOtherGamesData(req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready');
+        const otherGames = await db.getOtherGamesData(req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready');
 
         otherGames.forEach(game => {
             if (game.state === 'invited') {
@@ -151,7 +151,7 @@ gameRouter.get('/games', async (req, res) => {
 // Update game- accept state
 gameRouter.put('/games/:game_id', async (req, res) => {
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (req.user.id !== gameDetails.user2) {
@@ -162,7 +162,7 @@ gameRouter.put('/games/:game_id', async (req, res) => {
             return res.status(401).json({msg: 'Cannot accept an active game'});
         }
 
-        db.updateGameState(req.params.game_id, 'accepted');
+        await db.updateGameState(req.params.game_id, 'accepted');
         return res.status(200).json({msg: 'game accepted by opponent'});
 
     } catch(e) {
@@ -174,7 +174,7 @@ gameRouter.put('/games/:game_id', async (req, res) => {
 // delete a game
 gameRouter.delete('/games/:game_id', async (req, res) => {
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (req.user.id !== gameDetails.user2) {
@@ -185,7 +185,7 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
             return res.status(401).json({msg: 'Cannot delete an active game'});
         }
 
-        db.deleteGame(req.params.game_id);
+        await db.deleteGame(req.params.game_id);
         return res.status(200).json({msg: 'game deleted by opponent'});
 
     } catch(e) {
@@ -242,7 +242,7 @@ function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
 
 
 async function checkShips(req, dimension, ship_size) {
-    const userShips = db.getShipsSizes(req.params.game_id, req.user.id);
+    const userShips = await db.getShipsSizes(req.params.game_id, req.user.id);
     const gameShips = shipsAmount[dimension];
     const placedShips = userShips.map(ship => ship.size);
 
@@ -262,7 +262,7 @@ async function checkShips(req, dimension, ship_size) {
 
 
 async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, res) {
-    db.placeAShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col);
+    await db.placeAShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col);
     return res.status(200).json({msg: `Placed a ship of size ${ship_size}`});
 };
 
@@ -283,7 +283,7 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
     };
 
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
@@ -305,7 +305,7 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
             }
 
 
-            const ships = db.getShipsData(req.params.game_id, req.user.id);
+            const ships = await db.getShipsData(req.params.game_id, req.user.id);
             if (ships.length === 0) {
                 await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
             } else {
@@ -321,6 +321,7 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
         }
 
     } catch (e) {
+        console.log(e);
         res.status(500).json({ msg: 'Server error' });
     }
 
@@ -333,18 +334,18 @@ gameRouter.delete('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = db.getShipsData(req.params.game_id, req.user.id);
+            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
             const check = userShips.map(dbShip => {
                 if (dbShip.size === ship_size && dbShip.start_row === start_row && dbShip.start_col === start_col && dbShip.end_row === end_row && dbShip.end_col === end_col) {
                     return true;
                 }
             });
             if (check.includes(true)) {
-                db.deleteAShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col);
+                await db.deleteAShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col);
                 return res.status(200).json({msg: 'Ship deleted'});
             } else {
                 return res.status(400).json({ msg: 'Ship was not placed cannot be unplaced' });
@@ -363,11 +364,11 @@ gameRouter.delete('/games/:game_id/place', async (req, res) => {
 // Game state change to ready / turn
 gameRouter.post('/games/:game_id/ready', async (req,res) => {
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = db.getShipsData(req.params.game_id, req.user.id);
+            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
 
             const shipAmountDimension = {
                 10: 5,
@@ -376,13 +377,13 @@ gameRouter.post('/games/:game_id/ready', async (req,res) => {
 
             if (shipAmountDimension[gameDetails.dimension] === userShips.length) {
                 if (gameDetails.state === 'accepted' && gameDetails.user1 === req.user.id) {
-                    db.updateGameState(req.params.game_id, 'user1_ready');    
+                    await db.updateGameState(req.params.game_id, 'user1_ready');    
                 } else if (gameDetails.state === 'accepted' && gameDetails.user2 === req.user.id) {
-                    db.updateGameState(req.params.game_id, 'user2_ready');  
+                    await db.updateGameState(req.params.game_id, 'user2_ready');  
                 } else if (gameDetails.state === 'user1_ready' || gameDetails.state === 'user2_ready') {
                     const gameState = ['user1_turn', 'user2_turn'];
                     const randomChoose = Math.floor(Math.random() * 2);
-                    db.updateGameState(req.params.game_id, gameState[randomChoose]); 
+                    await db.updateGameState(req.params.game_id, gameState[randomChoose]); 
                 }
                 return res.status(200).json({msg: 'game state updated'});
             } else {
@@ -403,7 +404,7 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
         return res.status(400).json({ msg: 'The shot is outside of the game board' });
     }
 
-    const userGameShots = db.getUserShots(req.params.game_id, player);
+    const userGameShots = await db.getUserShots(req.params.game_id, player);
     const checkWasShot = userGameShots.map(shot => {
         if (shot.row === row && shot.col === col) {
             return 1;
@@ -416,22 +417,22 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
         return res.status(400).json({ msg: 'This cell was already shot' });
     };
 
-    const hitResults = db.getHitsResults(req.params.game_id, opponent, row, col);
+    const hitResults = await db.getHitsResults(req.params.game_id, opponent, row, col);
 
     if (Number(hitResults[0].hits) === 1) {
         const timestamp = new Date(Date.now());
-        db.insertIntoShots(req.params.game_id, player, row, col, 'true', timestamp);
+        await db.insertIntoShots(req.params.game_id, player, row, col, 'true', timestamp);
 
         const successfullShots = userGameShots.filter(shot => shot.hit === true);
         if (successfullShots.length + 1 === totalShipsSizes[gameDimension]) { // check winner
-            db.updateGameState(req.params.game_id, userWinner);
-            db.updateUsersScores(player, opponent)
+            await db.updateGameState(req.params.game_id, userWinner);
+            await db.updateUsersScores(player, opponent)
             return res.status(200).json({msg: 'Player performed a shot and won game'});
         }
     } else {
         const timestamp = new Date(Date.now());
-        db.insertIntoShots(req.params.game_id, player, row, col, 'false', timestamp);
-        db.updateGameState(req.params.game_id, userTurn);
+        await db.insertIntoShots(req.params.game_id, player, row, col, 'false', timestamp);
+        await db.updateGameState(req.params.game_id, userTurn);
     }
 
     return res.status(200).json({msg: 'Player performed a shot'});
@@ -440,7 +441,7 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
 gameRouter.post('/games/:game_id/shoot', async (req,res) => {
     const { row, col } = req.body;
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_turn') {
@@ -465,7 +466,7 @@ gameRouter.post('/games/:game_id/chat', async (req,res) => {
 
     try {
         const timestamp = new Date(Date.now());
-        db.postMsgToChat(req.params.game_id, req.user.id, message, timestamp);
+        await db.postMsgToChat(req.params.game_id, req.user.id, message, timestamp);
         return res.status(200).json({msg: 'sent message'});
     } catch (e) {
         res.status(500).json({ msg: 'Server error' });
@@ -475,7 +476,7 @@ gameRouter.post('/games/:game_id/chat', async (req,res) => {
 
 gameRouter.get('/games/:game_id/chat', async (req,res) => {
     try {
-        const gameChat = db.getChatMsgs(req.params.game_id);
+        const gameChat = await db.getChatMsgs(req.params.game_id);
         
         return res.status(200).json(gameChat);
     } catch (e) {
@@ -488,7 +489,7 @@ gameRouter.get('/games/:game_id/chat', async (req,res) => {
 gameRouter.get('/games/:game_id', async (req,res) => {
     let result = {};
     try {
-        const game = db.getGameById(req.params.game_id);
+        const game = await db.getGameById(req.params.game_id);
         const gameDetails = game[0];
 
         if (gameDetails.state === 'invited') {
@@ -505,7 +506,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
             gameOpponent = gameDetails.user1; //id
         };
 
-        const usersInformation = db.getUser(gameOpponent);
+        const usersInformation = await db.getUser(gameOpponent);
 
         // waiting_for_other_player phase
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
@@ -550,7 +551,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
 
         // placing_pieces phase
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = db.getShipsData(req.params.game_id, req.user.id);
+            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
 
             const gameShips = shipsAmount[gameDetails.dimension];
             const allGameShips = []; // [5,4,3,3,2]
@@ -593,7 +594,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
 
         // gamePlay phase
         if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
-            const userShips = db.getShipsData(req.params.game_id, req.user.id);
+            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
             const placedShips = userShips.map(ship => {
                 return {
                     ship_size: ship.size,
@@ -615,7 +616,7 @@ gameRouter.get('/games/:game_id', async (req,res) => {
                 myTurn = false;
             }
 
-            const gameShots = db.getGameShots(req.params.game_id, gameOpponent);
+            const gameShots = await db.getGameShots(req.params.game_id, gameOpponent);
             const shot_sent = [];
             const shot_recieved = [];
 

@@ -22,14 +22,14 @@ authRouter.post('/register', async (req, res) => {
     }
 
     try {
-        const check = db.getUsername(username);
+        const check = await db.getUsername(username);
         if (check.length > 0) {
             return res.status(400).json({msg: 'Email already exist, choose a different email'});
         }
 
         const hashedPassword = await passwordHash(password, 10);
         const timestamp = new Date(Date.now());
-        db.insertToUsers(username, nickname, hashedPassword, timestamp);
+        await db.insertToUsers(username, nickname, hashedPassword, timestamp);
         return res.status(201).json({msg: 'Success creating user'});
     } catch(e) {
         res.status(500).json({msg: 'Server error'});
@@ -45,7 +45,7 @@ authRouter.get("/login", (req, res) => {
 // Get user profile page
 authRouter.get("/profile", async (req, res) => {
     try {
-        const result = db.getUser(req.user.id);
+        const result = await db.getUser(req.user.id);
         const userData = {
             username: result[0].username,
             nickname: result[0].nickname,
@@ -103,7 +103,7 @@ authRouter.put('/profile', async (req, res, next) => {
     
     try {
         const timestamp = new Date(Date.now());
-        db.updateUsername(req.user.id, nickname, timestamp);
+        await db.updateUsername(req.user.id, nickname, timestamp);
         res.status(200).json({ msg: 'Updated user' });
     } catch(e) {
         res.status(500).json({msg: 'Server error'});

@@ -48,7 +48,8 @@ app.use(passport.session());
 passport.use(
   new LocalStrategy(async function (username, password, done) {
     try {
-      const results = db.getUsername(username);
+      const results = await db.getUsername(username);
+      console.log('the results' + results);
       if (results.length === 0) {
         return done(null, false);
       }
@@ -71,18 +72,18 @@ passport.use(new GoogleStrategy({
 },
   async function (issuer, profile, done) {
     try {
-      const check = db.getFromFederatedCredentials(issuer, profile.id);
+      const check = await db.getFromFederatedCredentials(issuer, profile.id);
       if (check.length === 0) {
         // The Google account has not logged in to this app before.
         // Create a new user record and link it to the Google account.
         const timestamp = new Date(Date.now());
-        const user = db.insertToUsers(profile.emails[0].value, profile.displayName, null, timestamp);
+        const user = await db.insertToUsers(profile.emails[0].value, profile.displayName, null, timestamp);
         await pool.query('INSERT INTO federated_credentials (user_id, provider, subject) VALUES ($1, $2, $3)', [user[0].id, issuer, profile.id]);
         return done(null, user[0]);
       } else {
         // The Google account has previously logged in to the app.  Get the
         // user record linked to the Google account and log the user in.
-        const result = db.getUser(check.rows[0].user_id);
+        const result = await db.getUser(check.rows[0].user_id);
         if (result.length === 0) {
           return done(null, false);
         }
@@ -102,7 +103,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const results = db.getUser(id);
+    const results = await db.getUser(id);
     done(null, results[0]);
   } catch(e) {
     done(e);
