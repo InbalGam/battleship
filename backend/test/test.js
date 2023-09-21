@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 const request = require('supertest');
-const {pool} = require('../server/db');
+const db = require('../server/db');
 
 const app = require('../server');
 const PORT = process.env.PORT || 4001;
@@ -631,7 +631,7 @@ describe('Performing a shot', function() {
         .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(async () => {
-            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            await db.updateGameState(4, 'user1_turn')
             return agent
             .post('/games/4/shoot')
             .send({row: 2, col: 8})
@@ -649,7 +649,7 @@ describe('Performing a shot', function() {
         .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(async () => {
-            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            await db.updateGameState(4, 'user1_turn')
             return agent
             .post('/games/4/shoot')
             .send({row: 9, col: 8})
@@ -667,7 +667,7 @@ describe('Performing a shot', function() {
         .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(async () => {
-            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            await db.updateGameState(4, 'user1_turn')
             return agent
             .post('/games/4/shoot')
             .send({row: 1, col: 10})

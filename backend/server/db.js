@@ -156,7 +156,6 @@ async function getGameShots(id, gameOpponent) {
 
 
 module.exports = {
-  pool,
   getFromFederatedCredentials,
   getUsername,
   insertToUsers,
