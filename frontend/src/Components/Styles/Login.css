@@ -1,0 +1,99 @@
+.login_container {
+    background-image: url('./images/waves.jpg');
+    background-size: cover;
+    height: 100vh;
+}
+
+.login_register {
+    min-width: 30%;
+    max-width: 25rem;
+    height: 100%;
+    background-color: rgb(44, 105, 197);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.loginH1 {
+    color: white;
+    text-align: center;
+    font-size: 3rem;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.textField {
+    background-color: white;
+    width: 60%;
+}
+
+.submitButton {
+    background-color: rgb(35, 63, 104);
+    color: white;
+    border: 0.1rem white solid;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.submitButton:hover {
+    cursor: pointer;
+    background-color: rgb(13, 22, 36);
+}
+
+.otherLoginOptions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.loginGoogleLink {
+    text-decoration: none;
+    width: 60%;
+}
+
+.google_login {
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.google_login:hover {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.imgLogo {
+    height: 2rem;
+    margin-right: 1rem;
+}
+
+.registrationLink_container {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.registrationLink {
+    color: white;
+    text-decoration: none;
+    font-size: larger;
+}
+
+.registrationLink:hover {
+    color:rgb(15, 33, 59);
+}
+
+.messages {
+    align-self: center;
+    color: white;
+    font-size: 1rem;
+}

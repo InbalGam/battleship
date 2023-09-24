@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 const request = require('supertest');
-const {pool} = require('../server/db');
+const db = require('../server/db');
 
 const app = require('../server');
 const PORT = process.env.PORT || 4001;
@@ -293,7 +293,7 @@ describe('Update a game', function() {
             .put('/games/4')
             .expect(401)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Cannot accept an active game'});
+                expect(response.body).to.be.deep.equal({msg: 'Cannot accept or delete an active game'});
             });
         });
     });
@@ -362,7 +362,7 @@ describe('Delete a game', function() {
             .delete('/games/4')
             .expect(401)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Cannot delete an active game'});
+                expect(response.body).to.be.deep.equal({msg: 'Cannot accept or delete an active game'});
             });
         });
     });
@@ -435,7 +435,7 @@ describe('Placing ships in game', function() {
             .send({ship_size: 5, start_row: 1, start_col: 1, end_row: 7, end_col: 4})
             .expect(400)
             .then((response) => {
-                expect(response.body).to.be.deep.equal({msg: 'Ship is not valid'});
+                expect(response.body).to.be.deep.equal({msg: 'Ship is not in the correct size'});
             });
         });
     });
@@ -631,7 +631,7 @@ describe('Performing a shot', function() {
         .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(async () => {
-            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            await db.updateGameState(4, 'user1_turn')
             return agent
             .post('/games/4/shoot')
             .send({row: 2, col: 8})
@@ -649,7 +649,7 @@ describe('Performing a shot', function() {
         .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(async () => {
-            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            await db.updateGameState(4, 'user1_turn')
             return agent
             .post('/games/4/shoot')
             .send({row: 9, col: 8})
@@ -667,7 +667,7 @@ describe('Performing a shot', function() {
         .send({username: 'inbal@gmail.com', password: 'dafsd444'}) // User exist
         .redirects(1)
         .then(async () => {
-            await pool.query('update games set state = $1 where id = 4;', ['user1_turn'])
+            await db.updateGameState(4, 'user1_turn')
             return agent
             .post('/games/4/shoot')
             .send({row: 1, col: 10})

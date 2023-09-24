@@ -1,0 +1,35 @@
+.gameCard {
+    background-color: rgb(28, 78, 153) !important;
+    color: white !important;
+}
+
+.gameCardLink {
+    text-decoration: none;
+    color: white;
+}
+
+.gameCardLink:hover {
+    cursor: pointer;
+    color: white;
+}
+
+.gameCardActionButtons {
+    color: white !important;
+}
+
+.gameInfo {
+    padding: 0.5rem;
+}
+
+.gameHits {
+    margin-right: 0.5rem;
+    color: rgb(73, 194, 99);
+}
+
+.gameBombed {
+    color: rgb(227, 121, 121);
+}
+
+.general {
+    margin-right: 0.5rem;
+}

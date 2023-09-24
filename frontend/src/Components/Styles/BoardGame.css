@@ -1,0 +1,157 @@
+.color {
+    background-color: blue;
+    width: 5rem;
+    height: 5rem;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.noColor {
+    background-color: white;
+    width: 5rem;
+    height: 5rem;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.light_blue {
+    background-color: rgb(161, 161, 250);
+    width: 5rem;
+    height: 5rem;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color:hover {
+    cursor: pointer;
+}
+
+.noColor:hover {
+    cursor: pointer;
+}
+
+.light_blue:hover {
+    cursor: pointer;
+}
+
+.numberedColumnStyle {
+    margin-left: 5rem;
+    display: flex;
+    gap: 4.5rem;
+    justify-content: center;
+    bottom: 10rem;
+    font-weight: bold;
+}
+
+.numberedColumnStyle p {
+    margin: 0;
+}
+
+.columnStyle {
+    display: flex;
+}
+
+.boardStyle {
+    display: flex;
+    justify-content: center;
+    bottom: 60rem;
+}
+
+.board_rows {
+    padding: 0;
+}
+
+.row_name {
+    width: 1rem;
+    align-self: center;
+    margin-right: 1rem;
+    font-weight: bold;
+}
+
+.Xcell {
+    font-size: 100px !important;
+}
+
+@media only screen and (max-width: 950px) {
+    .color {
+        width: 4rem;
+        height: 4rem;
+    }
+
+    .noColor {
+        width: 4rem;
+        height: 4rem;
+    }
+
+    .numberedColumnStyle {
+        gap: 3.5rem;
+    }
+}
+
+
+@media only screen and (max-width: 750px) {
+    .color {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .noColor {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .numberedColumnStyle {
+        gap: 2.5rem;
+    }
+
+    .Xcell {
+        font-size: 80px !important;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .color {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .noColor {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .numberedColumnStyle {
+        gap: 1.5rem;
+    }
+
+    .Xcell {
+        font-size: 50px !important;
+    }
+}
+
+
+@media only screen and (max-width: 430px) {
+    .color {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .noColor {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .numberedColumnStyle {
+        gap: 1.05rem;
+    }
+
+    .Xcell {
+        font-size: 40px !important;
+    }
+}

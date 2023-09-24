@@ -1,0 +1,24 @@
+.ships {
+    margin-left: 1rem !important;
+    margin-top: 2rem !important;
+    min-width: 30rem !important;
+}
+
+.main_board {
+    margin-top: 2rem !important;
+}
+
+.error_msg {
+    margin-top: 1rem !important;
+    max-width: 25rem;
+}
+
+.start_game_button {
+    margin-top: 1rem;
+}
+
+@media only screen and (max-width: 600px) {
+    .ships {
+        min-width: 20rem !important;
+    }
+}

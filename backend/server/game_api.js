@@ -1,56 +1,75 @@
 const express = require('express');
 const gameRouter = express.Router();
-const {pool} = require('./db');
+const db = require('./db');
+const {shipsAmount, totalShipsSizes, shipAmountDimension, checkShipPlacement} = require('./ships');
+const {waitingForPlayer, winnerPhase, placingPieces, gamePlay} = require('./phasesFuncs');
 
 
 // Middlewares
-gameRouter.use('/', (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({msg: 'You need to login first'});
+gameRouter.use(['/', '/profile'], (req, res, next) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ msg: 'You need to login first' });
+        }
+        next();
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
     }
-    next();
 });
 
 
 gameRouter.use('/games/:game_id', async (req, res, next) => {
-    const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-    if (game.rows.length === 0) {
-        return res.status(400).json({msg: 'Game does not exist'});
+    try {
+        const game = await db.getGameById(req.params.game_id);
+        if (game.length === 0) {
+            return res.status(400).json({ msg: 'Game does not exist' });
+        }
+
+        if (game[0].user1 !== req.user.id && game[0].user2 !== req.user.id) {
+            return res.status(400).json({ msg: 'User not part of game' });
+        }
+        next();
+    } catch (e) {
+        res.status(500).json({ msg: 'Server error' });
     }
-    next();
 });
 
-gameRouter.use('/games/:game_id', async (req, res, next) => {
-    const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-    if (game.rows[0].user1 !== req.user.id && game.rows[0].user2 !== req.user.id) {
-        return res.status(400).json({msg: 'User not part of game'});
+// Get user profile page
+gameRouter.get("/profile", async (req, res) => {
+    try {
+        const result = await db.getUser(req.user.id);
+        const userData = {
+            username: result[0].username,
+            nickname: result[0].nickname,
+            user_score: {
+                wins: result[0].wins,
+                loses: result[0].loses
+            }
+        }
+        res.status(200).json(userData);
+    } catch (e) {
+        res.status(500).json({msg: 'Server error'});
     }
-    next();
 });
 
-// Vars
-const shipsAmount = {
-    // ship size : amount of ships
-    10: {
-        5: 1,
-        4: 1,
-        3: 2,
-        2: 1
-    },
-    20: {
-        8: 1,
-        7: 1,
-        6: 2,
-        5: 2,
-        4: 3,
-        3: 4
-    }
-};
+// Update user profile page
+gameRouter.put('/profile', async (req, res, next) => { 
+    const { nickname } = req.body;
 
-const totalShipsSizes = {
-    10: 17,
-    20: 61
-}
+    if (!nickname) {
+        return res.status(400).json({msg: 'Nickname must be specified'});
+    }
+    
+    try {
+        const timestamp = new Date(Date.now());
+        await db.updateUsername(req.user.id, nickname, timestamp);
+        res.status(200).json({ msg: 'Updated user' });
+    } catch(e) {
+        res.status(500).json({msg: 'Server error'});
+    }
+});
+
+
 
 // Create a new game
 gameRouter.post('/games', async (req, res) => {
@@ -65,13 +84,13 @@ gameRouter.post('/games', async (req, res) => {
     }
 
     try {
-        const check = await pool.query('select * from users where username = $1', [opponent]);
-        if (check.rows.length === 0) {
+        const check = await db.getUsername(opponent);
+        if (check.length === 0) {
             return res.status(400).json({msg: 'User does not exists'});
         }
 
         const timestamp = new Date(Date.now());
-        await pool.query('insert into games (user1, user2, dimension, state, created_at) values ($1, $2, $3, $4, $5) returning *', [req.user.id, check.rows[0].id, dimension, 'invited', timestamp]);
+        await db.createGame(req.user.id, check[0].id, dimension, 'invited', timestamp);
         return res.status(201).json({msg: 'Game created'});
     } catch(e) {
         res.status(500).json({msg: 'Server error'});
@@ -85,33 +104,30 @@ gameRouter.get('/games', async (req, res) => {
     let gameInvitations = [];
 
     try {
-        const userStatus = await pool.query('select wins, loses from users where id = $1', [req.user.id]);
-        if (userStatus.rows.length === 0) {
+        const userScore = await db.getUserScore(req.user.id);
+        if (userScore.length === 0) {
             return res.status(400).json({msg: 'User does not exists'});
         }
 
-        const gamesShots = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when user_id = $1 then 1 else 0 end) as hits, sum(case when user_id = $1 then 0 else 1 end) as bombed 
-        from games g join shots s on g.id = s.game_id join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and s.hit = true and (g.state = $2 or g.state = $3) group by 1,2,3`,
-        [req.user.id, 'user1_turn', 'user2_turn']);
-        if (gamesShots.rows.length > 0) {
-            activeGames.push(...gamesShots.rows);
+        const gamesShots = await db.getActiveGameData(req.user.id, 'user1_turn', 'user2_turn');
+        if (gamesShots.length > 0) {
+            activeGames.push(...gamesShots);
         }
 
-        const otherGames = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
-        from games g join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`,
-        [req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready']);
+        const otherGames = await db.getOtherGamesData(req.user.id, 'invited', 'accepted', 'user1_ready', 'user2_ready');
 
-        otherGames.rows.forEach(game => {
+        otherGames.forEach(game => {
             if (game.state === 'invited') {
                 gameInvitations.push({
                     game_id: game.id,
                     opponent: game.opponent,
-                    board_dimension: game.dimension
+                    board_dimension: game.dimension,
+                    createdByMe: game.user1 === req.user.id
                 });
             }
         });
 
-        otherGames.rows.forEach(game => {
+        otherGames.forEach(game => {
             if (game.state !== 'invited') {
                 activeGames.push({
                     game_id: game.id,
@@ -125,8 +141,8 @@ gameRouter.get('/games', async (req, res) => {
 
         const finalResults = {
             user_score: {
-                wins: userStatus.rows[0].wins,
-                loses: userStatus.rows[0].loses
+                wins: userScore[0].wins,
+                loses: userScore[0].loses
             },
             invitations: gameInvitations,
             active_games: activeGames
@@ -138,22 +154,28 @@ gameRouter.get('/games', async (req, res) => {
     }
 });
 
-
-// Update game- accept state
-gameRouter.put('/games/:game_id', async (req, res) => {
+const verifyAcceptDecline = async (req, res, next) => {
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
+        const game = await db.getGameById(req.params.game_id);
+        const gameDetails = game[0];
 
         if (req.user.id !== gameDetails.user2) {
             return res.status(401).json({msg: 'You are not the correct opponent player'});
         }
 
         if (gameDetails.state !== 'invited') {
-            return res.status(401).json({msg: 'Cannot accept an active game'});
+            return res.status(401).json({msg: 'Cannot accept or delete an active game'});
         }
+        next();
+    } catch(e) {
+        res.status(500).json({msg: 'Server error'});
+    };
+};
 
-        await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, 'accepted']);
+// Update game- accept state
+gameRouter.put('/games/:game_id', verifyAcceptDecline, async (req, res) => {
+    try {
+        await db.updateGameState(req.params.game_id, 'accepted');
         return res.status(200).json({msg: 'game accepted by opponent'});
 
     } catch(e) {
@@ -163,20 +185,9 @@ gameRouter.put('/games/:game_id', async (req, res) => {
 
 
 // delete a game
-gameRouter.delete('/games/:game_id', async (req, res) => {
+gameRouter.delete('/games/:game_id', verifyAcceptDecline, async (req, res) => {
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
-
-        if (req.user.id !== gameDetails.user2) {
-            return res.status(401).json({msg: 'You are not the correct opponent player'});
-        }
-
-        if (gameDetails.state !== 'invited') {
-            return res.status(401).json({msg: 'Cannot delete an active game'});
-        }
-
-        await pool.query('delete from games where id = $1;', [req.params.game_id]);
+        await db.deleteGame(req.params.game_id);
         return res.status(200).json({msg: 'game deleted by opponent'});
 
     } catch(e) {
@@ -186,61 +197,14 @@ gameRouter.delete('/games/:game_id', async (req, res) => {
 
 
 // Placing ships
-function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
-    if (shipInDb.start_row === shipInDb.end_row) {
-        if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
-            return 1;
-        }
-
-        if (start_row === (shipInDb.start_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return 1;
-        }
-
-        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return 1;
-        }
-
-        if (start_row < shipInDb.start_row && end_row > shipInDb.start_row && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))) {
-            return 1;
-        }
-    } else if (shipInDb.start_row !== shipInDb.end_row) {
-        if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return 1;
-        }
-
-        if (start_col === (shipInDb.start_col + 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return 1;
-        }
-
-        if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return 1;
-        }
-
-        if (start_row === (shipInDb.end_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return 1;
-        }
-
-        if (start_col < shipInDb.start_col && end_col > shipInDb.start_col && (start_row >= (shipInDb.start_row - 1) && start_row <= (shipInDb.end_row + 1))) {
-            return 1;
-        }
-    }
-    return 0;
-};
-
-
-async function checkShips(req, dimension, ship_size) {
-    const userShips = await pool.query('select size from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+async function verifyRemainingShipsOfSize(req, dimension, ship_size) {
+    const userShips = await db.getShipsSizes(req.params.game_id, req.user.id);
     const gameShips = shipsAmount[dimension];
-    const placedShips = userShips.rows.map(ship => ship.size);
+    const placedShips = userShips.map(ship => ship.size);  
 
-    let count = 0;
-    for (let i = 0; i < placedShips.length; i++) {
-        if (ship_size === placedShips[i]) {
-            count += 1;
-        }
-    };
+    const amountFromShip = placedShips.filter(plShip => plShip === ship_size).length;
 
-    if (count < gameShips[ship_size]) {
+    if ( amountFromShip < gameShips[ship_size]) {
         return true; //'can place'
     } else {
         return false; //'cannot place'
@@ -249,29 +213,38 @@ async function checkShips(req, dimension, ship_size) {
 
 
 async function placeShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col, res) {
-    await pool.query('insert into ships (game_id, user_id, size, start_row, start_col, end_row, end_col) values ($1, $2, $3, $4, $5, $6, $7)', [game_id, user_id, ship_size, start_row, start_col, end_row, end_col]);
+    await db.placeAShip(game_id, user_id, ship_size, start_row, start_col, end_row, end_col);
     return res.status(200).json({msg: `Placed a ship of size ${ship_size}`});
+};
+
+
+function checkShipIsValid(ship_size, start_row, end_row, start_col, end_col) {
+    if (start_row === end_row) {
+        if ((Math.abs(end_col - start_col) + 1) !== ship_size) {
+            return false;
+        }
+    } else if (start_col === end_col) {
+        if ((Math.abs(end_row - start_row) + 1) !== ship_size) {
+            return false;
+        }
+    } else {
+        return false;
+    };
+
+    return true;
 };
 
 
 gameRouter.post('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
-    if (start_row === end_row) {
-        if ((end_col - start_col + 1) !== ship_size) {
-            return res.status(400).json({ msg: 'Ship is not in the correct size' });
-        }
-    } else if (start_col === end_col) {
-        if ((end_row - start_row + 1) !== ship_size) {
-            return res.status(400).json({ msg: 'Ship is not in the correct size' });
-        }
-    } else {
-        return res.status(400).json({ msg: 'Ship is not valid' });
+    if (!checkShipIsValid(ship_size, start_row, end_row, start_col, end_col)) {
+        return res.status(400).json({ msg: 'Ship is not in the correct size' });
     };
 
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
+        const game = await db.getGameById(req.params.game_id);
+        const gameDetails = game[0];
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
             if (req.user.id !== gameDetails.user1 && req.user.id !== gameDetails.user2) {
@@ -286,18 +259,18 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
                 return res.status(400).json({ msg: 'Ship is not inside board borders' });
             };
 
-            const canPlace = await checkShips(req, gameDetails.dimension, ship_size);
+            const canPlace = await verifyRemainingShipsOfSize(req, gameDetails.dimension, ship_size);
             if (!canPlace) {
                 return res.status(400).json({ msg: 'There are no more ships of this size to place' });
             }
 
 
-            const ships = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-            if (ships.rows.length === 0) {
+            const ships = await db.getShipsData(req.params.game_id, req.user.id);
+            if (ships.length === 0) {
                 await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
             } else {
-                const shipPlacementResult = ships.rows.map(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship)).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-                if (shipPlacementResult > 0) {
+                const isShipClose = ships.some(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship) === 1);
+                if (isShipClose) {
                     return res.status(400).json({ msg: 'Ship cannot be next to another ship' });
                 } else {
                     await placeShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col, res);
@@ -308,6 +281,7 @@ gameRouter.post('/games/:game_id/place', async (req, res) => {
         }
 
     } catch (e) {
+        console.log(e);
         res.status(500).json({ msg: 'Server error' });
     }
 
@@ -320,19 +294,14 @@ gameRouter.delete('/games/:game_id/place', async (req, res) => {
     const { ship_size, start_row, start_col, end_row, end_col } = req.body;
 
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
+        const game = await db.getGameById(req.params.game_id);
+        const gameDetails = game[0];
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-            const check = userShips.rows.map(dbShip => {
-                if (dbShip.size === ship_size && dbShip.start_row === start_row && dbShip.start_col === start_col && dbShip.end_row === end_row && dbShip.end_col === end_col) {
-                    return true;
-                }
-            });
-            if (check.includes(true)) {
-                await pool.query('delete from ships where game_id = $1 and user_id = $2 and size = $3 and start_row = $4 and start_col = $5 and end_row = $6 and end_col = $7', 
-                [req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col]);
+            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
+            const check = userShips.some(dbShip => dbShip.size === ship_size && dbShip.start_row === start_row && dbShip.start_col === start_col && dbShip.end_row === end_row && dbShip.end_col === end_col);
+            if (check) {
+                await db.deleteAShip(req.params.game_id, req.user.id, ship_size, start_row, start_col, end_row, end_col);
                 return res.status(200).json({msg: 'Ship deleted'});
             } else {
                 return res.status(400).json({ msg: 'Ship was not placed cannot be unplaced' });
@@ -351,26 +320,21 @@ gameRouter.delete('/games/:game_id/place', async (req, res) => {
 // Game state change to ready / turn
 gameRouter.post('/games/:game_id/ready', async (req,res) => {
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
+        const game = await db.getGameById(req.params.game_id);
+        const gameDetails = game[0];
 
         if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
+            const userShips = await db.getShipsData(req.params.game_id, req.user.id);
 
-            const shipAmountDimension = {
-                10: 5,
-                20: 13
-            }
-
-            if (shipAmountDimension[gameDetails.dimension] === userShips.rows.length) {
+            if (shipAmountDimension[gameDetails.dimension] === userShips.length) {
                 if (gameDetails.state === 'accepted' && gameDetails.user1 === req.user.id) {
-                    await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, 'user1_ready']);    
+                    await db.updateGameState(req.params.game_id, 'user1_ready');    
                 } else if (gameDetails.state === 'accepted' && gameDetails.user2 === req.user.id) {
-                    await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, 'user2_ready']);  
+                    await db.updateGameState(req.params.game_id, 'user2_ready');  
                 } else if (gameDetails.state === 'user1_ready' || gameDetails.state === 'user2_ready') {
                     const gameState = ['user1_turn', 'user2_turn'];
                     const randomChoose = Math.floor(Math.random() * 2);
-                    await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, gameState[randomChoose]]); 
+                    await db.updateGameState(req.params.game_id, gameState[randomChoose]); 
                 }
                 return res.status(200).json({msg: 'game state updated'});
             } else {
@@ -391,35 +355,29 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
         return res.status(400).json({ msg: 'The shot is outside of the game board' });
     }
 
-    const userGameShots = await pool.query('select * from shots where game_id = $1 and user_id = $2', [req.params.game_id, player]);
-    const checkWasShot = userGameShots.rows.map(shot => {
-        if (shot.row === row && shot.col === col) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    const userGameShots = await db.getUserShots(req.params.game_id, player);
 
-    if (checkWasShot > 0) {
+    const checkWasShot = userGameShots.some(shot => shot.row === row && shot.col === col);
+    if (checkWasShot) {
         return res.status(400).json({ msg: 'This cell was already shot' });
     };
 
-    const hitResults = await pool.query(`select sum(case when $3 >= start_row and $3 <= end_row and $4 >= start_col and $4 <= end_col then 1 else 0 end) as hits from ships where game_id = $1 and user_id = $2`,
-    [req.params.game_id, opponent, row, col]);
+    const hitResults = await db.getHitsResults(req.params.game_id, opponent, row, col);
 
-    if (Number(hitResults.rows[0].hits) === 1) {
+    if (Number(hitResults[0].hits) === 1) {
         const timestamp = new Date(Date.now());
-        await pool.query('insert into shots (game_id, user_id, row, col, hit, performed_at) values ($1, $2, $3, $4, $5, $6)', [req.params.game_id, player, row, col, 'true', timestamp]);
+        await db.insertIntoShots(req.params.game_id, player, row, col, 'true', timestamp);
 
-        const successfullShots = userGameShots.rows.filter(shot => shot.hit === true);
-        if (successfullShots.length === totalShipsSizes[gameDimension]) { // winner
-            await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, userWinner]);
+        const successfullShots = userGameShots.filter(shot => shot.hit === true);
+        if (successfullShots.length + 1 === totalShipsSizes[gameDimension]) { // check winner
+            await db.updateGameState(req.params.game_id, userWinner);
+            await db.updateUsersScores(player, opponent)
             return res.status(200).json({msg: 'Player performed a shot and won game'});
         }
     } else {
         const timestamp = new Date(Date.now());
-        await pool.query('insert into shots (game_id, user_id, row, col, hit, performed_at) values ($1, $2, $3, $4, $5, $6)', [req.params.game_id, player, row, col, 'false', timestamp]);
-        await pool.query('update games set state = $2 where id = $1;', [req.params.game_id, userTurn]);
+        await db.insertIntoShots(req.params.game_id, player, row, col, 'false', timestamp);
+        await db.updateGameState(req.params.game_id, userTurn);
     }
 
     return res.status(200).json({msg: 'Player performed a shot'});
@@ -428,8 +386,8 @@ async function performAShot(req, res, row, col, player, opponent, userTurn, user
 gameRouter.post('/games/:game_id/shoot', async (req,res) => {
     const { row, col } = req.body;
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
+        const game = await db.getGameById(req.params.game_id);
+        const gameDetails = game[0];
 
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_turn') {
             performAShot(req, res, row, col, gameDetails.user1, gameDetails.user2, 'user2_turn', 'user1_won', gameDetails.dimension);
@@ -453,7 +411,7 @@ gameRouter.post('/games/:game_id/chat', async (req,res) => {
 
     try {
         const timestamp = new Date(Date.now());
-        await pool.query('insert into chat_messages (game_id, user_id, text, created_at) values ($1, $2, $3, $4)', [req.params.game_id, req.user.id, message, timestamp]);
+        await db.postMsgToChat(req.params.game_id, req.user.id, message, timestamp);
         return res.status(200).json({msg: 'sent message'});
     } catch (e) {
         res.status(500).json({ msg: 'Server error' });
@@ -463,9 +421,9 @@ gameRouter.post('/games/:game_id/chat', async (req,res) => {
 
 gameRouter.get('/games/:game_id/chat', async (req,res) => {
     try {
-        const gameChat = await pool.query('select u.nickname as from, cm.text as message, cm.created_at as date from chat_messages cm join users u on cm.user_id = u.id where cm.game_id = $1', [req.params.game_id]);
+        const gameChat = await db.getChatMsgs(req.params.game_id);
         
-        return res.status(200).json(gameChat.rows);
+        return res.status(200).json(gameChat);
     } catch (e) {
         res.status(500).json({ msg: 'Server error' });
     }
@@ -474,10 +432,10 @@ gameRouter.get('/games/:game_id/chat', async (req,res) => {
 
 // Getting game info
 gameRouter.get('/games/:game_id', async (req,res) => {
-    let result = {};
+    let result;
     try {
-        const game = await pool.query('select * from games where id = $1', [req.params.game_id]);
-        const gameDetails = game.rows[0];
+        const game = await db.getGameById(req.params.game_id);
+        const gameDetails = game[0];
 
         if (gameDetails.state === 'invited') {
             return res.status(400).json({ msg: 'Game is in state invited' });
@@ -493,138 +451,20 @@ gameRouter.get('/games/:game_id', async (req,res) => {
             gameOpponent = gameDetails.user1; //id
         };
 
-        const usersInformation = await pool.query('select * from users where id = $1', [gameOpponent]);
+        const usersInformation = await db.getUser(gameOpponent);
 
-        // waiting_for_other_player phase
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
-            result = {
-                opponent: usersInformation.rows[0].nickname,
-                phase: 'waiting_for_other_player'
-            }
-        };
-
+        // waiting_for_other_player phase
+            result = waitingForPlayer(gameDetails, usersInformation);
+        } else if (gameDetails.state === 'user1_won' || gameDetails.state === 'user2_won') {
         // winner phase
-        if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
-            result = {
-                opponent: usersInformation.rows[0].nickname,
-                phase: 'finished',
-                i_won: true
-            }
-        } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-            result = {
-                opponent: usersInformation.rows[0].nickname,
-                phase: 'finished',
-                i_won: false
-            }
-        } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-            result = {
-                opponent: usersInformation.rows[0].nickname,
-                phase: 'finished',
-                i_won: false
-            }
-        } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-            result = {
-                opponent: usersInformation.rows[0].nickname,
-                phase: 'finished',
-                i_won: true
-            }
-        };
-
-
+            result = winnerPhase(gameDetails, gameUser, usersInformation);
+        } else if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
         // placing_pieces phase
-        if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
-            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-
-            const gameShips = shipsAmount[gameDetails.dimension];
-            const allGameShips = []; // [5,4,3,3,2]
-            for (key in gameShips) {
-                for (let i = 0; i < gameShips[key]; i++) {
-                    allGameShips.push(key);
-                }
-            };
-
-            if (userShips.rows.length === 0) {
-                result = {
-                    opponent: usersInformation.rows[0].nickname,
-                    phase: 'placing_pieces',
-                    remaining_ships: allGameShips,
-                    placed_ships: []
-                } 
-            } else {
-                const placedShips = userShips.rows.map(ship => {
-                    const shipIndex = allGameShips.indexOf(ship.size.toString());
-                    allGameShips.splice(shipIndex, 1);
-                    return {
-                        ship_size: ship.size,
-                        start_row: ship.start_row,
-                        start_col: ship.start_col,
-                        end_row: ship.end_row,
-                        end_col: ship.end_col
-                    }
-                });
-
-                result = {
-                    opponent: usersInformation.rows[0].nickname,
-                    phase: 'placing_pieces',
-                    remaining_ships: allGameShips,
-                    placed_ships: placedShips
-                } 
-            }
-        };
-
+            result = await placingPieces(gameDetails, req, shipsAmount[gameDetails.dimension], usersInformation);
+        } else if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
         // gamePlay phase
-        if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
-            const userShips = await pool.query('select * from ships where game_id = $1 and user_id = $2', [req.params.game_id, req.user.id]);
-            const placedShips = userShips.rows.map(ship => {
-                return {
-                    ship_size: ship.size,
-                    start_row: ship.start_row,
-                    start_col: ship.start_col,
-                    end_row: ship.end_row,
-                    end_col: ship.end_col
-                }
-            });
-
-            let myTurn;
-            if (gameUser === 'user1' && gameDetails.state === 'user1_turn') {
-                myTurn = true;
-            } else if (gameUser === 'user2' && gameDetails.state === 'user1_turn') {
-                myTurn = false;
-            } else if (gameUser === 'user2' && gameDetails.state === 'user2_turn') {
-                myTurn = true;
-            } else if (gameUser === 'user1' && gameDetails.state === 'user2_turn') {
-                myTurn = false;
-            }
-
-            const gameShots = await pool.query('select row, col, hit, case when user_id = $2 then 1 else 0 end as opponent_shot from shots where game_id = $1', [req.params.game_id, gameOpponent]);
-            const shot_sent = [];
-            const shot_recieved = [];
-
-            gameShots.rows.forEach(shot => {
-                if (shot.opponent_shot === 1) {
-                    shot_recieved.push({
-                        row: shot.row,
-                        col: shot.col,
-                        hit: shot.hit
-                    });
-                } else {
-                    shot_sent.push({
-                        row: shot.row,
-                        col: shot.col,
-                        hit: shot.hit
-                    });
-                }
-            });
-
-            result = {
-                opponent: usersInformation.rows[0].nickname,
-                phase: 'gamePlay',
-                my_turn: myTurn,
-                placed_ships: placedShips,
-                shots_sent: shot_sent,
-                shots_recieved: shot_recieved
-            }
-
+            result = await gamePlay(gameDetails, req, gameUser, gameOpponent, usersInformation);
         };
 
         return res.status(200).json(result);
