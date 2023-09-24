@@ -46,7 +46,7 @@ function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
             return 1;
         }
 
-        if (end_row > shipInDb.start_row && (end_col >= (shipInDb.start_col - 1) && end_col <= (shipInDb.end_col + 1))) {
+        if (((start_row === (shipInDb.start_row + 1)) || (start_row === (shipInDb.start_row - 1))) && (end_col >= (shipInDb.start_col - 1) && end_col <= (shipInDb.end_col + 1))) {
             return 1;
         }
     } else if (shipInDb.start_row !== shipInDb.end_row) {
