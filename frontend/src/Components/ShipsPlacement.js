@@ -40,30 +40,28 @@ function ShipsPlacement(props) {
 
 
     async function placeShip() {
-        if (shipRowCol.end.length !== 0) {
-            setIsLoading(true);
-            try {
-                const newShipData = {
-                    ship_size: Number(props.remainingShips[choosenShipInd]),
-                    start_row: shipRowCol.start[0],
-                    start_col: shipRowCol.start[1],
-                    end_row: shipRowCol.end[0],
-                    end_col: shipRowCol.end[1]
-                }
-                const result = await placeAShip(props.game_id, newShipData);
-                if (result.status === 200) {
-                    props.getTheGameInfo();
-                    setIsLoading(false);
-                } else {
-                    const jsonData = await result.json();
-                    setPlaceShipFail(jsonData.msg);
-                    setShipRowCol({start: [], end: []});
-                    setChoosenShipInd('');
-                    setIsLoading(false);
-                }
-            } catch (e) {
-                navigate('/error');
+        setIsLoading(true);
+        try {
+            const newShipData = {
+                ship_size: Number(props.remainingShips[choosenShipInd]),
+                start_row: shipRowCol.start[0],
+                start_col: shipRowCol.start[1],
+                end_row: shipRowCol.end[0],
+                end_col: shipRowCol.end[1]
             }
+            const result = await placeAShip(props.game_id, newShipData);
+            if (result.status === 200) {
+                props.getTheGameInfo();
+                setIsLoading(false);
+            } else {
+                const jsonData = await result.json();
+                setPlaceShipFail(jsonData.msg);
+                setShipRowCol({start: [], end: []});
+                setChoosenShipInd('');
+                setIsLoading(false);
+            }
+        } catch (e) {
+            navigate('/error');
         }
     };
 
@@ -90,7 +88,9 @@ function ShipsPlacement(props) {
     
 
     useEffect(() => {
-        placeShip();
+        if (shipRowCol.end.length !== 0) {
+            placeShip();
+        }
     }, [shipRowCol]);
 
 
