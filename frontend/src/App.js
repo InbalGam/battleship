@@ -8,6 +8,7 @@ import BoardGame from "./Components/BoardGame";
 import Games from "./Components/Games";
 import Profile from "./Components/Profile";
 import Game from "./Components/Game";
+import Error from "./Components/Error";
 import styles from './App.css';
 
 
@@ -24,6 +25,7 @@ function App() {
       <Route path='login' element={ <Login/> } />
       <Route path='register' element={ <Register/> } />
       <Route path='logout' element={ <Logout/> } />
+      <Route path='error' element={ <Error/> } />
     </Route>
   ));
 
