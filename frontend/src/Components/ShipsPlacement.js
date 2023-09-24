@@ -24,7 +24,7 @@ function ShipsPlacement(props) {
     const [isLoading, setIsLoading] = useState(false);
 
 
-    function getIndexesData(rowColData) {
+    function onCellClick(rowColData) {
         if (shipRowCol.start.length === 0) {
             setShipRowCol(prev => ({
                 ...prev,
@@ -150,7 +150,7 @@ function ShipsPlacement(props) {
                 </div>
             </Grid>
             <Grid item xs={'auto'} className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} getIndexesData={getIndexesData} clicked={true} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} onCellClick={onCellClick} clicked={true} />
                 {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
             </Grid>
         </Grid>

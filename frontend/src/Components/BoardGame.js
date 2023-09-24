@@ -71,7 +71,7 @@ function BoardGame(props) {
                                 <li className='row_name'>{alphabet[rowInd]}</li>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
-                                        <div onClick={() => {if (props.clicked)  {props.getIndexesData([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
+                                        <div onClick={() => {if (props.clicked)  {props.onCellClick([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
                                             {checkX(props.shots, [(rowInd+1), (colInd+1)]) ? <CloseIcon style={{color: 'red'}} className='Xcell'/> : ''}
                                         </div>
                                     </li>

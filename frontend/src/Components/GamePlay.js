@@ -18,7 +18,7 @@ function GamePlay(props) {
     const [notMyTurn, setNotMyTurn] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    async function getIndexesData(rowColData) {
+    async function onCellClick(rowColData) {
         if (props.myTurn) {
             setIsLoading(true);
             try {
@@ -53,7 +53,7 @@ function GamePlay(props) {
                     <div className={props.myTurn ? 'player_turn' : ''}><Avatar className='player_avatar' >You</Avatar></div>
                 </Grid>
                 <Grid item xs={12} >
-                    <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} getIndexesData={getIndexesData} />
+                    <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} onCellClick={onCellClick} />
                     {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
                 </Grid>
             </Grid>
