@@ -102,7 +102,7 @@ async function createNewGame(gameInfo) {
         body: JSON.stringify(gameInfo)
     });
 
-    return response.status === 201;
+    return response;
 };
 
 

@@ -14,6 +14,7 @@ function AddGame(props) {
     const [opponent, setOpponent] = useState('');
     const [gameDimension, setGameDimension] = useState('10');
     const [insertFailed, setInsertFailed] = useState(false);
+    const [msg, setMsg] = useState('');
     const navigate = useNavigate();
 
 
@@ -31,11 +32,13 @@ function AddGame(props) {
         try {
             const dimensionNum = Number(gameDimension)
             const result = await createNewGame({opponent, dimension: dimensionNum});
-            if (result === true) {
+            if (result.status === 201) {
                 await props.getUserGames();
                 props.setShowForm(false);
                 props.setIsLoading(false);
             } else {
+                const jsonData = await result.json();
+                setMsg(jsonData.msg);
                 setInsertFailed(true);
                 props.setIsLoading(false);
             }
@@ -72,7 +75,7 @@ function AddGame(props) {
                 </ToggleButton>
             </ToggleButtonGroup>
             <button type="submit" className="submitButton">Invite</button>
-            {insertFailed ? <Alert severity="warning">Could not create game</Alert> : ''}
+            {insertFailed ? <Alert severity="warning">{msg}</Alert> : ''}
             </div>
         </form>
     );
