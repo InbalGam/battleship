@@ -47,12 +47,8 @@ function BoardGame(props) {
     };
 
     const checkFirstCell = (firstCell, cell) => {
-        if (firstCell) {
-            if ((firstCell.start.length > 0) && (firstCell.end.length === 0)) {
-                if (firstCell.start[0] === cell[0] && firstCell.start[1] === cell[1]) {
-                    return 'light_blue';
-                }
-            };
+        if (firstCell && (firstCell.start.length > 0) && (firstCell.end.length === 0) && (firstCell.start[0] === cell[0] && firstCell.start[1] === cell[1])) {
+            return 'light_blue';
         }
         return 'noColor';
     };
