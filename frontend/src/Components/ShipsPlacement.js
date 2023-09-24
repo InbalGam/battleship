@@ -150,7 +150,7 @@ function ShipsPlacement(props) {
                 </div>
             </Grid>
             <Grid item xs={'auto'} className='main_board'>
-                <BoardGame dimension={props.dimension} placedShips={props.placedShips} onCellClick={onCellClick} clicked={true} />
+                <BoardGame dimension={props.dimension} placedShips={props.placedShips} onCellClick={onCellClick} clicked={true} shipRowCol={shipRowCol} />
                 {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
             </Grid>
         </Grid>

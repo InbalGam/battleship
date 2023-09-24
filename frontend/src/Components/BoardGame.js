@@ -46,6 +46,17 @@ function BoardGame(props) {
         return false;
     };
 
+    const checkFirstCell = (firstCell, cell) => {
+        if (firstCell) {
+            if ((firstCell.start.length > 0) && (firstCell.end.length === 0)) {
+                if (firstCell.start[0] === cell[0] && firstCell.start[1] === cell[1]) {
+                    return 'light_blue';
+                }
+            };
+        }
+        return 'noColor';
+    };
+
     function checkX(cellsToX, cell) {
         if (props.shots) {
             for (let i = 0; i < cellsToX.length; i++) {
@@ -68,10 +79,11 @@ function BoardGame(props) {
                     {boardDimension.map((row, rowInd) =>
                         <li key={rowInd} >
                             <ul className='columnStyle'>
-                                <li className='row_name'>{alphabet[rowInd]}</li>
+                                <li key={rowInd + 1} className='row_name'>{alphabet[rowInd]}</li>
                                 {boardDimension.map((column, colInd) =>
                                     <li key={colInd} >
-                                        <div onClick={() => {if (props.clicked)  {props.onCellClick([(rowInd+1), (colInd+1)])}} } className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : 'noColor'}>
+                                        <div onClick={() => {if (props.clicked)  {props.onCellClick([(rowInd+1), (colInd+1)])}} } 
+                                        className={checkSubset(coloredCells, [(rowInd+1), (colInd+1)]) ? 'color' : checkFirstCell(props.shipRowCol, [(rowInd+1), (colInd+1)])}>
                                             {checkX(props.shots, [(rowInd+1), (colInd+1)]) ? <CloseIcon style={{color: 'red'}} className='Xcell'/> : ''}
                                         </div>
                                     </li>

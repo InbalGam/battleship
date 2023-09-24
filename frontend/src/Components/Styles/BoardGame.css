@@ -18,11 +18,25 @@
     justify-content: center;
 }
 
+.light_blue {
+    background-color: rgb(161, 161, 250);
+    width: 5rem;
+    height: 5rem;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .color:hover {
     cursor: pointer;
 }
 
 .noColor:hover {
+    cursor: pointer;
+}
+
+.light_blue:hover {
     cursor: pointer;
 }
 
