@@ -11,6 +11,7 @@ import styles from './Styles/ShipsPlacement.css';
 import Alert from '@mui/material/Alert';
 import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
+import { alphabet } from '../utils';
 
 
 function ShipsPlacement(props) {
@@ -21,7 +22,6 @@ function ShipsPlacement(props) {
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
     const [isLoading, setIsLoading] = useState(false);
-    const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
 
     function getIndexesData(rowColData) {

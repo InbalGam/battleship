@@ -1,11 +1,11 @@
 import styles from './Styles/BoardGame.css';
 import CloseIcon from '@mui/icons-material/Close';
 import { useMemo } from "react";
+import { alphabet } from '../utils';
 
 
 function BoardGame(props) {
     const boardDimension = Array.from(Array(props.dimension).keys());
-    const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
 
     function cellsToColor() {
