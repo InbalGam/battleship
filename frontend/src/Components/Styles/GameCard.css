@@ -23,6 +23,11 @@
 
 .gameHits {
     margin-right: 0.5rem;
+    color: rgb(73, 194, 99);
+}
+
+.gameBombed {
+    color: rgb(227, 121, 121);
 }
 
 .general {

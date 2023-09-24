@@ -69,8 +69,8 @@ function GameCard(props) {
                         <div className='gameInfo'>{'1 shot per turn'}</div>
                         {props.active ? 
                             <>
-                                <div className='gameInfo'><p className='gameHits' style={{color: 'rgb(73, 194, 99)'}}> {props.game.hits} hits</p></div>
-                                <div className='gameInfo'><p className='gameBombed' style={{color: 'rgb(227, 121, 121)'}}> {props.game.bombed} bombed </p></div>
+                                <div className='gameInfo'><p className='gameHits' > {props.game.hits} hits</p></div>
+                                <div className='gameInfo'><p className='gameBombed' > {props.game.bombed} bombed </p></div>
                             </> : ''}
                     </CardActions>
                 </Card>}
