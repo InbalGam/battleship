@@ -28,7 +28,7 @@ function Chat() {
         try {
             const result = await sendChatMsg(game_id, {message: newMsg});
             if (result) {
-                getChatMsgs();
+                getGameChatMsgs();
                 setNewMsg('');
                 setIsLoading(false);
             } else {
@@ -42,7 +42,7 @@ function Chat() {
         }
     };
 
-    async function getChatMsgs() {
+    async function getGameChatMsgs() {
         setIsLoading(true);
         try {
             const result = await getChatMsgs(game_id);
@@ -55,7 +55,7 @@ function Chat() {
     };
 
     useEffect(() => {
-        getChatMsgs();
+        getGameChatMsgs();
     }, []);
 
 
