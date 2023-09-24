@@ -1,4 +1,4 @@
-import { sendMsg, getMsgs } from '../Api';
+import { sendChatMsg, getChatMsgs } from '../Api';
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import Fab from '@mui/material/Fab';
@@ -26,7 +26,7 @@ function Chat() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const result = await sendMsg(game_id, {message: newMsg});
+            const result = await sendChatMsg(game_id, {message: newMsg});
             if (result) {
                 getChatMsgs();
                 setNewMsg('');
@@ -45,7 +45,7 @@ function Chat() {
     async function getChatMsgs() {
         setIsLoading(true);
         try {
-            const result = await getMsgs(game_id);
+            const result = await getChatMsgs(game_id);
             const jsonData = await result.json();
             setMsgs(jsonData);
             setIsLoading(false);

@@ -165,7 +165,7 @@ async function performShot(gameId, shotData) {
 
 // Chat
 
-async function sendMsg(gameId, message) {
+async function sendChatMsg(gameId, message) {
     const url = `${baseURL}/games/${gameId}/chat`;
     const response = await fetch(url, {
         method: 'POST',
@@ -178,7 +178,7 @@ async function sendMsg(gameId, message) {
 };
 
 
-async function getMsgs(gameId) {
+async function getChatMsgs(gameId) {
     const url = `${baseURL}/games/${gameId}/chat`;
     const response = await fetch(url, {
         method: 'GET',
@@ -190,4 +190,4 @@ async function getMsgs(gameId) {
 
 export {login, register, logout, getProfile, updateNickname,
         getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip, performShot,
-        sendMsg, getMsgs};
+        sendChatMsg, getChatMsgs};
