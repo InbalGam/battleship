@@ -14,7 +14,7 @@ function Games() {
     const [userGameInvitations, setUserGameInvitations] = useState([]);
     const [userActiveGames, setUserActiveGames] = useState([]);
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
 
     async function getUserGames() {
@@ -25,11 +25,7 @@ function Games() {
                 navigate('/login');
             } else {
                 const jsonData = await result.json();
-                setUserScore(prevState => ({
-                    ...prevState,
-                    wins: jsonData.user_score.wins,
-                    loses: jsonData.user_score.loses
-                }));
+                setUserScore(jsonData.user_score);
                 setUserGameInvitations(jsonData.invitations);
                 setUserActiveGames(jsonData.active_games);
                 setIsLoading(false);

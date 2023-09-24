@@ -13,7 +13,7 @@ function Profile() {
     const [user, setUser] = useState({});
     const [newNickname, setNewNickname] = useState('');
     const [show, setShow] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [updateFailed, setUpdateFailed] = useState(false);
     const navigate = useNavigate();
 
@@ -34,13 +34,7 @@ function Profile() {
                 navigate('/login');
             } else {
                 const jsonData = await result.json();
-                setUser(prevState => ({
-                    ...prevState,
-                    username: jsonData.username,
-                    nickname: jsonData.nickname,
-                    wins: jsonData.user_score.wins,
-                    loses: jsonData.user_score.loses
-                }));
+                setUser(jsonData);
                 setIsLoading(false);
             }
         } catch (e) {
@@ -86,9 +80,9 @@ function Profile() {
                     <div className='userScore'>
                         <p>You current score is:</p>
                         <div>
-                            <p className='wins'>wins: {user.wins}</p>
-                            <p className='loses'>Loses: {user.loses}</p>
-                            <p>Total: {user.wins - user.loses}</p>
+                            <p className='wins'>wins: {user.user_score.wins}</p>
+                            <p className='loses'>Loses: {user.user_score.loses}</p>
+                            <p>Total: {user.user_score.wins - user.user_score.loses}</p>
                         </div>
                     </div>
                     {updateFailed ? <Alert severity="warning">Could not update nickname</Alert> : ''}
