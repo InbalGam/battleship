@@ -9,7 +9,7 @@ function BoardGame(props) {
 
 
     function cellsToColor() {
-        let pairs = [];
+        const pairs = [];
         if (props.placedShips) {
             props.placedShips.forEach(ship => {
                 // [row, col]
