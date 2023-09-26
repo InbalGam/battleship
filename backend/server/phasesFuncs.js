@@ -1,7 +1,7 @@
 const db = require('./db');
 
 
-function waitingForPlayer(gameDetails, opponentsInformation) {
+function waitingForPlayer(gameDetails, opponentsInformation, playersInformation) {
     const result = {
         opponent: opponentsInformation[0].nickname,
         opponentImage: opponentsInformation[0].imagename,
@@ -14,7 +14,7 @@ function waitingForPlayer(gameDetails, opponentsInformation) {
 };
 
 
-function winnerPhase(gameDetails, gameUser, opponentsInformation) {
+function winnerPhase(gameDetails, gameUser, opponentsInformation, playersInformation) {
     let result = {
         opponent: opponentsInformation[0].nickname,
         opponentImage: opponentsInformation[0].imagename,
@@ -24,19 +24,19 @@ function winnerPhase(gameDetails, gameUser, opponentsInformation) {
         dimension: gameDetails.dimension
     };
     if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
-        result[i_won] = true;
+        result['i_won'] = true;
     } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-        result[i_won]= false;
+        result['i_won']= false;
     } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-        result[i_won] = false;
+        result['i_won'] = false;
     } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-        result[i_won] =  true;
+        result['i_won'] =  true;
     };
     return result;
 };
 
 
-async function placingPieces(gameDetails, req, shipsAmount, opponentsInformation) {
+async function placingPieces(gameDetails, req, shipsAmount, opponentsInformation, playersInformation) {
     const userShips = await db.getShipsData(req.params.game_id, req.user.id);
 
     const gameShips = shipsAmount;

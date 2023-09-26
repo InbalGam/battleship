@@ -502,13 +502,13 @@ gameRouter.get('/games/:game_id', async (req,res) => {
 
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
         // waiting_for_other_player phase
-            result = waitingForPlayer(gameDetails, opponentsInformation);
+            result = waitingForPlayer(gameDetails, opponentsInformation, playersInformation);
         } else if (gameDetails.state === 'user1_won' || gameDetails.state === 'user2_won') {
         // winner phase
-            result = winnerPhase(gameDetails, gameUser, opponentsInformation);
+            result = winnerPhase(gameDetails, gameUser, opponentsInformation, playersInformation);
         } else if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
         // placing_pieces phase
-            result = await placingPieces(gameDetails, req, shipsAmount[gameDetails.dimension], opponentsInformation);
+            result = await placingPieces(gameDetails, req, shipsAmount[gameDetails.dimension], opponentsInformation, playersInformation);
         } else if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
         // gamePlay phase
             result = await gamePlay(gameDetails, req, gameUser, gameOpponent, opponentsInformation, playersInformation);

@@ -42,8 +42,10 @@ function Game() {
                 setPhase(jsonData.phase);
                 setDimension(jsonData.dimension);
                 if (jsonData.phase === 'finished') {
+                    console.log(jsonData);
                     setWinner(jsonData.i_won);
                 } else if (jsonData.phase === 'placing_pieces') {
+                    console.log(jsonData);
                     setRemainingShips(jsonData.remaining_ships);
                     setPlacedShips(jsonData.placed_ships);
                 } else if (jsonData.phase === 'gamePlay') {
@@ -76,7 +78,7 @@ function Game() {
 
                     {phase === 'waiting_for_other_player' ?
                         <div className='game_not_started'>
-                            <p>Waiting for {opponent} to finish placing ships</p>
+                            <p>Waiting for {opponent.opponentNickname} to finish placing ships</p>
                             <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
                         </div> : ''}
 
