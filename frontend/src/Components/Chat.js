@@ -14,6 +14,7 @@ function Chat() {
     const { game_id } = useParams();
     const [msgs, setMsgs] = useState([]);
     const [newMsg, setNewMsg] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
     const [failedMsg, setFailedMsg] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -27,12 +28,14 @@ function Chat() {
         setIsLoading(true);
         try {
             const result = await sendChatMsg(game_id, {message: newMsg});
-            if (result) {
+            if (result.status === 200) {
                 getGameChatMsgs();
                 setNewMsg('');
                 setIsLoading(false);
             } else {
+                const jsonData = await result.json();
                 setNewMsg('');
+                setErrorMsg(jsonData.msg);
                 setFailedMsg(true);
                 setIsLoading(false);
             }
@@ -67,8 +70,9 @@ function Chat() {
                         <TextareaAutosize minRows={2} placeholder="Post a new message to chat" value={newMsg} onChange={handleNewMsgChange} className='textArea'/>
                         <Fab variant="extended" color="primary" aria-label="add" onClick={submitMsg} className='sendMsg'> Send </Fab>
                         <Fab aria-label="refresh" onClick={getChatMsgs} className='chatRefresh'> <RefreshIcon /> </Fab>
-                        {failedMsg ? <Alert severity="warning" className='chat_alert'>Could not send message</Alert> : ''}
                     </div>
+                    {failedMsg ? <Alert severity="warning" className='chat_alert'>Could not send message</Alert> : ''}
+                    {errorMsg ? <Alert severity="warning" className='chat_alert'>{errorMsg}</Alert> : ''}
                     {isLoading ? <CircularProgress size={80} className='msgs_loader' /> :
                     <ul className='chat_messages_container'>
                         {msgs.map((msg, ind) =>

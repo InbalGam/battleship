@@ -174,7 +174,7 @@ async function sendChatMsg(gameId, message) {
         body: JSON.stringify(message)
     });
 
-    return response.status === 200;
+    return response;
 };
 
 

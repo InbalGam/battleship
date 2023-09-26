@@ -452,6 +452,10 @@ gameRouter.post('/games/:game_id/shoot', async (req,res) => {
 gameRouter.post('/games/:game_id/chat', async (req,res) => {
     const { message } = req.body;
 
+    if (!message) {
+        return res.status(400).json({msg: 'Cannot send an empty message'});
+    }
+
     try {
         const timestamp = new Date(Date.now());
         await db.postMsgToChat(req.params.game_id, req.user.id, message, timestamp);
