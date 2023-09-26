@@ -14,7 +14,8 @@ function Game() {
     const navigate = useNavigate();
     const { game_id } = useParams();
     const [isLoading, setIsLoading] = useState(false);
-    const [opponent, setOpponent] = useState('');
+    const [opponent, setOpponent] = useState({});
+    const [player, setPlayer] = useState({});
     const [phase, setPhase] = useState('');
     const [winner, setWinner] = useState(false);
     const [remainingShips, setRemainingShips] = useState([]);
@@ -36,7 +37,8 @@ function Game() {
                 setState('invited');
                 setIsLoading(false);
             } else {
-                setOpponent(jsonData.opponent);
+                setOpponent({opponentNickname: jsonData.opponent, opponentImage: jsonData.opponentImage});
+                setPlayer({playerNickname: jsonData.player, playerImage: jsonData.playerImage});
                 setPhase(jsonData.phase);
                 setDimension(jsonData.dimension);
                 if (jsonData.phase === 'finished') {
@@ -85,7 +87,7 @@ function Game() {
 
                     {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} /> : ''}
 
-                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} myTurn={myTurn} opponent={opponent} shotsSent={shotsSent} shotsRecived={shotsRecived} /> : ''}
+                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} myTurn={myTurn} opponent={opponent} player={player} shotsSent={shotsSent} shotsRecived={shotsRecived} /> : ''}
                 </div>}
         </div>
     );

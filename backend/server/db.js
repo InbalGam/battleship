@@ -35,13 +35,13 @@ async function insertToUsers(username, nickname, hashedPassword, timestamp) {
 
 
 async function getUser(id) {
-  const user = await pool.query('select * from users where id = $1', [id]);
+  const user = await pool.query('select u.*, if.filename as imagename from users u left join image_files if on u.image_id = if.id where u.id = $1', [id]);
   return user.rows;
 };
 
 
-async function updateUsername(id, nickname, timestamp) {
-  await pool.query('update users set nickname = $2, modified_at = $3 where id = $1;', [id, nickname, timestamp]);
+async function updateUsername(id, nickname, imgId, timestamp) {
+  await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1;', [id, nickname, imgId, timestamp]);
 };
 
 
@@ -155,6 +155,12 @@ async function getGameShots(id, gameOpponent) {
 };
 
 
+async function insertImage(req) {
+  const result =  await pool.query('insert into image_files (filename, filepath, mimetype, size) values ($1, $2, $3, $4) returning *', [req.file.filename, req.file.path, req.file.mimetype, req.file.size]);
+  return result.rows;
+};
+
+
 module.exports = {
   getFromFederatedCredentials,
   getUsername,
@@ -178,5 +184,6 @@ module.exports = {
   updateUsersScores,
   postMsgToChat,
   getChatMsgs,
-  getGameShots
+  getGameShots,
+  insertImage
 };

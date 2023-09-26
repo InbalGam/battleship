@@ -46,13 +46,13 @@ async function getProfile() {
     return response;
 };
 
-async function updateNickname(nickname) {
+async function updateProfile(data) {
     const url = `${baseURL}/profile`;
     const response = await fetch(url, {
         method: 'PUT',
         credentials: 'include',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({nickname})
+        body: JSON.stringify(data)
     });
 
     return response.status === 200;
@@ -188,6 +188,19 @@ async function getChatMsgs(gameId) {
     return response;
 };
 
-export {login, register, logout, getProfile, updateNickname,
+
+async function loadImage(data) {
+    const url = `${baseURL}/image`;
+    const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Accept': 'application/json'},
+        body: data
+    });
+
+    return response;
+};
+
+export {login, register, logout, getProfile, updateProfile,
         getGames, acceptGame, deleteAGame, createNewGame, getGameInfo, readyToPlay, deleteAShip, placeAShip, performShot,
-        sendChatMsg, getChatMsgs};
+        sendChatMsg, getChatMsgs, loadImage};

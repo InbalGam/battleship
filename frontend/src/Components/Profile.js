@@ -1,4 +1,4 @@
-import { getProfile, updateNickname } from '../Api';
+import { getProfile, updateProfile, loadImage } from '../Api';
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
@@ -7,6 +7,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import styles from './Styles/Profile.css';
 import Fab from '@mui/material/Fab';
+import Avatar from '@mui/material/Avatar';
+import {baseURL} from '../apiKey';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
 
 
 function Profile() {
@@ -45,7 +49,7 @@ function Profile() {
     async function submitNewNickname() {
         setIsLoading(true);
         try {
-            const result = await updateNickname(newNickname);
+            const result = await updateProfile({nickname: newNickname, imgId: user.imgId});
             if (result === true) {
                 await getUserProfile();
                 setShow(false);
@@ -64,10 +68,54 @@ function Profile() {
         getUserProfile();
     }, []);
 
+    async function submitProfileImg(e) {
+        e.preventDefault();
+        setIsLoading(true);
+        let imgId;
+        const profileImg = e.target.files[0];
+        const data = new FormData();
+        data.append('image', profileImg );
+        try {
+            if (profileImg) {
+                const imgResult = await loadImage(data);
+                const jsonData = await imgResult.json();
+                imgId = jsonData.id;
+            } else {
+                imgId = null;
+            }
+            const result = await updateProfile({nickname: user.nickname, imgId: imgId});
+            if (result === true) {
+                await getUserProfile();
+                setIsLoading(false);
+            } else {
+                setUpdateFailed(true);
+                setIsLoading(false);
+            }
+        } catch (e) {
+            navigate('/error');
+        }
+    };
+
+    const VisuallyHiddenInput = styled('input')({
+        clip: 'rect(0 0 0 0)',
+        clipPath: 'inset(50%)',
+        height: 1,
+        overflow: 'hidden',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        whiteSpace: 'nowrap',
+        width: 1,
+      });
+
     return (
         <div>
             {isLoading ? <CircularProgress size={150} className='loader' /> :
                 <div className='profile_container'>
+                    <div className='profile_image'>
+                        {user.imageName ? <Avatar className='avatar_img' alt="Player image" src={`${baseURL}/image/${user.imageName}`}></Avatar> : <Avatar className='profile_avatar' ></Avatar>}
+                        <Fab component="label" variant="contained" className='editProfileImage' > <EditIcon /><VisuallyHiddenInput type="file" onChange={submitProfileImg}/> </Fab>
+                    </div>
                     <p>Your username is {user.username}</p>
                     <div className='nicknameChange'>
                         {show ?

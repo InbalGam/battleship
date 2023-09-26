@@ -1,9 +1,12 @@
 const db = require('./db');
 
 
-function waitingForPlayer(gameDetails, usersInformation) {
+function waitingForPlayer(gameDetails, opponentsInformation) {
     const result = {
-        opponent: usersInformation[0].nickname,
+        opponent: opponentsInformation[0].nickname,
+        opponentImage: opponentsInformation[0].imagename,
+        player: playersInformation[0].nickname,
+        playerImage: playersInformation[0].imagename,
         phase: 'waiting_for_other_player',
         dimension: gameDetails.dimension
     }
@@ -11,42 +14,29 @@ function waitingForPlayer(gameDetails, usersInformation) {
 };
 
 
-function winnerPhase(gameDetails, gameUser, usersInformation) {
-    let result;
+function winnerPhase(gameDetails, gameUser, opponentsInformation) {
+    let result = {
+        opponent: opponentsInformation[0].nickname,
+        opponentImage: opponentsInformation[0].imagename,
+        player: playersInformation[0].nickname,
+        playerImage: playersInformation[0].imagename,
+        phase: 'finished',
+        dimension: gameDetails.dimension
+    };
     if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
-        result = {
-            opponent: usersInformation[0].nickname,
-            phase: 'finished',
-            i_won: true,
-            dimension: gameDetails.dimension
-        }
+        result[i_won] = true;
     } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-        result = {
-            opponent: usersInformation[0].nickname,
-            phase: 'finished',
-            i_won: false,
-            dimension: gameDetails.dimension
-        }
+        result[i_won]= false;
     } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-        result = {
-            opponent: usersInformation[0].nickname,
-            phase: 'finished',
-            i_won: false,
-            dimension: gameDetails.dimension
-        }
+        result[i_won] = false;
     } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-        result = {
-            opponent: usersInformation[0].nickname,
-            phase: 'finished',
-            i_won: true,
-            dimension: gameDetails.dimension
-        }
+        result[i_won] =  true;
     };
     return result;
 };
 
 
-async function placingPieces(gameDetails, req, shipsAmount, usersInformation) {
+async function placingPieces(gameDetails, req, shipsAmount, opponentsInformation) {
     const userShips = await db.getShipsData(req.params.game_id, req.user.id);
 
     const gameShips = shipsAmount;
@@ -70,7 +60,10 @@ async function placingPieces(gameDetails, req, shipsAmount, usersInformation) {
     });
 
     const result = {
-        opponent: usersInformation[0].nickname,
+        opponent: opponentsInformation[0].nickname,
+        opponentImage: opponentsInformation[0].imagename,
+        player: playersInformation[0].nickname,
+        playerImage: playersInformation[0].imagename,
         phase: 'placing_pieces',
         remaining_ships: allGameShips,
         placed_ships: placedShips,
@@ -80,7 +73,7 @@ async function placingPieces(gameDetails, req, shipsAmount, usersInformation) {
 };
 
 
-async function gamePlay(gameDetails, req, gameUser, gameOpponent, usersInformation) {
+async function gamePlay(gameDetails, req, gameUser, gameOpponent, opponentsInformation, playersInformation) {
     const userShips = await db.getShipsData(req.params.game_id, req.user.id);
     const placedShips = userShips.map(ship => {
         return {
@@ -124,7 +117,10 @@ async function gamePlay(gameDetails, req, gameUser, gameOpponent, usersInformati
     });
 
     const result = {
-        opponent: usersInformation[0].nickname,
+        opponent: opponentsInformation[0].nickname,
+        opponentImage: opponentsInformation[0].imagename,
+        player: playersInformation[0].nickname,
+        playerImage: playersInformation[0].imagename,
         phase: 'gamePlay',
         my_turn: myTurn,
         placed_ships: placedShips,

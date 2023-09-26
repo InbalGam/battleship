@@ -10,6 +10,7 @@ import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
+import {baseURL} from '../apiKey';
 
 
 function GamePlay(props) {
@@ -50,7 +51,11 @@ function GamePlay(props) {
             </Grid>
             <Grid container item xs={'auto'}>
                 <Grid item xs={12} className='player_names_container'>
-                    <div className={props.myTurn ? 'player_turn' : ''}><Avatar className='player_avatar' >You</Avatar></div>
+                <div className={props.myTurn ? 'player_turn' : ''}>
+                    {props.player.playerImage ? 
+                        <div className='avatar_image'><Avatar className='avatar_img' alt="Player image" src={`${baseURL}/image/${props.player.playerImage}`}></Avatar> {props.player.playerNickname}</div> 
+                    : <div className='avatar_image'><Avatar className='player_avatar' ></Avatar> {props.player.playerNickname}</div>}
+                </div>
                 </Grid>
                 <Grid item xs={12} >
                     <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} onCellClick={onCellClick} />
@@ -59,7 +64,11 @@ function GamePlay(props) {
             </Grid>
             <Grid container item xs={'auto'}>
                 <Grid item xs={12} className='player_names_container'>
-                    <div className={props.myTurn ? '' : 'player_turn'}><Avatar className='opponent_avatar' >{props.opponent[0]}</Avatar></div>
+                    <div className={props.myTurn ? '' : 'player_turn'}>
+                        {props.opponent.opponentImage ? 
+                            <div className='avatar_image'><Avatar className='avatar_img' alt="Player image" src={`${baseURL}/image/${props.opponent.opponentImage}`}></Avatar> {props.opponent.opponentNickname}</div> 
+                            : <div className='avatar_image'><Avatar className='opponent_avatar' ></Avatar> {props.opponent.opponentNickname}</div>}
+                    </div>
                 </Grid>
                 <Grid item xs={12} >
                     <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />

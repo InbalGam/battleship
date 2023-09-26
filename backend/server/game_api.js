@@ -3,6 +3,8 @@ const gameRouter = express.Router();
 const db = require('./db');
 const {shipsAmount, totalShipsSizes, shipAmountDimension, checkShipPlacement} = require('./ships');
 const {waitingForPlayer, winnerPhase, placingPieces, gamePlay} = require('./phasesFuncs');
+const multer = require('multer');
+const path = require('path');
 
 
 // Middlewares
@@ -44,7 +46,9 @@ gameRouter.get("/profile", async (req, res) => {
             user_score: {
                 wins: result[0].wins,
                 loses: result[0].loses
-            }
+            },
+            imageName: result[0].imagename,
+            imgId: result[0].image_id
         }
         res.status(200).json(userData);
     } catch (e) {
@@ -54,7 +58,7 @@ gameRouter.get("/profile", async (req, res) => {
 
 // Update user profile page
 gameRouter.put('/profile', async (req, res, next) => { 
-    const { nickname } = req.body;
+    const { nickname, imgId } = req.body;
 
     if (!nickname) {
         return res.status(400).json({msg: 'Nickname must be specified'});
@@ -62,13 +66,52 @@ gameRouter.put('/profile', async (req, res, next) => {
     
     try {
         const timestamp = new Date(Date.now());
-        await db.updateUsername(req.user.id, nickname, timestamp);
+        await db.updateUsername(req.user.id, nickname, imgId, timestamp);
         res.status(200).json({ msg: 'Updated user' });
     } catch(e) {
         res.status(500).json({msg: 'Server error'});
     }
 });
 
+
+// Image Upload & Retrieve
+const imageUpload = multer({
+    storage: multer.diskStorage(
+        {
+            destination: function (req, file, cb) {
+                cb(null, 'images/');
+            },
+            filename: function (req, file, cb) {
+                cb(
+                    null,
+                    new Date().valueOf() + 
+                    '_' +
+                    file.originalname
+                );
+            }
+        }
+    ), 
+});
+// Image Upload Routes
+gameRouter.post('/image',
+    imageUpload.single('image'),
+    async (req, res) => {
+        //console.log(req.file);
+        try {
+            const result = await db.insertImage(req);
+            res.status(200).json(result[0]);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({ msg: 'Server error' });
+        }
+});
+// Image Get Routes
+gameRouter.get('/image/:filename', (req, res) => {
+    const { filename } = req.params;
+    const dirname = path.resolve();
+    const fullfilepath = path.join(dirname, 'images/' + filename);
+    return res.sendFile(fullfilepath);
+});
 
 
 // Create a new game
@@ -442,29 +485,33 @@ gameRouter.get('/games/:game_id', async (req,res) => {
         };
 
         let gameUser;
+        let gamePlayer;
         let gameOpponent;
         if (gameDetails.user1 === req.user.id) {
             gameUser = 'user1'; //string
+            gamePlayer = gameDetails.user1;
             gameOpponent = gameDetails.user2; //id
         } else {
             gameUser = 'user2'; //string
+            gamePlayer = gameDetails.user2;
             gameOpponent = gameDetails.user1; //id
         };
 
-        const usersInformation = await db.getUser(gameOpponent);
+        const opponentsInformation = await db.getUser(gameOpponent);
+        const playersInformation = await db.getUser(gamePlayer);
 
         if (gameDetails.user1 === req.user.id && gameDetails.state === 'user1_ready' || gameDetails.user2 === req.user.id && gameDetails.state === 'user2_ready') {
         // waiting_for_other_player phase
-            result = waitingForPlayer(gameDetails, usersInformation);
+            result = waitingForPlayer(gameDetails, opponentsInformation);
         } else if (gameDetails.state === 'user1_won' || gameDetails.state === 'user2_won') {
         // winner phase
-            result = winnerPhase(gameDetails, gameUser, usersInformation);
+            result = winnerPhase(gameDetails, gameUser, opponentsInformation);
         } else if (gameDetails.state === 'accepted' || (gameDetails.user1 === req.user.id && gameDetails.state === 'user2_ready') || (gameDetails.user2 === req.user.id && gameDetails.state === 'user1_ready')) {
         // placing_pieces phase
-            result = await placingPieces(gameDetails, req, shipsAmount[gameDetails.dimension], usersInformation);
+            result = await placingPieces(gameDetails, req, shipsAmount[gameDetails.dimension], opponentsInformation);
         } else if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
         // gamePlay phase
-            result = await gamePlay(gameDetails, req, gameUser, gameOpponent, usersInformation);
+            result = await gamePlay(gameDetails, req, gameUser, gameOpponent, opponentsInformation, playersInformation);
         };
 
         return res.status(200).json(result);
