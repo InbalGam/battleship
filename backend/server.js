@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 4001;
 app.use(morgan('short'));
 // middleware for handling CORS requests from index.html
 app.use(cors(
-  {origin : process.env.CORS_ORIGIN, //(Whatever the frontend url is) 
+  {//origin : process.env.CORS_ORIGIN, //(Whatever the frontend url is) 
   credentials: true, // <= Accept credentials (cookies) sent by the client
 }
 ));
