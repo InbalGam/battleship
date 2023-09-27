@@ -21,7 +21,6 @@ function ShipsPlacement(props) {
     const [placeShipFail, setPlaceShipFail] = useState('');
     const [startGameFail, setStartGameFail] = useState(false);
     const [shipRowCol, setShipRowCol] = useState({start: [], end: []});
-    const [isLoading, setIsLoading] = useState(false);
 
 
     function onCellClick(rowColData) {
@@ -40,7 +39,7 @@ function ShipsPlacement(props) {
 
 
     async function placeShip() {
-        setIsLoading(true);
+        props.setIsLoading(true);
         try {
             const newShipData = {
                 ship_size: Number(props.remainingShips[choosenShipInd]),
@@ -52,13 +51,13 @@ function ShipsPlacement(props) {
             const result = await placeAShip(props.game_id, newShipData);
             if (result.status === 200) {
                 props.getTheGameInfo();
-                setIsLoading(false);
+                props.setIsLoading(false);
             } else {
                 const jsonData = await result.json();
                 setPlaceShipFail(jsonData.msg);
                 setShipRowCol({start: [], end: []});
                 setChoosenShipInd('');
-                setIsLoading(false);
+                props.setIsLoading(false);
             }
         } catch (e) {
             navigate('/error');
@@ -71,15 +70,15 @@ function ShipsPlacement(props) {
 
     async function deleteShip(e) {
         e.preventDefault();
-        setIsLoading(true);
+        props.setIsLoading(true);
         try {
             const result = await deleteAShip(props.game_id, props.placedShips[e.target.value]);
             if (result === true) {
                 props.getTheGameInfo();
-                setIsLoading(false);
+                props.setIsLoading(false);
             } else {
                 setDeleteShipFail(true);
-                setIsLoading(false);
+                props.setIsLoading(false);
             }
         } catch(e) {
             navigate('/error');
@@ -96,15 +95,15 @@ function ShipsPlacement(props) {
 
     async function ready(e) {
         e.preventDefault();
-        setIsLoading(true);
+        props.setIsLoading(true);
         try {
             const result = await readyToPlay(props.game_id);
             if (result === true) {
                 props.getTheGameInfo();
-                setIsLoading(false);
+                props.setIsLoading(false);
             } else {
                 setStartGameFail(true);
-                setIsLoading(false);
+                props.setIsLoading(false);
             }
         } catch(e) {
             navigate('/error');
@@ -151,7 +150,7 @@ function ShipsPlacement(props) {
             </Grid>
             <Grid item xs={'auto'} className='main_board'>
                 <BoardGame dimension={props.dimension} placedShips={props.placedShips} onCellClick={onCellClick} clicked={true} shipRowCol={shipRowCol} />
-                {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
+                {props.isLoading ? <CircularProgress size={150} className='loader' /> : ''}
             </Grid>
         </Grid>
     );

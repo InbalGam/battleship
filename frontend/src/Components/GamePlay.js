@@ -17,19 +17,18 @@ function GamePlay(props) {
     const navigate = useNavigate();
     const [shotFail, setShotFail] = useState(false);
     const [notMyTurn, setNotMyTurn] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     async function onCellClick(rowColData) {
         if (props.myTurn) {
-            setIsLoading(true);
+            props.setIsLoading(true);
             try {
                 const result = await performShot(props.game_id, { row: rowColData[0], col: rowColData[1] });
                 if (result === true) {
                     props.getTheGameInfo();
-                    setIsLoading(false);
+                    props.setIsLoading(false);
                 } else {
                     setShotFail(true);
-                    setIsLoading(false);
+                    props.setIsLoading(false);
                 }
             } catch (e) {
                 navigate('/error');
@@ -59,7 +58,7 @@ function GamePlay(props) {
                 </Grid>
                 <Grid item xs={12} >
                     <BoardGame dimension={props.dimension} shotsSent={props.shotsSent} shots={props.shotsSent} clicked={true} onCellClick={onCellClick} />
-                    {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
+                    {props.isLoading ? <CircularProgress size={150} className='loader' /> : ''}
                 </Grid>
             </Grid>
             <Grid container item xs={'auto'}>
@@ -72,7 +71,7 @@ function GamePlay(props) {
                 </Grid>
                 <Grid item xs={12} >
                     <BoardGame dimension={props.dimension} placedShips={props.placedShips} shots={props.shotsRecived} />
-                    {isLoading ? <CircularProgress size={150} className='loader' /> : ''}
+                    {props.isLoading ? <CircularProgress size={150} className='loader' /> : ''}
                 </Grid>
             </Grid>
             <Grid item xs={12} className='game_chat'>

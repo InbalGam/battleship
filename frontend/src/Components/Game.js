@@ -68,29 +68,30 @@ function Game() {
 
     return (
         <div>
-            {isLoading ? <CircularProgress size={150} className='loader' /> :
                 <div>
                     {state === 'invited' ?
+                        (isLoading ? <CircularProgress size={150} className='loader' /> : 
                         <div className='game_not_started'>
                             <p>Waiting for opponent to accept game</p>
                             <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
-                        </div> : ''}
+                        </div>) : ''} 
 
                     {phase === 'waiting_for_other_player' ?
-                        <div className='game_not_started'>
+                        (isLoading ? <CircularProgress size={150} className='loader' /> : <div className='game_not_started'>
                             <p>Waiting for {opponent.opponentNickname} to finish placing ships</p>
                             <Fab aria-label="refresh" onClick={getTheGameInfo}> <RefreshIcon /> </Fab>
-                        </div> : ''}
+                        </div>) : ''}
 
                     {phase === 'finished' ?
                         <div className='winning'>
                             {winner ? <div className='winner'><h3>You won</h3> <CelebrationIcon/></div> : <h3>You Lost</h3>}
                         </div> : ''}
 
-                    {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} /> : ''}
+                    {phase === 'placing_pieces' ? <ShipsPlacement remainingShips={remainingShips} placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} setIsLoading={setIsLoading} isLoading={isLoading} /> : ''}
 
-                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} myTurn={myTurn} opponent={opponent} player={player} shotsSent={shotsSent} shotsRecived={shotsRecived} /> : ''}
-                </div>}
+                    {phase === 'gamePlay' ? <GamePlay placedShips={placedShips} dimension={dimension} getTheGameInfo={getTheGameInfo} game_id={game_id} 
+                                            myTurn={myTurn} opponent={opponent} player={player} shotsSent={shotsSent} shotsRecived={shotsRecived} setIsLoading={setIsLoading} isLoading={isLoading} /> : ''}
+                </div>
         </div>
     );
 };
