@@ -39,6 +39,9 @@ function ShipsPlacement(props) {
 
 
     async function placeShip() {
+        setPlaceShipFail(false);
+        setDeleteShipFail(false);
+        setStartGameFail(false);
         props.setIsLoading(true);
         try {
             const newShipData = {

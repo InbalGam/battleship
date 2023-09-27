@@ -19,6 +19,8 @@ function GamePlay(props) {
     const [notMyTurn, setNotMyTurn] = useState(false);
 
     async function onCellClick(rowColData) {
+        setShotFail(false);
+        setNotMyTurn(false);
         if (props.myTurn) {
             props.setIsLoading(true);
             try {
