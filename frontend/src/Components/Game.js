@@ -35,11 +35,13 @@ function Game() {
                 navigate('/login');
             } else if ((result.status === 400) && (jsonData.msg === 'Game is in state invited')) {
                 setState('invited');
+                setPhase('');
                 setIsLoading(false);
             } else {
                 setOpponent({opponentNickname: jsonData.opponent, opponentImage: jsonData.opponentImage});
                 setPlayer({playerNickname: jsonData.player, playerImage: jsonData.playerImage});
                 setPhase(jsonData.phase);
+                setState('');
                 setDimension(jsonData.dimension);
                 if (jsonData.phase === 'finished') {
                     console.log(jsonData);

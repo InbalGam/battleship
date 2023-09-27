@@ -54,14 +54,13 @@ function ShipsPlacement(props) {
             const result = await placeAShip(props.game_id, newShipData);
             if (result.status === 200) {
                 props.getTheGameInfo();
-                props.setIsLoading(false);
             } else {
                 const jsonData = await result.json();
-                setPlaceShipFail(jsonData.msg);
-                setShipRowCol({start: [], end: []});
-                setChoosenShipInd('');
-                props.setIsLoading(false);
+                setPlaceShipFail(jsonData.msg);    
             }
+            setShipRowCol({start: [], end: []});
+            setChoosenShipInd('');
+            props.setIsLoading(false);
         } catch (e) {
             navigate('/error');
         }
