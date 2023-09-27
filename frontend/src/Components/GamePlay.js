@@ -52,7 +52,7 @@ function GamePlay(props) {
             </Grid>
             <Grid container item xs={'auto'}>
                 <Grid item xs={12} className='player_names_container'>
-                <div className={props.myTurn ? 'player_turn' : ''}>
+                <div className={props.myTurn ? 'player_turn' : 'no_turn'}>
                     {props.player.playerImage ? 
                         <div className='avatar_image'><Avatar className='avatar_img' alt="Player image" src={`${baseURL}/image/${props.player.playerImage}`}></Avatar> {props.player.playerNickname}</div> 
                     : <div className='avatar_image'><Avatar className='player_avatar' ></Avatar> {props.player.playerNickname}</div>}
@@ -65,7 +65,7 @@ function GamePlay(props) {
             </Grid>
             <Grid container item xs={'auto'}>
                 <Grid item xs={12} className='player_names_container'>
-                    <div className={props.myTurn ? '' : 'player_turn'}>
+                    <div className={props.myTurn ? 'no_turn' : 'player_turn'}>
                         {props.opponent.opponentImage ? 
                             <div className='avatar_image'><Avatar className='avatar_img' alt="Player image" src={`${baseURL}/image/${props.opponent.opponentImage}`}></Avatar> {props.opponent.opponentNickname}</div> 
                             : <div className='avatar_image'><Avatar className='opponent_avatar' ></Avatar> {props.opponent.opponentNickname}</div>}

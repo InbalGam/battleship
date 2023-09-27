@@ -27,6 +27,11 @@
     padding: 0.5rem;
 }
 
+.no_turn {
+    width: 20%;
+    padding: 0.5rem;
+}
+
 .player_avatar {
     background-color: rgb(238, 138, 16) !important;
     margin: auto;
