@@ -83,7 +83,7 @@ passport.use(new GoogleStrategy({
       } else {
         // The Google account has previously logged in to the app.  Get the
         // user record linked to the Google account and log the user in.
-        const result = await db.getUser(check.rows[0].user_id);
+        const result = await db.getUser(check[0].user_id);
         if (result.length === 0) {
           return done(null, false);
         }
