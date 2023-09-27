@@ -78,7 +78,7 @@ passport.use(new GoogleStrategy({
         // Create a new user record and link it to the Google account.
         const timestamp = new Date(Date.now());
         const user = await db.insertToUsers(profile.emails[0].value, profile.displayName, null, timestamp);
-        await pool.query('INSERT INTO federated_credentials (user_id, provider, subject) VALUES ($1, $2, $3)', [user[0].id, issuer, profile.id]);
+        await db.insertFederatedCredentials(user[0].id, issuer, profile.id);
         return done(null, user[0]);
       } else {
         // The Google account has previously logged in to the app.  Get the

@@ -34,6 +34,10 @@ async function insertToUsers(username, nickname, hashedPassword, timestamp) {
 };
 
 
+async function insertFederatedCredentials(user_id, issuer, profile_id) {
+  await pool.query('INSERT INTO federated_credentials (user_id, provider, subject) VALUES ($1, $2, $3)', [user_id, issuer, profile_id]);
+};
+
 async function getUser(id) {
   const user = await pool.query('select u.*, if.filename as imagename from users u left join image_files if on u.image_id = if.id where u.id = $1', [id]);
   return user.rows;
@@ -165,6 +169,7 @@ module.exports = {
   getFromFederatedCredentials,
   getUsername,
   insertToUsers,
+  insertFederatedCredentials,
   getUser,
   updateUsername,
   getGameById,
