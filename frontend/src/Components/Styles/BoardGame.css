@@ -92,6 +92,11 @@
     .numberedColumnStyle {
         gap: 3.5rem;
     }
+
+    .light_blue {
+        width: 4rem;
+        height: 4rem;
+    }
 }
 
 
@@ -113,6 +118,11 @@
     .Xcell {
         font-size: 80px !important;
     }
+
+    .light_blue {
+        width: 3rem;
+        height: 3rem;
+    }
 }
 
 @media only screen and (max-width: 600px) {
@@ -132,6 +142,11 @@
 
     .Xcell {
         font-size: 50px !important;
+    }
+
+    .light_blue {
+        width: 2rem;
+        height: 2rem;
     }
 }
 
@@ -153,5 +168,10 @@
 
     .Xcell {
         font-size: 40px !important;
+    }
+
+    .light_blue {
+        width: 1.5rem;
+        height: 1.5rem;
     }
 }
