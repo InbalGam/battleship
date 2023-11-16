@@ -7,7 +7,11 @@ Players strategically place ships, taking turns for shots, with a successful hit
 [Battleship game web app](https://battleship-ysnn.onrender.com/).
 [Live preview of the game](https://bit.ly/3rzyjF9).
 
+**Login page**
+![game login page](/game_images/img1.png)
 
+**Sign up page**
+![game register page](/game_images/img2.png)
 ### Main features - Backend
 **Players can choose how to sign up for the game**
 - Regular registration where they use a valid email and create their own password and nickname.
@@ -26,6 +30,23 @@ I used the Multer middleware in order to enable players the option of uploading 
 
 When a player wants to upload a profile picture he will click on an edit icon near his profile nickname (default option for those without a picture).
 The edit button will open up a file upload window, when choosing the picture a copy of it will be created in an 'images' folder in the backend side and the picture path and information will be saved in the DB in relation to the player information.
-
+![profile page](/game_images/img3.png)
 
 ### Main features - Frontend
+I used **Material UI Grid** in order to place the components on the browser.
+For example- I used it for the ship placeing phase, where each player places his ships on his board. In addition, I used it in the game phase where each player is shown both boards- his own and the opponent board.
+
+**Board game**
+This is the main component of the frontend.
+This component represents the board of the game, thus it is used in other components where the board is needed.
+In order to create a board of certain size (the game can be either 10X10 or 20X20), I rendered a simple div element by the chosen dimension of the game.
+
+
+**Ship placing phase**
+In this phase each player places his ships on his board.
+The player chooses what size ship hhe wants to place, this was done using Material UI Toggle Button.
+Once a ship was placed it will be removed from the 'Remaining ships' list and it will move to the 'Placed ships' list. 
+If a player wants to change a ship's location he can press on the ship size under the 'Placed ships' list, it will be removed from that list and go back to the 'Remaining ships' list where he can choose it again and assign a different location.
+
+If a player tried to place a ship againt the rules, he will get an alert regarding why the ship cannot be placed. These checks are done on the backend side.
+![ship placing phase](/game_images/img4.png)
