@@ -36,11 +36,17 @@ The edit button will open up a file upload window, when choosing the picture a c
 I used **Material UI Grid** in order to place the components on the browser.
 For example- I used it for the ship placeing phase, where each player places his ships on his board. In addition, I used it in the game phase where each player is shown both boards- his own and the opponent board.
 
+**Game component**
+The game component is the main component for the game phase.
+This component is in charge on rendering the relevant components according to the state of the game.
+
 **Board game**
 This is the main component of the frontend.
 This component represents the board of the game, thus it is used in other components where the board is needed.
 In order to create a board of certain size (the game can be either 10X10 or 20X20), I rendered a simple div element by the chosen dimension of the game.
-
+If a player wants to place a ship on the board, those divs will be colored accordingly. In order to represent the placed ship.
+Once the game started and a player tries to hit an opponent's ship- if that cell contained a ship it will be shown by a blue color and a red X on top of it. If there wasn't a ship in that cell the cell will only contain a red X.
+![example of a game session](/game_images/img5.png)
 
 **Ship placing phase**
 In this phase each player places his ships on his board.
@@ -50,3 +56,14 @@ If a player wants to change a ship's location he can press on the ship size unde
 
 If a player tried to place a ship againt the rules, he will get an alert regarding why the ship cannot be placed. These checks are done on the backend side.
 ![ship placing phase](/game_images/img4.png)
+
+
+**Game card**
+Players can see the game progress in the Home page under 'Ongoing games'.
+Each game is represented by a card with the following information-
+The opponent name, How many hits the player made and how many bombed ships the player has indured.
+![game cards](/game_images/img6.png)
+
+**Game chat**
+During the game the players can use the chat in order to communicate.
+![game chat](/game_images/img7.png)

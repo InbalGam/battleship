@@ -11,7 +11,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   idleTimeoutMillis: 60000,
   connectionTimeoutMillis: 60000,
-  ssl: true
+  //ssl: true
 });
 
 
