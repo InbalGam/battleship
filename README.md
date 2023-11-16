@@ -4,7 +4,8 @@
 
 I Created the classic Battleship game for users to challenge each other in two dimensions: 10x10 or 20x20.
 Players strategically place ships, taking turns for shots, with a successful hit granting an extra turn.
-[Live preview](https://bit.ly/3rzyjF9) of the game.
+[Battleship game web app](https://battleship-ysnn.onrender.com/).
+[Live preview of the game](https://bit.ly/3rzyjF9).
 
 
 ### Main features - Backend
