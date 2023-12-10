@@ -15,6 +15,19 @@ const pool = new Pool({
 });
 
 
+interface UserDb {
+  id: number;
+  username: string;
+  password: string;
+  nickname: string;
+  wins: number;
+  loses: number;
+  created_at: Date;
+  modified_at: Date;
+  image_id: number;
+}
+
+
 interface Ship {
   gameId: number;
   userId: number;
@@ -63,8 +76,9 @@ export async function getUserById(id: number) {
 };
 
 
-export async function updateUsername(id: number, nickname: string, imgId: number, timestamp: Date) {
-  await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1;', [id, nickname, imgId, timestamp]);
+export async function updateProfile(id: number, nickname: string, imgId: number | null, timestamp: Date): Promise<UserDb> {
+  const user = await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1;', [id, nickname, imgId, timestamp]);
+  return user.rows[0];
 };
 
 
