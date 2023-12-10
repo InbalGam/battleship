@@ -7,16 +7,19 @@ import { validateEmail } from '../utils';
 export default class UserManager {
     constructor() {}
 
-    async register(username: string, password: string) : Promise<Result<User>> {
+    async register(username: string, nickname: string, password: string) : Promise<Result<User>> {
         if (!validateEmail(username)) {
             return new Failure('Email is not valid', 400);
         }
         if (password.length < 8) {
             return new Failure('Password must be at least 8 characters', 400);
         }
+        if (!nickname) {
+            return new Failure('Nickname must be specified', 400);
+        }
 
         try {
-            const check = await db.getUserByUsername(username);
+            const check = await db.getUsernameByUsername(username);
             if (check) {
                 if (check.username === username) {
                     return new Failure('Email already exist, choose a different email', 400);
@@ -24,7 +27,7 @@ export default class UserManager {
             }
             const hashedPassword = await passwordHash(password, 10);
             const timestamp: Date = new Date(Date.now());
-            const user = await db.insertToUsers(username, hashedPassword, timestamp);
+            const user = await db.insertToUsers(username, nickname, hashedPassword, timestamp);
             return new Success(new User(user.id, user.username));
         } catch(e) {
             console.log(e);
@@ -34,7 +37,7 @@ export default class UserManager {
 
     async authenticate(username: string, password: string) : Promise<Result<User>> {
         
-        const check = await db.getUserByUsername(username);
+        const check = await db.getUsernameByUsername(username);
         if (!check) {
             return new Failure('User was not found', 400);
         }
@@ -47,11 +50,11 @@ export default class UserManager {
         return new Success(new User(check.id, check.username)); 
     }
 
-    async googleAuthenticate(issuer: string, profile_id: string, username: string) : Promise<Result<User>> {
+    async googleAuthenticate(issuer: string, profile_id: string, username: string, nickname: string) : Promise<Result<User>> {
         const check = await db.getFromFederatedCredentials(issuer, profile_id);
         if (check.length === 0) {
             const timestamp: Date = new Date(Date.now());
-            const user = await db.insertToUsers(username, null, timestamp);
+            const user = await db.insertToUsers(username, nickname, null, timestamp);
             await db.insertFederatedCredentials(user.id, issuer, profile_id);
             return new Success(new User(user.id, user.username));
         } else {
