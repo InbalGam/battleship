@@ -28,6 +28,42 @@ interface UserDb {
 }
 
 
+export interface UserScore {
+  id: number;
+  wins: number;
+  loses: number;
+}
+
+
+export interface ActiveGames {
+  game_id: number;
+  opponent: string;
+  board_dimension: number;
+  hits: number;
+  bombed: number;
+}
+
+
+export interface OtherGames {
+  id: number;
+  user1: number;
+  user2: number;
+  opponent: string;
+  dimension: number;
+  state: string;
+}
+
+
+interface Game {
+  id: number;
+  user1: number;
+  user2: number;
+  dimension: number;
+  state: string;
+  created_at: Date;
+}
+
+
 interface Ship {
   gameId: number;
   userId: number;
@@ -82,25 +118,26 @@ export async function updateProfile(id: number, nickname: string, imgId: number 
 };
 
 
-export async function getGameById(id: number) {
+export async function getGameById(id: number): Promise<Game> {
   const game = await pool.query('select * from games where id = $1', [id]);
-  return game.rows;
+  return game.rows[0];
 };
 
 
-export async function createGame(user1Id: number, user2Id: number, dimension: number, state: string, timestamp: Date) {
-  await pool.query('insert into games (user1, user2, dimension, state, created_at) values ($1, $2, $3, $4, $5) returning *', [user1Id, user2Id, dimension, state, timestamp]);
+export async function createGame(user1Id: number, user2Id: number, dimension: number, state: string, timestamp: Date): Promise<Game> {
+  const game = await pool.query('insert into games (user1, user2, dimension, state, created_at) values ($1, $2, $3, $4, $5) returning *', [user1Id, user2Id, dimension, state, timestamp]);
+  return game.rows[0];
 };
 
 
-export async function getUserScore(id: number) {
-  const userStatus = await pool.query('select wins, loses from users where id = $1', [id]);
-  return userStatus.rows;
+export async function getUserScore(id: number): Promise<UserScore> {
+  const userStatus = await pool.query('select id, wins, loses from users where id = $1', [id]);
+  return userStatus.rows[0];
 };
 
 
 
-export async function getActiveGameData(id: number, state1: string, state2: string) {
+export async function getActiveGameData(id: number, state1: string, state2: string): Promise<ActiveGames[]> {
   const result = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when s.user_id = $1 and s.hit = true then 1 else 0 end) as hits,
         sum(case when s.user_id <> $1 and s.hit = true then 1 else 0 end) as bombed from games g left join shots s on g.id = s.game_id join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 
         where (user1 = $1 or user2 = $1) and (g.state = $2 or g.state = $3) group by 1,2,3`,
@@ -109,7 +146,7 @@ export async function getActiveGameData(id: number, state1: string, state2: stri
 };
 
 
-export async function getOtherGamesData(id: number, state1: string, state2: string, state3: string, state4: string) {
+export async function getOtherGamesData(id: number, state1: string, state2: string, state3: string, state4: string): Promise<OtherGames[]> {
   const result = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
         from games g join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`,
         [id, state1, state2, state3, state4]);
