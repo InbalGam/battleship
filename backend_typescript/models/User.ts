@@ -1,4 +1,4 @@
-import { Result, Success } from "./Result";
+import { Result, Success, Failure } from "./Result";
 import * as db from '../db';
 import GameManager from "./GameManager";
 
@@ -27,10 +27,17 @@ export default class User {
     }
 
     async updateProfile(imgId: number | null, nickname: string): Promise<Result<User>> {
+        if (!nickname) {
+            return new Failure('Nickname must be specified', 400);
+        }
         this.nickname = nickname;
         const timestamp: Date = new Date(Date.now());
-        const user = await db.updateProfile(this.id, this.nickname, imgId, timestamp);
-        return new Success(new User(user.id, user.username, user.nickname));
+        try {
+            const user = await db.updateProfile(this.id, this.nickname, imgId, timestamp);
+            return new Success(new User(user.id, user.username, user.nickname));
+        } catch(e) {
+            return new Failure('Server error', 500);
+        }
     }
 
     getGameManager(): GameManager {
