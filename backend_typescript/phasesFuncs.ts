@@ -74,6 +74,20 @@ export function waitingForPlayer(gameDetails: db.Game, opponentsInformation: db.
 
 
 export function winnerPhase(gameDetails: db.Game, gameUser: string, opponentsInformation: db.UserDb, playersInformation: db.UserDb): Winner {
+    let iWon: boolean;
+    if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
+        iWon = true;
+    } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
+        iWon = false;
+    } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
+        iWon = false;
+    } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
+        iWon =  true;
+    } else {
+        console.error('Unexpected winner');
+        throw Error('Unexpected winner');
+    };
+
     let result: Winner = {
         opponent: opponentsInformation.nickname,
         opponentImage: opponentsInformation.imagename,
@@ -81,16 +95,7 @@ export function winnerPhase(gameDetails: db.Game, gameUser: string, opponentsInf
         playerImage: playersInformation.imagename,
         phase: 'finished',
         dimension: gameDetails.dimension,
-        i_won: true
-    };
-    if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
-        result['i_won'] = true;
-    } else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-        result['i_won']= false;
-    } else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-        result['i_won'] = false;
-    } else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-        result['i_won'] =  true;
+        i_won: iWon
     };
     return result;
 };
