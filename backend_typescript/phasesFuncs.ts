@@ -145,7 +145,7 @@ export async function gamePlay(gameDetails: db.Game, gameId: number, reqUserId: 
         }
     });
 
-    let myTurn: boolean = true;
+    let myTurn: boolean;
     if (gameUser === 'user1' && gameDetails.state === 'user1_turn') {
         myTurn = true;
     } else if (gameUser === 'user2' && gameDetails.state === 'user1_turn') {
@@ -154,6 +154,9 @@ export async function gamePlay(gameDetails: db.Game, gameId: number, reqUserId: 
         myTurn = true;
     } else if (gameUser === 'user1' && gameDetails.state === 'user2_turn') {
         myTurn = false;
+    } else {
+        console.error('Unexpected user turn');
+        throw Error('Unexpected user turn');
     }
 
     const gameShots = await db.getGameShots(gameId, gameOpponent);
