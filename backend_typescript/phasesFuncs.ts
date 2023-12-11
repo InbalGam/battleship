@@ -85,7 +85,7 @@ export function winnerPhase(gameDetails: db.Game, gameUser: string, opponentsInf
         iWon =  true;
     } else {
         console.error('Unexpected winner');
-        throw Error('Unexpected winner');
+        throw new Error('Unexpected winner');
     };
 
     let result: Winner = {
@@ -161,7 +161,7 @@ export async function gamePlay(gameDetails: db.Game, gameId: number, reqUserId: 
         myTurn = false;
     } else {
         console.error('Unexpected user turn');
-        throw Error('Unexpected user turn');
+        throw new Error('Unexpected user turn');
     }
 
     const gameShots = await db.getGameShots(gameId, gameOpponent);
