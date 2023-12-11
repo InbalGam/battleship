@@ -61,7 +61,7 @@ export interface GamePlay {
 
 
 export function waitingForPlayer(gameDetails: db.Game, opponentsInformation: db.UserDb, playersInformation: db.UserDb): Waiting {
-    const result = {
+    const result: Waiting = {
         opponent: opponentsInformation.nickname,
         opponentImage: opponentsInformation.imagename,
         player: playersInformation.nickname,
@@ -74,7 +74,7 @@ export function waitingForPlayer(gameDetails: db.Game, opponentsInformation: db.
 
 
 export function winnerPhase(gameDetails: db.Game, gameUser: string, opponentsInformation: db.UserDb, playersInformation: db.UserDb): Winner {
-    let result = {
+    let result: Winner = {
         opponent: opponentsInformation.nickname,
         opponentImage: opponentsInformation.imagename,
         player: playersInformation.nickname,
@@ -119,7 +119,7 @@ export async function placingPieces(gameDetails: db.Game, gameId: number, reqUse
         }
     });
 
-    const result = {
+    const result: PlacingShips = {
         opponent: opponentsInformation.nickname,
         opponentImage: opponentsInformation.imagename,
         player: playersInformation.nickname,
@@ -176,7 +176,7 @@ export async function gamePlay(gameDetails: db.Game, gameId: number, reqUserId: 
         }
     });
 
-    const result = {
+    const result: GamePlay = {
         opponent: opponentsInformation.nickname,
         opponentImage: opponentsInformation.imagename,
         player: playersInformation.nickname,
