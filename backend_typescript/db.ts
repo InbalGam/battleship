@@ -163,8 +163,9 @@ export async function getOtherGamesData(id: number, state1: string, state2: stri
 }
 
 
-export async function updateGameState(id: number, state: string) {
-  await pool.query('update games set state = $2 where id = $1;', [id, state]);
+export async function updateGameState(id: number, state: string): Promise<Game> {
+  const updatedGame = await pool.query('update games set state = $2 where id = $1 returning *;', [id, state]);
+  return updatedGame.rows[0];
 };
 
 
