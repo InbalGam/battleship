@@ -18,7 +18,7 @@ export interface Winner {
     playerImage: string | null;
     phase: string;
     dimension: number;
-    //i_won: boolean;
+    i_won: boolean;
 }
 
 
@@ -80,7 +80,8 @@ export function winnerPhase(gameDetails: db.Game, gameUser: string, opponentsInf
         player: playersInformation.nickname,
         playerImage: playersInformation.imagename,
         phase: 'finished',
-        dimension: gameDetails.dimension
+        dimension: gameDetails.dimension,
+        i_won: true
     };
     if (gameDetails.state === 'user1_won' && gameUser === 'user1'){
         result['i_won'] = true;
