@@ -1,5 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const Result_1 = require("./Result");
+const pf = require("../phasesFuncs");
+const db = require("../db");
+const ships_1 = require("../ships");
 class Game {
     constructor(id, user1, user2, dimension, state) {
         this.id = id;
@@ -7,6 +11,68 @@ class Game {
         this.user2 = user2;
         this.dimension = dimension;
         this.state = state;
+    }
+    getGameId() {
+        return this.id;
+    }
+    getPlayerId() {
+        return this.user1;
+    }
+    getOpponentId() {
+        return this.user2;
+    }
+    getDimension() {
+        return this.dimension;
+    }
+    getState() {
+        return this.state;
+    }
+    async getGameInfo(reqUserId) {
+        let result;
+        try {
+            const gameDetails = await db.getGameById(this.id);
+            if (gameDetails.state === 'invited') {
+                return new Result_1.Failure('Game is in state invited', 400);
+            }
+            ;
+            let gameUser;
+            let gamePlayer;
+            let gameOpponent;
+            if (gameDetails.user1 === reqUserId) {
+                gameUser = 'user1'; //string
+                gamePlayer = gameDetails.user1;
+                gameOpponent = gameDetails.user2; //id
+            }
+            else {
+                gameUser = 'user2'; //string
+                gamePlayer = gameDetails.user2;
+                gameOpponent = gameDetails.user1; //id
+            }
+            ;
+            const opponentsInformation = await db.getUserById(gameOpponent);
+            const playersInformation = await db.getUserById(gamePlayer);
+            if (gameDetails.user1 === reqUserId && gameDetails.state === 'user1_ready' || gameDetails.user2 === reqUserId && gameDetails.state === 'user2_ready') {
+                // waiting_for_other_player phase
+                result = pf.waitingForPlayer(gameDetails, opponentsInformation, playersInformation);
+            }
+            else if (gameDetails.state === 'user1_won' || gameDetails.state === 'user2_won') {
+                // winner phase
+                result = pf.winnerPhase(gameDetails, gameUser, opponentsInformation, playersInformation);
+            }
+            else if (gameDetails.state === 'accepted' || (gameDetails.user1 === reqUserId && gameDetails.state === 'user2_ready') || (gameDetails.user2 === reqUserId && gameDetails.state === 'user1_ready')) {
+                // placing_pieces phase
+                result = await pf.placingPieces(gameDetails, this.id, reqUserId, ships_1.shipsAmount[gameDetails.dimension], opponentsInformation, playersInformation);
+            }
+            else if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
+                // gamePlay phase
+                result = await pf.gamePlay(gameDetails, this.id, reqUserId, gameUser, gameOpponent, opponentsInformation, playersInformation);
+            }
+            ;
+            return new Result_1.Success(result);
+        }
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
+        }
     }
 }
 exports.default = Game;

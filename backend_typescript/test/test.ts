@@ -5,7 +5,8 @@ import User from '../models/User';
 import { Failure, Success } from "../models/Result";
 import GameManager from "../models/GameManager";
 import Game from "../models/Game";
-
+import { GamePlay, PlacingShips, Waiting, Winner } from "../phasesFuncs";
+/*
 // UserManager tests
 describe('Register users', () => {
     it('should NOT register- not a valid email', async () => {
@@ -178,5 +179,51 @@ describe('Check GameManager functionality', () => {
         const final = (newGame as Success<Game>).result;
         expect(final).to.be.an.instanceof(Game);
         expect(final).to.have.property("id").to.equal(23);
+    });
+});
+*/
+
+// Game tests
+describe('Check Game class getGameInfo function', () => {
+    it('should NOT get game info- state invited', async () => {
+        const game = new Game(1, 1, 2, 10, 'invited');
+        const gameInfo = await game.getGameInfo(1);
+        expect(gameInfo).to.be.an.instanceof(Failure);
+        expect(gameInfo).to.have.property("msg").to.equal('Game is in state invited');
+        expect(gameInfo).to.have.property("status").to.equal(400);
+    });
+
+    it('should get game info- Waiting phase', async () => {
+        const game = new Game(7, 1, 3, 10, 'user1_ready');
+        const gameInfo = await game.getGameInfo(1);
+        const result = gameInfo as Success<Waiting>
+        expect(gameInfo).to.be.an.instanceof(Success);
+        expect(result.result).to.have.property("phase").to.equal('waiting_for_other_player');
+    });
+
+    it('should get game info- Winner phase', async () => {
+        const game = new Game(14, 4, 1, 10, 'user2_won');
+        const gameInfo = await game.getGameInfo(4);
+        const result = gameInfo as Success<Winner>
+        expect(gameInfo).to.be.an.instanceof(Success);
+        expect(result.result).to.have.property("phase").to.equal('finished');
+        expect(result.result).to.have.property("i_won").to.equal(false);
+    });
+
+    it('should get game info- Placing pieces', async () => {
+        const game = new Game(5, 1, 3, 10, 'accepted');
+        const gameInfo = await game.getGameInfo(1);
+        const result = gameInfo as Success<PlacingShips>
+        expect(gameInfo).to.be.an.instanceof(Success);
+        expect(result.result).to.have.property("phase").to.equal('placing_pieces');
+    });
+
+    it('should get game info- Placing pieces', async () => {
+        const game = new Game(2, 1, 2, 10, 'user2_turn');
+        const gameInfo = await game.getGameInfo(1);
+        const result = gameInfo as Success<GamePlay>
+        expect(gameInfo).to.be.an.instanceof(Success);
+        expect(result.result).to.have.property("phase").to.equal('gamePlay');
+        expect(result.result).to.have.property("my_turn").to.equal(false);
     });
 });

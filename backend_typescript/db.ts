@@ -15,7 +15,7 @@ const pool = new Pool({
 });
 
 
-interface UserDb {
+export interface UserDb {
   id: number;
   username: string;
   password: string;
@@ -25,6 +25,7 @@ interface UserDb {
   created_at: Date;
   modified_at: Date;
   image_id: number;
+  imagename: string | null;
 }
 
 
@@ -61,7 +62,7 @@ export interface OtherGames {
 }
 
 
-interface Game {
+export interface Game {
   id: number;
   user1: number;
   user2: number;
@@ -71,7 +72,7 @@ interface Game {
 }
 
 
-interface Ship {
+export interface Ship {
   gameId: number;
   userId: number;
   size: number;
@@ -88,6 +89,7 @@ interface Shot {
   row: number;
   col: number;
   hit: boolean;
+  opponent_shot: number;
 }
 
 
@@ -183,7 +185,7 @@ export async function placeAShip(gameId: number, userId: number, ship_size: numb
 };
 
 
-export async function getShipsData(gameId: number, userId: number) {
+export async function getShipsData(gameId: number, userId: number): Promise<Ship[]> {
   const result = await pool.query('select * from ships where game_id = $1 and user_id = $2', [gameId, userId]);
   return result.rows;
 };
@@ -230,7 +232,7 @@ export async function getChatMsgs(id: number) {
 };
 
 
-export async function getGameShots(id: number, gameOpponent: number) {
+export async function getGameShots(id: number, gameOpponent: number): Promise<Shot[]> {
   const result = await pool.query('select row, col, hit, case when user_id = $2 then 1 else 0 end as opponent_shot from shots where game_id = $1', [id, gameOpponent]);
   return result.rows;
 };
