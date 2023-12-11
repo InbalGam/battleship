@@ -19,7 +19,7 @@ export default class UserManager {
         }
 
         try {
-            const check = await db.getUsernameByUsername(username);
+            const check = await db.getUserByUsername(username);
             if (check) {
                 if (check.username === username) {
                     return new Failure('Email already exist, choose a different email', 400);
@@ -37,7 +37,7 @@ export default class UserManager {
 
     async authenticate(username: string, password: string) : Promise<Result<User>> {
         
-        const check = await db.getUsernameByUsername(username);
+        const check = await db.getUserByUsername(username);
         if (!check) {
             return new Failure('User was not found', 400);
         }

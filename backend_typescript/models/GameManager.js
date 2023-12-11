@@ -12,14 +12,17 @@ class GameManager {
         let gameInvitations = [];
         try {
             const userScore = await db.getUserScore(this.userId);
-            if (!userScore.id) {
+            console.log(userScore);
+            if (!userScore) {
                 return new Result_1.Failure('User does not exists', 400);
             }
             const gamesShots = await db.getActiveGameData(this.userId, 'user1_turn', 'user2_turn');
+            console.log(gamesShots);
             if (gamesShots.length > 0) {
                 activeGames.push(...gamesShots);
             }
             const otherGames = await db.getOtherGamesData(this.userId, 'invited', 'accepted', 'user1_ready', 'user2_ready');
+            console.log(otherGames);
             otherGames.forEach(game => {
                 if (game.state === 'invited') {
                     gameInvitations.push({
@@ -30,6 +33,7 @@ class GameManager {
                     });
                 }
             });
+            console.log(gameInvitations);
             otherGames.forEach(game => {
                 if (game.state !== 'invited') {
                     activeGames.push({
@@ -41,15 +45,17 @@ class GameManager {
                     });
                 }
             });
+            console.log(activeGames);
             const FinalResults = {
                 user_score: {
                     id: userScore.id,
-                    wins: userScore[0].wins,
-                    loses: userScore[0].loses
+                    wins: userScore.wins,
+                    loses: userScore.loses
                 },
                 invitations: gameInvitations,
                 active_games: activeGames
             };
+            console.log(FinalResults);
             return new Result_1.Success(FinalResults);
         }
         catch (e) {
@@ -59,7 +65,7 @@ class GameManager {
     async getGameById(gameId) {
         try {
             const game = await db.getGameById(gameId);
-            if (!game.id) {
+            if (!game) {
                 return new Result_1.Failure('Game does not exists', 400);
             }
             return new Result_1.Success(new Game_1.default(game.id, game.user1, game.user2, game.dimension, game.state));

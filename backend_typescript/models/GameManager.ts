@@ -30,7 +30,7 @@ export default class GameManager {
 
         try {
             const userScore = await db.getUserScore(this.userId);
-            if (!userScore.id) {
+            if (!userScore) {
                 return new Failure('User does not exists', 400);
             }
 
@@ -64,11 +64,11 @@ export default class GameManager {
                 }
             });
 
-            const FinalResults = {
+            const FinalResults: FinalResults = {
                 user_score: {
                     id: userScore.id,
-                    wins: userScore[0].wins,
-                    loses: userScore[0].loses
+                    wins: userScore.wins,
+                    loses: userScore.loses
                 },
                 invitations: gameInvitations,
                 active_games: activeGames
@@ -83,7 +83,7 @@ export default class GameManager {
     async getGameById(gameId: number): Promise<Result<Game>> {
         try {
             const game = await db.getGameById(gameId);
-            if (!game.id) {
+            if (!game) {
                 return new Failure('Game does not exists', 400);
             }
             return new Success(new Game(game.id, game.user1, game.user2, game.dimension, game.state));

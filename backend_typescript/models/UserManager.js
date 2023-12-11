@@ -18,7 +18,7 @@ class UserManager {
             return new Result_1.Failure('Nickname must be specified', 400);
         }
         try {
-            const check = await db.getUsernameByUsername(username);
+            const check = await db.getUserByUsername(username);
             if (check) {
                 if (check.username === username) {
                     return new Result_1.Failure('Email already exist, choose a different email', 400);
@@ -35,7 +35,7 @@ class UserManager {
         }
     }
     async authenticate(username, password) {
-        const check = await db.getUsernameByUsername(username);
+        const check = await db.getUserByUsername(username);
         if (!check) {
             return new Result_1.Failure('User was not found', 400);
         }

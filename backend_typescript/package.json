@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env PORT=8000 DB=battleship_tests mocha --watch"
   },
   "keywords": [],
   "author": "",

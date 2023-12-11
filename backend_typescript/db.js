@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.insertImage = exports.getGameShots = exports.getChatMsgs = exports.postMsgToChat = exports.updateUsersScores = exports.insertIntoShots = exports.getHitsResults = exports.getUserShots = exports.deleteAShip = exports.getShipsData = exports.placeAShip = exports.getShipsSizes = exports.deleteGame = exports.updateGameState = exports.getOtherGamesData = exports.getActiveGameData = exports.getUserScore = exports.createGame = exports.getGameById = exports.updateProfile = exports.getUserById = exports.insertFederatedCredentials = exports.insertToUsers = exports.getUsernameByUsername = exports.getFromFederatedCredentials = void 0;
+exports.insertImage = exports.getGameShots = exports.getChatMsgs = exports.postMsgToChat = exports.updateUsersScores = exports.insertIntoShots = exports.getHitsResults = exports.getUserShots = exports.deleteAShip = exports.getShipsData = exports.placeAShip = exports.getShipsSizes = exports.deleteGame = exports.updateGameState = exports.getOtherGamesData = exports.getActiveGameData = exports.getUserScore = exports.createGame = exports.getGameById = exports.updateProfile = exports.getUserById = exports.insertFederatedCredentials = exports.insertToUsers = exports.getUserByUsername = exports.getFromFederatedCredentials = void 0;
 const dotenv = require("dotenv");
 const Pool = require('pg').Pool;
 dotenv.config();
@@ -14,21 +14,22 @@ const pool = new Pool({
     connectionTimeoutMillis: 60000,
     //ssl: true
 });
+;
 async function getFromFederatedCredentials(issuer, id) {
     const check = await pool.query('SELECT * FROM federated_credentials WHERE provider = $1 AND subject = $2', [issuer, id]);
     return check.rows;
 }
 exports.getFromFederatedCredentials = getFromFederatedCredentials;
 ;
-async function getUsernameByUsername(username) {
+async function getUserByUsername(username) {
     const userUsername = await pool.query('select * from users where username = $1', [username]);
-    return userUsername.rows;
+    return userUsername.rows[0];
 }
-exports.getUsernameByUsername = getUsernameByUsername;
+exports.getUserByUsername = getUserByUsername;
 ;
 async function insertToUsers(username, nickname, hashedPassword, timestamp) {
     const user = await pool.query('INSERT INTO users (username, nickname, password, created_at) VALUES ($1, $2, $3, $4) returning *', [username, nickname, hashedPassword, timestamp]);
-    return user.rows;
+    return user.rows[0];
 }
 exports.insertToUsers = insertToUsers;
 ;
@@ -39,12 +40,12 @@ exports.insertFederatedCredentials = insertFederatedCredentials;
 ;
 async function getUserById(id) {
     const user = await pool.query('select u.*, if.filename as imagename from users u left join image_files if on u.image_id = if.id where u.id = $1', [id]);
-    return user.rows;
+    return user.rows[0];
 }
 exports.getUserById = getUserById;
 ;
 async function updateProfile(id, nickname, imgId, timestamp) {
-    const user = await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1;', [id, nickname, imgId, timestamp]);
+    const user = await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1 returning *;', [id, nickname, imgId, timestamp]);
     return user.rows[0];
 }
 exports.updateProfile = updateProfile;

@@ -35,6 +35,13 @@ export interface UserScore {
 }
 
 
+interface FederatedCredentialsInfo {
+  user_id: number;
+  provider: string;
+  subject: string;
+};
+
+
 export interface ActiveGames {
   game_id: number;
   opponent: string;
@@ -84,21 +91,21 @@ interface Shot {
 }
 
 
-export async function getFromFederatedCredentials(issuer: string, id: string) {
+export async function getFromFederatedCredentials(issuer: string, id: string): Promise<FederatedCredentialsInfo[]> {
   const check = await pool.query('SELECT * FROM federated_credentials WHERE provider = $1 AND subject = $2', [issuer, id]);
   return check.rows;
 };
 
 
-export async function getUsernameByUsername(username: string) {
+export async function getUserByUsername(username: string): Promise<UserDb> {
   const userUsername = await pool.query('select * from users where username = $1', [username]);
-  return userUsername.rows;
+  return userUsername.rows[0];
 };
 
 
-export async function insertToUsers(username: string, nickname: string, hashedPassword: string | null, timestamp: Date) {
+export async function insertToUsers(username: string, nickname: string, hashedPassword: string | null, timestamp: Date): Promise<UserDb> {
   const user = await pool.query('INSERT INTO users (username, nickname, password, created_at) VALUES ($1, $2, $3, $4) returning *', [username, nickname, hashedPassword, timestamp]);
-  return user.rows;
+  return user.rows[0];
 };
 
 
@@ -106,14 +113,14 @@ export async function insertFederatedCredentials(user_id: number, issuer: string
   await pool.query('INSERT INTO federated_credentials (user_id, provider, subject) VALUES ($1, $2, $3)', [user_id, issuer, profile_id]);
 };
 
-export async function getUserById(id: number) {
+export async function getUserById(id: number): Promise<UserDb> {
   const user = await pool.query('select u.*, if.filename as imagename from users u left join image_files if on u.image_id = if.id where u.id = $1', [id]);
-  return user.rows;
+  return user.rows[0];
 };
 
 
 export async function updateProfile(id: number, nickname: string, imgId: number | null, timestamp: Date): Promise<UserDb> {
-  const user = await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1;', [id, nickname, imgId, timestamp]);
+  const user = await pool.query('update users set nickname = $2, image_id = $3, modified_at = $4 where id = $1 returning *;', [id, nickname, imgId, timestamp]);
   return user.rows[0];
 };
 
