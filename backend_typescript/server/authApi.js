@@ -21,8 +21,7 @@ authRouter.get("/login", (req, res) => {
     res.status(401).json({ msg: 'Authentication failed' });
 });
 authRouter.post("/login", passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
-    //res.redirect("/bots");
-    return res.status(201).json({ msg: "Logged in" });
+    res.redirect("/bots");
 });
 // Login a user - using Google
 authRouter.get('/login/google', passport.authenticate('google', {
