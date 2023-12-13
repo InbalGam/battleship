@@ -1,7 +1,7 @@
 import { Failure, Success, Result } from "./Result";
 import * as pf from '../phasesFuncs';
 import * as db from '../db';
-import { shipsAmount, shipAmountDimension } from '../ships';
+import { shipsAmount, shipAmountDimension, totalShipsSizes } from '../ships';
 
 
 export default class Game {
@@ -130,6 +130,58 @@ export default class Game {
             } else {
                 return new Failure('Game is not in correct state or user not correct user', 400);
             }
+        } catch (e) {
+            return new Failure('Server error', 500);
+        }
+    }
+
+    private async performAShot(row: number, col: number, player: number, opponent: number, userTurn: string, userWinner: string, gameDimension: number): Promise<Result<string>> {
+        if (row > gameDimension || row < 1 || col > gameDimension || col < 1) {
+            return new Failure('The shot is outside of the game board', 400);
+        }
+    
+        const userGameShots = await db.getUserShots(this.id, player);
+    
+        const checkWasShot = userGameShots.some(shot => shot.row === row && shot.col === col);
+        if (checkWasShot) {
+            return new Failure('This cell was already shot', 400);
+        };
+    
+        const hitResults = await db.getHitsResults(this.id, opponent, row, col);
+    
+        if (Number(hitResults[0].hits) === 1) {
+            const timestamp = new Date(Date.now());
+            await db.insertIntoShots(this.id, player, row, col, true, timestamp);
+    
+            const successfullShots = userGameShots.filter(shot => shot.hit === true);
+            if (successfullShots.length + 1 === totalShipsSizes[gameDimension]) { // check winner
+                await this.updateGameState(userWinner);
+                await db.updateUsersScores(player, opponent);
+                return 'Player performed a shot and won game';
+            }
+        } else {
+            const timestamp = new Date(Date.now());
+            await db.insertIntoShots(this.id, player, row, col, false, timestamp);
+            await this.updateGameState(userTurn);
+        }
+    
+        return 'Player performed a shot';
+    };
+
+    async userShoot(reqUserId: number, row: number, col: number): Promise<Result<string>> {
+        let result;
+        try {    
+            if (this.user1 === reqUserId && this.state === 'user1_turn') {
+                result = await this.performAShot(row, col, this.user1, this.user2, 'user2_turn', 'user1_won', this.dimension);
+    
+            } else if (this.user2 === reqUserId && this.state === 'user2_turn') {
+                result = await this.performAShot(row, col, this.user2, this.user1, 'user1_turn', 'user2_won', this.dimension);
+    
+            } else {
+                return new Failure('Game is not in correct state or user not correct user', 400);
+            }
+            return new Success(result);
+    
         } catch (e) {
             return new Failure('Server error', 500);
         }
