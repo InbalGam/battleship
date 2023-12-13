@@ -35,38 +35,53 @@ class UserManager {
         }
     }
     async authenticate(username, password) {
-        const check = await db.getUserByUsername(username);
-        if (!check) {
-            return new Result_1.Failure('User was not found', 400);
+        try {
+            const check = await db.getUserByUsername(username);
+            if (!check) {
+                return new Result_1.Failure('User was not found', 400);
+            }
+            const passwordCheck = await (0, hash_1.comparePasswords)(password, check.password);
+            if (!passwordCheck) {
+                return new Result_1.Failure('Passwords did not match', 401);
+            }
+            return new Result_1.Success(new User_1.default(check.id, check.username, check.nickname));
         }
-        const passwordCheck = await (0, hash_1.comparePasswords)(password, check.password);
-        if (!passwordCheck) {
-            return new Result_1.Failure('Passwords did not match', 401);
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
         }
-        return new Result_1.Success(new User_1.default(check.id, check.username, check.nickname));
     }
     async googleAuthenticate(issuer, profile_id, username, nickname) {
-        const check = await db.getFromFederatedCredentials(issuer, profile_id);
-        if (check.length === 0) {
-            const timestamp = new Date(Date.now());
-            const user = await db.insertToUsers(username, nickname, null, timestamp);
-            await db.insertFederatedCredentials(user.id, issuer, profile_id);
-            return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+        try {
+            const check = await db.getFromFederatedCredentials(issuer, profile_id);
+            if (check.length === 0) {
+                const timestamp = new Date(Date.now());
+                const user = await db.insertToUsers(username, nickname, null, timestamp);
+                await db.insertFederatedCredentials(user.id, issuer, profile_id);
+                return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+            }
+            else {
+                const user = await db.getUserById(check[0].user_id);
+                if (!user) {
+                    return new Result_1.Failure('User was not found', 400);
+                }
+                return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+            }
         }
-        else {
-            const user = await db.getUserById(check[0].user_id);
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
+        }
+    }
+    async getUserById(id) {
+        try {
+            const user = await db.getUserById(id);
             if (!user) {
                 return new Result_1.Failure('User was not found', 400);
             }
             return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
         }
-    }
-    async getUserById(id) {
-        const user = await db.getUserById(id);
-        if (!user) {
-            return new Result_1.Failure('User was not found', 400);
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
         }
-        return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
     }
 }
 exports.default = UserManager;

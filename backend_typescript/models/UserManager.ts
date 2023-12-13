@@ -36,42 +36,53 @@ export default class UserManager {
     }
 
     async authenticate(username: string, password: string) : Promise<Result<User>> {
-        
-        const check = await db.getUserByUsername(username);
-        if (!check) {
-            return new Failure('User was not found', 400);
-        }
+        try {
+            const check = await db.getUserByUsername(username);
+            if (!check) {
+                return new Failure('User was not found', 400);
+            }
 
-        const passwordCheck: boolean = await comparePasswords(password, check.password);
-        if (!passwordCheck) {
-            return new Failure('Passwords did not match', 401);
-        }
+            const passwordCheck: boolean = await comparePasswords(password, check.password);
+            if (!passwordCheck) {
+                return new Failure('Passwords did not match', 401);
+            }
 
-        return new Success(new User(check.id, check.username, check.nickname)); 
+            return new Success(new User(check.id, check.username, check.nickname));
+        } catch (e) {
+            return new Failure('Server error', 500);
+        }
     }
 
-    async googleAuthenticate(issuer: string, profile_id: string, username: string, nickname: string) : Promise<Result<User>> {
-        const check = await db.getFromFederatedCredentials(issuer, profile_id);
-        if (check.length === 0) {
-            const timestamp: Date = new Date(Date.now());
-            const user = await db.insertToUsers(username, nickname, null, timestamp);
-            await db.insertFederatedCredentials(user.id, issuer, profile_id);
-            return new Success(new User(user.id, user.username, user.nickname));
-        } else {
-            const user = await db.getUserById(check[0].user_id);
+    async googleAuthenticate(issuer: string, profile_id: string, username: string, nickname: string): Promise<Result<User>> {
+        try {
+            const check = await db.getFromFederatedCredentials(issuer, profile_id);
+            if (check.length === 0) {
+                const timestamp: Date = new Date(Date.now());
+                const user = await db.insertToUsers(username, nickname, null, timestamp);
+                await db.insertFederatedCredentials(user.id, issuer, profile_id);
+                return new Success(new User(user.id, user.username, user.nickname));
+            } else {
+                const user = await db.getUserById(check[0].user_id);
+                if (!user) {
+                    return new Failure('User was not found', 400);
+                }
+                return new Success(new User(user.id, user.username, user.nickname));
+            }
+        } catch (e) {
+            return new Failure('Server error', 500);
+        }
+    }
+
+    async getUserById(id: number): Promise<Result<User>> {
+        try {
+            const user = await db.getUserById(id);
             if (!user) {
                 return new Failure('User was not found', 400);
             }
             return new Success(new User(user.id, user.username, user.nickname));
+        } catch (e) {
+            return new Failure('Server error', 500);
         }
-    }
-
-    async getUserById(id: number) : Promise<Result<User>> {
-        const user = await db.getUserById(id);
-        if (!user) {
-            return new Failure('User was not found', 400);
-        }
-        return new Success(new User(user.id, user.username, user.nickname));
     }
 }
 
