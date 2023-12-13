@@ -74,5 +74,59 @@ class Game {
             return new Result_1.Failure('Server error', 500);
         }
     }
+    async updateGameState(state) {
+        this.state = state;
+        const game = await db.updateGameState(this.id, this.state);
+        return new Game(game.id, game.user1, game.user2, game.dimension, game.state);
+    }
+    async deleteGame() {
+        try {
+            await db.deleteGame(this.id);
+            return new Result_1.Success('Game deleted');
+        }
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
+        }
+    }
+    async acceptGame() {
+        try {
+            const game = await this.updateGameState('accepted');
+            return new Result_1.Success(game);
+        }
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
+        }
+    }
+    async userIsReady(reqUserId) {
+        let game;
+        try {
+            if (this.state === 'accepted' || (this.user1 === reqUserId && this.state === 'user2_ready') || (this.user2 === reqUserId && this.state === 'user1_ready')) {
+                const userShips = await db.getShipsData(this.id, reqUserId);
+                if (ships_1.shipAmountDimension[this.dimension] === userShips.length) {
+                    if (this.state === 'accepted' && this.user1 === reqUserId) {
+                        game = await this.updateGameState('user1_ready');
+                    }
+                    else if (this.state === 'accepted' && this.user2 === reqUserId) {
+                        game = await this.updateGameState('user2_ready');
+                    }
+                    else if (this.state === 'user1_ready' || this.state === 'user2_ready') {
+                        const gameState = ['user1_turn', 'user2_turn'];
+                        const randomChoose = Math.floor(Math.random() * 2);
+                        game = await this.updateGameState(gameState[randomChoose]);
+                    }
+                    return new Result_1.Success(game);
+                }
+                else {
+                    return new Result_1.Failure('Player did not finish placeing ships', 400);
+                }
+            }
+            else {
+                return new Result_1.Failure('Game is not in correct state or user not correct user', 400);
+            }
+        }
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
+        }
+    }
 }
 exports.default = Game;

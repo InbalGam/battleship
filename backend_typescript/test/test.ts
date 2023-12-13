@@ -227,3 +227,41 @@ describe('Check Game class getGameInfo function', () => {
         expect(result.result).to.have.property("my_turn").to.equal(false);
     });
 });
+
+
+describe('Check Game general funcs', () => {
+    it('should get game constructor data', () => {
+        const game = new Game(2, 1, 2, 10, 'user2_turn');
+        const gameId = game.getGameId();
+        const gamePlayer = game.getPlayerId();
+        const gameOpponent = game.getOpponentId();
+        const gameState = game.getState();
+        const gameDimension = game.getDimension();
+        expect(gameId).to.equal(2);
+        expect(gamePlayer).to.equal(1);
+        expect(gameOpponent).to.equal(2);
+        expect(gameState).to.equal('user2_turn');
+        expect(gameDimension).to.equal(10);
+    });
+});
+
+
+describe('Check Delete game', () => {
+    it('should delete game', async () => {
+        const game = new Game(1, 1, 2, 10, 'invited');
+        const result = await game.deleteGame();
+        expect(result).to.be.an.instanceof(Success);
+        expect(result).to.have.property("result").to.equal('Game deleted');
+    });
+});
+
+
+describe('Check Game update state funcs', () => {
+    it('should accept game', async () => {
+        const game = new Game(18, 8, 5, 10, 'invited');
+        const response = await game.acceptGame();
+        const result = response as Success<Game>;
+        expect(response).to.be.an.instanceof(Success);
+        expect(result.result).to.have.property("state").to.equal('accepted');
+    });
+});

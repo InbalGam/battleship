@@ -16,27 +16,33 @@ function waitingForPlayer(gameDetails, opponentsInformation, playersInformation)
 exports.waitingForPlayer = waitingForPlayer;
 ;
 function winnerPhase(gameDetails, gameUser, opponentsInformation, playersInformation) {
+    let iWon;
+    if (gameDetails.state === 'user1_won' && gameUser === 'user1') {
+        iWon = true;
+    }
+    else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
+        iWon = false;
+    }
+    else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
+        iWon = false;
+    }
+    else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
+        iWon = true;
+    }
+    else {
+        console.error('Unexpected winner');
+        throw new Error('Unexpected winner');
+    }
+    ;
     let result = {
         opponent: opponentsInformation.nickname,
         opponentImage: opponentsInformation.imagename,
         player: playersInformation.nickname,
         playerImage: playersInformation.imagename,
         phase: 'finished',
-        dimension: gameDetails.dimension
+        dimension: gameDetails.dimension,
+        i_won: iWon
     };
-    if (gameDetails.state === 'user1_won' && gameUser === 'user1') {
-        result['i_won'] = true;
-    }
-    else if (gameDetails.state === 'user1_won' && gameUser === 'user2') {
-        result['i_won'] = false;
-    }
-    else if (gameDetails.state === 'user2_won' && gameUser === 'user1') {
-        result['i_won'] = false;
-    }
-    else if (gameDetails.state === 'user2_won' && gameUser === 'user2') {
-        result['i_won'] = true;
-    }
-    ;
     return result;
 }
 exports.winnerPhase = winnerPhase;
@@ -87,7 +93,7 @@ async function gamePlay(gameDetails, gameId, reqUserId, gameUser, gameOpponent, 
             end_col: ship.end_col
         };
     });
-    let myTurn = true;
+    let myTurn;
     if (gameUser === 'user1' && gameDetails.state === 'user1_turn') {
         myTurn = true;
     }
@@ -99,6 +105,10 @@ async function gamePlay(gameDetails, gameId, reqUserId, gameUser, gameOpponent, 
     }
     else if (gameUser === 'user1' && gameDetails.state === 'user2_turn') {
         myTurn = false;
+    }
+    else {
+        console.error('Unexpected user turn');
+        throw new Error('Unexpected user turn');
     }
     const gameShots = await db.getGameShots(gameId, gameOpponent);
     const shot_sent = [];

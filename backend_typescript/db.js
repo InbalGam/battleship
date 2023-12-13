@@ -83,7 +83,8 @@ async function getOtherGamesData(id, state1, state2, state3, state4) {
 }
 exports.getOtherGamesData = getOtherGamesData;
 async function updateGameState(id, state) {
-    await pool.query('update games set state = $2 where id = $1;', [id, state]);
+    const updatedGame = await pool.query('update games set state = $2 where id = $1 returning *;', [id, state]);
+    return updatedGame.rows[0];
 }
 exports.updateGameState = updateGameState;
 ;

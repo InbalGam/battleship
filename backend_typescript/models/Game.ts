@@ -1,8 +1,8 @@
 import { Failure, Success, Result } from "./Result";
 import * as pf from '../phasesFuncs';
 import * as db from '../db';
-import { shipsAmount } from '../ships';
-import User from "./User";
+import { shipsAmount, shipAmountDimension } from '../ships';
+
 
 export default class Game {
     id: number;
@@ -83,14 +83,10 @@ export default class Game {
         }
     }
 
-    private async updateGameState(state: string) {
-        try {
-            this.state = state;
-            const game = await db.updateGameState(this.id, this.state);
-            return new Success(new Game(game.id, game.user1, game.user2, game.dimension, game.state));
-        } catch (e) {
-            return new Failure('Server error', 500);
-        }
+    private async updateGameState(state: string): Promise<Game> {
+        this.state = state;
+        const game = await db.updateGameState(this.id, this.state);
+        return new Game(game.id, game.user1, game.user2, game.dimension, game.state);
     }
 
     async deleteGame(): Promise<Result<string>> {
@@ -102,10 +98,38 @@ export default class Game {
         }
     }
 
-    async acceptGame() {
+    async acceptGame(): Promise<Result<Game>> {
         try {
-            await this.updateGameState('accepted');
-            return new Success('Game accepted by opponent');
+            const game = await this.updateGameState('accepted');
+            return new Success(game);
+        } catch (e) {
+            return new Failure('Server error', 500);
+        }
+    }
+
+    async userIsReady(reqUserId: number): Promise<Result<Game>> {
+        let game;
+        try {
+            if (this.state === 'accepted' || (this.user1 === reqUserId && this.state === 'user2_ready') || (this.user2 === reqUserId && this.state === 'user1_ready')) {
+                const userShips = await db.getShipsData(this.id, reqUserId);
+    
+                if (shipAmountDimension[this.dimension] === userShips.length) {
+                    if (this.state === 'accepted' && this.user1 === reqUserId) {
+                        game = await this.updateGameState('user1_ready');    
+                    } else if (this.state === 'accepted' && this.user2 === reqUserId) {
+                        game = await this.updateGameState('user2_ready');  
+                    } else if (this.state === 'user1_ready' || this.state === 'user2_ready') {
+                        const gameState = ['user1_turn', 'user2_turn'];
+                        const randomChoose = Math.floor(Math.random() * 2);
+                        game = await this.updateGameState(gameState[randomChoose]); 
+                    }
+                    return new Success(game);
+                } else {
+                    return new Failure('Player did not finish placeing ships', 400);
+                }
+            } else {
+                return new Failure('Game is not in correct state or user not correct user', 400);
+            }
         } catch (e) {
             return new Failure('Server error', 500);
         }
