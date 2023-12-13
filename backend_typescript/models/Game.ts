@@ -2,6 +2,8 @@ import { Failure, Success, Result } from "./Result";
 import * as pf from '../phasesFuncs';
 import * as db from '../db';
 import { shipsAmount, shipAmountDimension, totalShipsSizes } from '../ships';
+import ShipManager from "./ShipManager";
+import ChatManager from "./ChatManager";
 
 
 export default class Game {
@@ -18,24 +20,36 @@ export default class Game {
         this.state = state;
     }
 
-    getGameId() {
+    getGameId(): number {
         return this.id;
     }
 
-    getPlayerId() {
+    getPlayerId(): number {
         return this.user1;
     }
 
-    getOpponentId() {
+    getOpponentId(): number {
         return this.user2;
     }
 
-    getDimension() {
+    getDimension(): number {
         return this.dimension;
     }
 
-    getState() {
+    getState(): string {
         return this.state;
+    }
+
+    getGameShipManager(reqUserId: number): ShipManager | string {
+        if (this.state === 'accepted' || this.state === 'user1_ready' || this.state === 'user2_ready') {
+            return new ShipManager(this.id, reqUserId);
+        } else {
+            return 'Game is not in correct state to get ShipManager';
+        }
+    }
+
+    getGameChatManager(): ChatManager {
+        return new ChatManager(this.id);
     }
 
     async getGameInfo(reqUserId: number): Promise<Result<pf.Waiting | pf.Winner | pf.PlacingShips | pf.GamePlay>> {
