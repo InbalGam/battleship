@@ -108,7 +108,7 @@ export default class Game {
     }
 
     async userIsReady(reqUserId: number): Promise<Result<Game>> {
-        let game;
+        let game: Game;
         try {
             if (this.state === 'accepted' || (this.user1 === reqUserId && this.state === 'user2_ready') || (this.user2 === reqUserId && this.state === 'user1_ready')) {
                 const userShips = await db.getShipsData(this.id, reqUserId);
@@ -122,6 +122,9 @@ export default class Game {
                         const gameState = ['user1_turn', 'user2_turn'];
                         const randomChoose = Math.floor(Math.random() * 2);
                         game = await this.updateGameState(gameState[randomChoose]); 
+                    } else {
+                        console.error('Unexpected game state or user');
+                        throw new Error('Unexpected game state or user');
                     }
                     return new Success(game);
                 } else {
