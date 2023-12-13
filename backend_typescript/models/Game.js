@@ -156,7 +156,7 @@ class Game {
         }
         ;
         const hitResults = await db.getHitsResults(this.id, opponent, row, col);
-        if (Number(hitResults[0].hits) === 1) {
+        if (Number(hitResults) === 1) {
             const timestamp = new Date(Date.now());
             await db.insertIntoShots(this.id, player, row, col, true, timestamp);
             const successfullShots = userGameShots.filter(shot => shot.hit === true);

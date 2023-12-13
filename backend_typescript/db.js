@@ -123,7 +123,7 @@ exports.getUserShots = getUserShots;
 ;
 async function getHitsResults(id, opponent, row, col) {
     const results = await pool.query(`select sum(case when $3 >= start_row and $3 <= end_row and $4 >= start_col and $4 <= end_col then 1 else 0 end) as hits from ships where game_id = $1 and user_id = $2`, [id, opponent, row, col]);
-    return results.rows;
+    return results.rows[0];
 }
 exports.getHitsResults = getHitsResults;
 ;
@@ -157,7 +157,7 @@ exports.getGameShots = getGameShots;
 ;
 async function insertImage(req) {
     const result = await pool.query('insert into image_files (filename, filepath, mimetype, size) values ($1, $2, $3, $4) returning *', [req.file.filename, req.file.path, req.file.mimetype, req.file.size]);
-    return result.rows;
+    return result.rows[0];
 }
 exports.insertImage = insertImage;
 ;

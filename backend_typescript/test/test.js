@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const expect = require('chai').expect;
 const Result_1 = require("../models/Result");
 const Game_1 = require("../models/Game");
+const ShipManager_1 = require("../models/ShipManager");
 /*
 // UserManager tests
 describe('Register users', () => {
@@ -294,5 +295,98 @@ describe('Check ChatManager functionality', () => {
         const result = await chatManager.postNewGameMsg(3, 'That was a good shot');
         expect(result).to.be.an.instanceof(Result_1.Success);
         expect(result).to.have.property('result').to.equal('Sent message');
+    });
+});
+// ShipManager tests
+describe('Check ShipManager', () => {
+    it('should get user ships', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.getUserShips();
+            expect(result).to.be.an.instanceof(Result_1.Success);
+        }
+    });
+});
+describe('Check ShipManager place a ship', () => {
+    it('should NOT place a ship- not correct size', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.placeShip(1, 3, 6, 6, 1, 5);
+            expect(result).to.be.an.instanceof(Result_1.Failure);
+            expect(result).to.have.property("msg").to.equal('Ship is not in the correct size');
+            expect(result).to.have.property("status").to.equal(400);
+        }
+    });
+    it('should NOT place a ship- user not a player in the game', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(9);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.placeShip(9, 3, 6, 8, 10, 10);
+            expect(result).to.be.an.instanceof(Result_1.Failure);
+            expect(result).to.have.property("msg").to.equal('User is not a player in the game');
+            expect(result).to.have.property("status").to.equal(400);
+        }
+    });
+    it('should NOT place a ship- not inside borders', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.placeShip(1, 3, 6, 6, 9, 11);
+            expect(result).to.be.an.instanceof(Result_1.Failure);
+            expect(result).to.have.property("msg").to.equal('Ship is not inside board borders');
+            expect(result).to.have.property("status").to.equal(400);
+        }
+    });
+    it('should NOT place a ship- no more ships of this size', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.placeShip(1, 2, 6, 6, 9, 10);
+            expect(result).to.be.an.instanceof(Result_1.Failure);
+            expect(result).to.have.property("msg").to.equal('There are no more ships of this size to place');
+            expect(result).to.have.property("status").to.equal(400);
+        }
+    });
+    it('should NOT place a ship- close to another ship', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.placeShip(1, 3, 7, 9, 1, 1);
+            expect(result).to.be.an.instanceof(Result_1.Failure);
+            expect(result).to.have.property("msg").to.equal('Ship cannot be next to another ship');
+            expect(result).to.have.property("status").to.equal(400);
+        }
+    });
+    it('should place a ship', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.placeShip(1, 3, 10, 10, 4, 6);
+            expect(result).to.be.an.instanceof(Result_1.Success);
+            expect(result).to.have.property("result").to.equal('Placed a ship of size 3');
+        }
+    });
+});
+describe('Check ShipManager Unplace a ship', () => {
+    it('should NOT place a ship- close to another ship', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.unplaceShip(1, 5, 1, 1, 5, 9);
+            expect(result).to.be.an.instanceof(Result_1.Failure);
+            expect(result).to.have.property("msg").to.equal('Ship was not placed cannot be unplaced');
+            expect(result).to.have.property("status").to.equal(400);
+        }
+    });
+    it('should Unplace a ship', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const shipManager = game.getGameShipManager(1);
+        if (shipManager instanceof ShipManager_1.default) {
+            const result = await shipManager.unplaceShip(1, 3, 10, 10, 4, 6);
+            expect(result).to.be.an.instanceof(Result_1.Success);
+            expect(result).to.have.property("result").to.equal('Ship deleted');
+        }
     });
 });
