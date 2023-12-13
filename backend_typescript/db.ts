@@ -93,6 +93,14 @@ export interface Shot {
 }
 
 
+export interface Chat {
+  gameId: number;
+  userId: number;
+  text: string;
+  created_at: Date;
+}
+
+
 export async function getFromFederatedCredentials(issuer: string, id: string): Promise<FederatedCredentialsInfo[]> {
   const check = await pool.query('SELECT * FROM federated_credentials WHERE provider = $1 AND subject = $2', [issuer, id]);
   return check.rows;
@@ -227,7 +235,7 @@ export async function postMsgToChat(gameId: number, userId: number, message: str
 };
 
 
-export async function getChatMsgs(id: number) {
+export async function getChatMsgs(id: number): Promise<Chat[]> {
   const result = await pool.query('select u.nickname as from, cm.text as message, cm.created_at as date from chat_messages cm join users u on cm.user_id = u.id where cm.game_id = $1 order by cm.created_at desc', [id]);
   return result.rows;
 };
