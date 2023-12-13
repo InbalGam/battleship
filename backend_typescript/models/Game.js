@@ -128,5 +128,55 @@ class Game {
             return new Result_1.Failure('Server error', 500);
         }
     }
+    async performAShot(row, col, player, opponent, userTurn, userWinner, gameDimension) {
+        if (row > gameDimension || row < 1 || col > gameDimension || col < 1) {
+            return new Result_1.Failure('The shot is outside of the game board', 400);
+        }
+        const userGameShots = await db.getUserShots(this.id, player);
+        const checkWasShot = userGameShots.some(shot => shot.row === row && shot.col === col);
+        if (checkWasShot) {
+            return new Result_1.Failure('This cell was already shot', 400);
+        }
+        ;
+        const hitResults = await db.getHitsResults(this.id, opponent, row, col);
+        if (Number(hitResults[0].hits) === 1) {
+            const timestamp = new Date(Date.now());
+            await db.insertIntoShots(this.id, player, row, col, true, timestamp);
+            const successfullShots = userGameShots.filter(shot => shot.hit === true);
+            if (successfullShots.length + 1 === ships_1.totalShipsSizes[gameDimension]) { // check winner
+                await this.updateGameState(userWinner);
+                await db.updateUsersScores(player, opponent);
+                return 'Player performed a shot and won game';
+            }
+        }
+        else {
+            const timestamp = new Date(Date.now());
+            await db.insertIntoShots(this.id, player, row, col, false, timestamp);
+            await this.updateGameState(userTurn);
+        }
+        return 'Player performed a shot';
+    }
+    ;
+    async userShoot(reqUserId, row, col) {
+        let result;
+        try {
+            if (this.user1 === reqUserId && this.state === 'user1_turn') {
+                result = await this.performAShot(row, col, this.user1, this.user2, 'user2_turn', 'user1_won', this.dimension);
+            }
+            else if (this.user2 === reqUserId && this.state === 'user2_turn') {
+                result = await this.performAShot(row, col, this.user2, this.user1, 'user1_turn', 'user2_won', this.dimension);
+            }
+            else {
+                return new Result_1.Failure('Game is not in correct state or user not correct user', 400);
+            }
+            if (result instanceof Result_1.Failure) {
+                return result;
+            }
+            return new Result_1.Success(result);
+        }
+        catch (e) {
+            return new Result_1.Failure('Server error', 500);
+        }
+    }
 }
 exports.default = Game;

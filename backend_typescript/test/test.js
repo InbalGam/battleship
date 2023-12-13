@@ -251,3 +251,33 @@ describe('Check Game update state funcs', () => {
         expect(result.result).to.have.property("state").to.equal('accepted');
     });
 });
+describe('Check User shoot', () => {
+    it('should NOT perform shot - wrong game state', async () => {
+        const game = new Game_1.default(5, 1, 3, 10, 'accepted');
+        const result = await game.userShoot(1, 3, 4);
+        expect(result).to.be.an.instanceof(Result_1.Failure);
+        expect(result).to.have.property("msg").to.equal('Game is not in correct state or user not correct user');
+        expect(result).to.have.property("status").to.equal(400);
+    });
+    it('should NOT perform shot - shot outside of board', async () => {
+        const game = new Game_1.default(4, 1, 3, 10, 'user1_turn');
+        const result = await game.userShoot(1, 13, 4);
+        expect(result).to.be.an.instanceof(Result_1.Failure);
+        expect(result).to.have.property("msg").to.equal('The shot is outside of the game board');
+        expect(result).to.have.property("status").to.equal(400);
+    });
+    it('should NOT perform shot - cell already chot', async () => {
+        const game = new Game_1.default(4, 1, 3, 10, 'user1_turn');
+        const result = await game.userShoot(1, 5, 2);
+        expect(result).to.be.an.instanceof(Result_1.Failure);
+        expect(result).to.have.property("msg").to.equal('This cell was already shot');
+        expect(result).to.have.property("status").to.equal(400);
+    });
+    it('should perform a shot', async () => {
+        const game = new Game_1.default(4, 1, 3, 10, 'user1_turn');
+        const result = await game.userShoot(1, 8, 9);
+        console.log(result);
+        expect(result).to.be.an.instanceof(Result_1.Success);
+        expect(result).to.have.property("result").to.equal('Player performed a shot');
+    });
+});

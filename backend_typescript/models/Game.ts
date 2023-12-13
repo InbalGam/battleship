@@ -180,6 +180,9 @@ export default class Game {
             } else {
                 return new Failure('Game is not in correct state or user not correct user', 400);
             }
+            if (result instanceof Failure) {
+                return result;
+            }
             return new Success(result);
     
         } catch (e) {
