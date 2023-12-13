@@ -299,3 +299,23 @@ describe('Check User shoot', () => {
         expect(result).to.have.property("result").to.equal('Player performed a shot');
     });
 });
+
+
+// ChatManager tests
+describe('Check ChatManager functionality', () => {
+    it('should get game chat', async () => {
+        const game = new Game(4, 1, 3, 10, 'user1_turn');
+        const chatManager = game.getGameChatManager();
+        const result = await chatManager.getGameChat();
+        expect(result).to.be.an.instanceof(Success);
+    });
+
+    it('should post new message to game chat', async () => {
+        const game = new Game(4, 1, 3, 10, 'user1_turn');
+        const chatManager = game.getGameChatManager();
+        const result = await chatManager.postNewGameMsg(3, 'That was a good shot');
+        expect(result).to.be.an.instanceof(Success);
+        expect(result).to.have.property('result').to.equal('Sent message');
+    });
+});
+

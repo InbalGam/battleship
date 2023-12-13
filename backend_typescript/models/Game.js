@@ -4,6 +4,8 @@ const Result_1 = require("./Result");
 const pf = require("../phasesFuncs");
 const db = require("../db");
 const ships_1 = require("../ships");
+const ShipManager_1 = require("./ShipManager");
+const ChatManager_1 = require("./ChatManager");
 class Game {
     constructor(id, user1, user2, dimension, state) {
         this.id = id;
@@ -26,6 +28,17 @@ class Game {
     }
     getState() {
         return this.state;
+    }
+    getGameShipManager(reqUserId) {
+        if (this.state === 'accepted' || this.state === 'user1_ready' || this.state === 'user2_ready') {
+            return new ShipManager_1.default(this.id, reqUserId);
+        }
+        else {
+            return 'Game is not in correct state to get ShipManager';
+        }
+    }
+    getGameChatManager() {
+        return new ChatManager_1.default(this.id);
     }
     async getGameInfo(reqUserId) {
         let result;
@@ -113,6 +126,10 @@ class Game {
                         const gameState = ['user1_turn', 'user2_turn'];
                         const randomChoose = Math.floor(Math.random() * 2);
                         game = await this.updateGameState(gameState[randomChoose]);
+                    }
+                    else {
+                        console.error('Unexpected game state or user');
+                        throw new Error('Unexpected game state or user');
                     }
                     return new Result_1.Success(game);
                 }

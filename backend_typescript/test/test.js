@@ -276,8 +276,23 @@ describe('Check User shoot', () => {
     it('should perform a shot', async () => {
         const game = new Game_1.default(4, 1, 3, 10, 'user1_turn');
         const result = await game.userShoot(1, 8, 9);
-        console.log(result);
         expect(result).to.be.an.instanceof(Result_1.Success);
         expect(result).to.have.property("result").to.equal('Player performed a shot');
+    });
+});
+// ChatManager tests
+describe('Check ChatManager functionality', () => {
+    it('should get game chat', async () => {
+        const game = new Game_1.default(4, 1, 3, 10, 'user1_turn');
+        const chatManager = game.getGameChatManager();
+        const result = await chatManager.getGameChat();
+        expect(result).to.be.an.instanceof(Result_1.Success);
+    });
+    it('should post new message to game chat', async () => {
+        const game = new Game_1.default(4, 1, 3, 10, 'user1_turn');
+        const chatManager = game.getGameChatManager();
+        const result = await chatManager.postNewGameMsg(3, 'That was a good shot');
+        expect(result).to.be.an.instanceof(Result_1.Success);
+        expect(result).to.have.property('result').to.equal('Sent message');
     });
 });
