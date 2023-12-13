@@ -100,6 +100,18 @@ export interface Chat {
   created_at: Date;
 }
 
+interface ShipSize {
+  size: number;
+}
+
+
+export interface Img {
+  id: number;
+  filename: string;
+  filepath: string;
+  mimetype: string;
+  size: number;
+}
 
 export async function getFromFederatedCredentials(issuer: string, id: string): Promise<FederatedCredentialsInfo[]> {
   const check = await pool.query('SELECT * FROM federated_credentials WHERE provider = $1 AND subject = $2', [issuer, id]);
@@ -182,7 +194,7 @@ export async function deleteGame(id: number) {
 };
 
 
-export async function getShipsSizes(gameId: number, userId: number) {
+export async function getShipsSizes(gameId: number, userId: number): Promise<ShipSize[]> {
   const sizes = await pool.query('select size from ships where game_id = $1 and user_id = $2', [gameId, userId]);
   return sizes.rows;
 };
@@ -215,7 +227,7 @@ export async function getUserShots(gameId: number, userId: number): Promise<Shot
 export async function getHitsResults(id: number, opponent: number, row: number, col: number): Promise<number> {
   const results = await pool.query(`select sum(case when $3 >= start_row and $3 <= end_row and $4 >= start_col and $4 <= end_col then 1 else 0 end) as hits from ships where game_id = $1 and user_id = $2`,
     [id, opponent, row, col]);
-  return results.rows;
+  return results.rows[0];
 };
 
 
@@ -247,8 +259,8 @@ export async function getGameShots(id: number, gameOpponent: number): Promise<Sh
 };
 
 
-export async function insertImage(req) {
+export async function insertImage(req): Promise<Img> {
   const result =  await pool.query('insert into image_files (filename, filepath, mimetype, size) values ($1, $2, $3, $4) returning *', [req.file.filename, req.file.path, req.file.mimetype, req.file.size]);
-  return result.rows;
+  return result.rows[0];
 };
 
