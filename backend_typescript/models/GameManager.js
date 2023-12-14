@@ -68,10 +68,14 @@ class GameManager {
             return new Result_1.Failure('Server error', 500);
         }
     }
-    async createGame(opponentId, dimension) {
+    async createGame(opponent, dimension) {
         try {
+            const check = await db.getUserByUsername(opponent);
+            if (!check) {
+                return new Result_1.Failure('User does not exists', 400);
+            }
             const timestamp = new Date(Date.now());
-            const game = await db.createGame(this.userId, opponentId, dimension, 'invited', timestamp);
+            const game = await db.createGame(this.userId, check.id, dimension, 'invited', timestamp);
             return new Result_1.Success(new Game_1.default(game.id, game.user1, game.user2, game.dimension, game.state));
         }
         catch (e) {

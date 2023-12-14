@@ -29,6 +29,9 @@ exports.shipAmountDimension = {
 };
 function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
     if (shipInDb.start_row === shipInDb.end_row) {
+        if ((start_row === shipInDb.start_row && start_col === shipInDb.start_col) || (start_row === shipInDb.start_row && end_col === shipInDb.end_col)) {
+            return 1;
+        }
         if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
             return 1;
         }
@@ -46,6 +49,9 @@ function checkShipPlacement(start_row, end_row, start_col, end_col, shipInDb) {
         }
     }
     else if (shipInDb.start_row !== shipInDb.end_row) {
+        if (start_row === shipInDb.start_row && start_col === shipInDb.start_col) {
+            return 1;
+        }
         if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
             return 1;
         }

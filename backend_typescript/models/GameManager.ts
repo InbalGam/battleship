@@ -96,7 +96,7 @@ export default class GameManager {
         try {
             const check = await db.getUserByUsername(opponent);
             if (!check) {
-                new Failure('User does not exists', 400);
+                return new Failure('User does not exists', 400);
             }
             const timestamp: Date = new Date(Date.now());
             const game = await db.createGame(this.userId, check.id, dimension, 'invited', timestamp);

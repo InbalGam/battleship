@@ -186,7 +186,7 @@ export default class Game {
     
         const hitResults = await db.getHitsResults(this.id, opponent, row, col);
     
-        if (Number(hitResults) === 1) {
+        if (Number(hitResults.hits) === 1) {
             const timestamp = new Date(Date.now());
             await db.insertIntoShots(this.id, player, row, col, true, timestamp);
     

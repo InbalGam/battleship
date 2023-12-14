@@ -4,10 +4,12 @@ import { Failure, Success } from "../models/Result";
 const multer = require('multer');
 const path = require('path');
 import * as db from '../db';
+import * as pf from '../phasesFuncs';
 import { NextFunction, Response } from 'express';
 import User from "../models/User";
 import Game from "../models/Game";
 import { FinalResults } from "../models/GameManager";
+import ShipManager from "../models/ShipManager";
 
 
 interface ProfileUpdateBody {
@@ -19,6 +21,26 @@ interface ProfileUpdateBody {
 interface GameBody {
     opponent: string;
     dimension: number;
+}
+
+
+interface ShipBody {
+    ship_size: number;
+    start_row: number;
+    start_col: number;
+    end_row: number;
+    end_col: number;
+}
+
+
+interface ShotBody {
+    row: number;
+    col: number;
+}
+
+
+interface ChatMsg {
+    message: string;
 }
 
 
@@ -37,23 +59,32 @@ gameRouter.use(['/', '/profile'], (req, res: Response, next: NextFunction) => {
 
 
 gameRouter.use('/games/:game_id', async (req, res: Response, next: NextFunction) => {
-    try {
-        const user = req.user as User;
-        const gameManager = await user.getGameManager();
-        const game = await gameManager.getGameById(req.params.game_id);
-        if (game instanceof Failure) {
-            return res.status(game.status).json({msg: game.msg});
-        }
-        const userGame = game as Success<Game>;
-
-        if (userGame.result.user1 !== user.id && userGame.result.user2 !== user.id) {
-            return res.status(400).json({ msg: 'User not part of game' });
-        }
-        req.game = userGame.result;
-        next();
-    } catch (e) {
-        res.status(500).json({ msg: 'Server error' });
+    const user = req.user as User;
+    const gameManager = await user.getGameManager();
+    const game = await gameManager.getGameById(req.params.game_id);
+    if (game instanceof Failure) {
+        return res.status(game.status).json({msg: game.msg});
     }
+    const userGame = game as Success<Game>;
+
+    if (userGame.result.user1 !== user.id && userGame.result.user2 !== user.id) {
+        return res.status(400).json({ msg: 'User not part of game' });
+    }
+    req.game = userGame.result;
+    next();
+});
+
+
+gameRouter.use('/games/:game_id/place', async (req, res: Response, next: NextFunction) => {
+    const user = req.user as User;
+    const game = req.game as Game;
+    const gameShipManager = game.getGameShipManager(user.id);
+    if (!(gameShipManager instanceof ShipManager)) {
+        return res.status(400).json({msg: gameShipManager});
+    }
+    const shipManager = gameShipManager as ShipManager;
+    req.shipManager = shipManager;
+    next();
 });
 
 
@@ -117,7 +148,6 @@ const imageUpload = multer({
 gameRouter.post('/image',
     imageUpload.single('image'),
     async (req, res) => {
-        //console.log(req.file);
         try {
             const result = await db.insertImage(req);
             res.status(200).json(result[0]);
@@ -192,6 +222,104 @@ gameRouter.delete('/games/:game_id', async (req, res: Response) => {
         return res.status(result.status).json({msg: result.msg});
     }
     return res.status(200).json({msg: 'game deleted by opponent'});
+});
+
+
+// Placing ships
+gameRouter.post('/games/:game_id/place', async (req, res: Response) => {
+    const { ship_size, start_row, start_col, end_row, end_col }: ShipBody = req.body;
+    const user = req.user as User;
+    const shipManager = req.shipManager as ShipManager;
+    const result = await shipManager.placeShip(user.id, ship_size, start_row, end_row, start_col, end_col);
+    if (result instanceof Failure) {
+        return res.status(result.status).json({msg: result.msg});
+    }
+    const finalResult = result as Success<string>;
+    return res.status(200).json({msg: finalResult.result});
+});
+
+
+// Unplace a ship
+gameRouter.delete('/games/:game_id/place', async (req, res: Response) => {
+    const { ship_size, start_row, start_col, end_row, end_col }: ShipBody = req.body;
+    const user = req.user as User;
+    const shipManager = req.shipManager as ShipManager;
+    const result = await shipManager.unplaceShip(user.id, ship_size, start_row, end_row, start_col, end_col);
+    if (result instanceof Failure) {
+        return res.status(result.status).json({msg: result.msg});
+    }
+    const finalResult = result as Success<string>;
+    return res.status(200).json({msg: finalResult.result});
+});
+
+
+// Game state change to ready / turn
+gameRouter.post('/games/:game_id/ready', async (req, res: Response) => {
+    const user = req.user as User;
+    const game = req.game as Game;
+    const result = await game.userIsReady(user.id);
+    if (result instanceof Failure) {
+        return res.status(result.status).json({msg: result.msg});
+    }
+    return res.status(200).json({msg: 'game state updated'});
+});
+
+
+// Player performs a shot
+gameRouter.post('/games/:game_id/shoot', async (req, res: Response) => {
+    const { row, col }: ShotBody = req.body;
+    const user = req.user as User;
+    const game = req.game as Game;
+    const shotResult = await game.userShoot(user.id, row, col);
+    if (shotResult instanceof Failure) {
+        return res.status(shotResult.status).json({msg: shotResult.msg});
+    }
+    const shot = shotResult as Success<string>;
+    return res.status(200).json({msg: shot.result});
+});
+
+
+// Chat api
+gameRouter.post('/games/:game_id/chat', async (req, res: Response) => {
+    const { message }: ChatMsg = req.body;
+    if (!message) {
+        return res.status(400).json({msg: 'Cannot send an empty message'});
+    }
+
+    const user = req.user as User;
+    const game = req.game as Game;
+    const chatManager = game.getGameChatManager();
+    const chatResult = await chatManager.postNewGameMsg(user.id, message);
+    if (chatResult instanceof Failure) {
+        return res.status(chatResult.status).json({msg: chatResult.msg});
+    }
+    const result = chatResult as Success<string>;
+    return res.status(200).json({msg: result.result});
+});
+
+
+gameRouter.get('/games/:game_id/chat', async (req, res: Response) => {
+    const game = req.game as Game;
+    const chatManager = game.getGameChatManager();
+    const chatResult = await chatManager.getGameChat();
+    if (chatResult instanceof Failure) {
+        return res.status(chatResult.status).json({msg: chatResult.msg});
+    }
+    const result = chatResult as Success<db.Chat[]>;
+    return res.status(200).json(result.result);
+});
+
+
+// Getting game info
+gameRouter.get('/games/:game_id', async (req, res: Response) => {
+    const user = req.user as User;
+    const game = req.game as Game;
+    const result = await game.getGameInfo(user.id);
+    if (result instanceof Failure) {
+        return res.status(result.status).json({msg: result.msg});
+    }
+    const gameInfo = result as Success<pf.Waiting | pf.Winner | pf.PlacingShips | pf.GamePlay>
+    return res.status(200).json(gameInfo.result);
 });
 
 

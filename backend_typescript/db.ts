@@ -105,6 +105,11 @@ interface ShipSize {
 }
 
 
+interface Hits {
+  hits: string;
+}
+
+
 export interface Img {
   id: number;
   filename: string;
@@ -224,7 +229,7 @@ export async function getUserShots(gameId: number, userId: number): Promise<Shot
 };
 
 
-export async function getHitsResults(id: number, opponent: number, row: number, col: number): Promise<number> {
+export async function getHitsResults(id: number, opponent: number, row: number, col: number): Promise<Hits> {
   const results = await pool.query(`select sum(case when $3 >= start_row and $3 <= end_row and $4 >= start_col and $4 <= end_col then 1 else 0 end) as hits from ships where game_id = $1 and user_id = $2`,
     [id, opponent, row, col]);
   return results.rows[0];

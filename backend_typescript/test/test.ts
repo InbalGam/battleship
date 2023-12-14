@@ -250,7 +250,7 @@ describe('Check Game general funcs', () => {
 describe('Check Delete game', () => {
     it('should delete game', async () => {
         const game = new Game(1, 1, 2, 10, 'invited');
-        const result = await game.deleteGame();
+        const result = await game.deleteGame(2);
         expect(result).to.be.an.instanceof(Success);
         expect(result).to.have.property("result").to.equal('Game deleted');
     });
@@ -260,7 +260,7 @@ describe('Check Delete game', () => {
 describe('Check Game update state funcs', () => {
     it('should accept game', async () => {
         const game = new Game(18, 8, 5, 10, 'invited');
-        const response = await game.acceptGame();
+        const response = await game.acceptGame(5);
         const result = response as Success<Game>;
         expect(response).to.be.an.instanceof(Success);
         expect(result.result).to.have.property("state").to.equal('accepted');
