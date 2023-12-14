@@ -7,7 +7,7 @@ import GameManager from "../models/GameManager";
 import Game from "../models/Game";
 import { GamePlay, PlacingShips, Waiting, Winner } from "../phasesFuncs";
 import ShipManager from "../models/ShipManager";
-/*
+
 // UserManager tests
 describe('Register users', () => {
     it('should NOT register- not a valid email', async () => {
@@ -102,20 +102,20 @@ describe('Get user by ID', () => {
 // User tests
 describe('Get user information', () => {
     it('should get user Id', () => {
-        const user = new User(1, 'inbal@gmail.com', 'inbal');
+        const user = new User(1, 'inbal@gmail.com', 'inbal', 2, 0, null, null);
         const result = user.getUserId();
         expect(result).to.be.a("number");
         expect(result).to.equal(1);
     });
 
     it('should get username', () => {
-        const user = new User(1, 'inbal@gmail.com', 'inbal');
+        const user = new User(1, 'inbal@gmail.com', 'inbal', 2, 0, null, null);
         const result = user.getUsername();
         expect(result).to.equal('inbal@gmail.com');
     });
 
     it('should get nickname', () => {
-        const user = new User(1, 'inbal@gmail.com', 'inbal');
+        const user = new User(1, 'inbal@gmail.com', 'inbal', 2, 0, null, null);
         const result = user.getNickname();
         expect(result).to.equal('inbal');
     });
@@ -123,7 +123,7 @@ describe('Get user information', () => {
 
 describe('Get user game manager', () => {
     it('should get game manager', () => {
-        const user = new User(1, 'inbal@gmail.com', 'inbal');
+        const user = new User(1, 'inbal@gmail.com', 'inbal', 2, 0, null, null);
         const result = user.getGameManager();
         expect(result).to.be.an.instanceof(GameManager);
     });
@@ -132,7 +132,7 @@ describe('Get user game manager', () => {
 
 describe('Update user profile', () => {
     it('should update profile', async () => {
-        const user = new User(1, 'inbal@gmail.com', 'inbal');
+        const user = new User(1, 'inbal@gmail.com', 'inbal', 2, 0, null, null);
         const result = await user.updateProfile(null, 'InbalNew');
         const final = (result as Success<User>).result;
         expect(final).to.be.an.instanceof(User);
@@ -176,13 +176,13 @@ describe('Check GameManager functionality', () => {
 
     it ('should create new game', async () => {
         const gameManager = new GameManager(1);
-        const newGame = await gameManager.createGame(2, 10);
+        const newGame = await gameManager.createGame('inbalgam@gmail.com', 10);
         const final = (newGame as Success<Game>).result;
         expect(final).to.be.an.instanceof(Game);
         expect(final).to.have.property("id").to.equal(23);
     });
 });
-*/
+
 
 // Game tests
 describe('Check Game class getGameInfo function', () => {
