@@ -35,9 +35,6 @@ export default class User {
     }
 
     async updateProfile(imgId: number | null, nickname: string): Promise<Result<User>> {
-        if (!nickname) {
-            return new Failure('Nickname must be specified', 400);
-        }
         this.nickname = nickname;
         const timestamp: Date = new Date(Date.now());
         try {

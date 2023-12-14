@@ -95,8 +95,8 @@ const authRouter = require('./server/authApi');
 app.use('/', authRouter);
 
 // // Start app routers
-// const gameRouter = require('./server/gameApi');
-// app.use('/', gameRouter);
+const gameRouter = require('./server/gameApi');
+app.use('/', gameRouter);
 
 // start the server listening at PORT below:
 app.listen(PORT, () => {

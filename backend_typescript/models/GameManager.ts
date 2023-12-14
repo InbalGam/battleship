@@ -11,7 +11,7 @@ interface InvitedGames {
 }
 
 
-interface FinalResults {
+export interface FinalResults {
     user_score: db.UserScore;
     invitations: InvitedGames[];
     active_games: db.ActiveGames[];
@@ -92,10 +92,14 @@ export default class GameManager {
         }
     }
  
-    async createGame(opponentId: number, dimension: number): Promise<Result<Game>> {
+    async createGame(opponent: string, dimension: number): Promise<Result<Game>> {
         try {
+            const check = await db.getUserByUsername(opponent);
+            if (!check) {
+                new Failure('User does not exists', 400);
+            }
             const timestamp: Date = new Date(Date.now());
-            const game = await db.createGame(this.userId, opponentId, dimension, 'invited', timestamp);
+            const game = await db.createGame(this.userId, check.id, dimension, 'invited', timestamp);
             return new Success(new Game(game.id, game.user1, game.user2, game.dimension, game.state));
         } catch (e) {
             return new Failure('Server error', 500);

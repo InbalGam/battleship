@@ -27,7 +27,7 @@ class UserManager {
             const hashedPassword = await (0, hash_1.passwordHash)(password, 10);
             const timestamp = new Date(Date.now());
             const user = await db.insertToUsers(username, nickname, hashedPassword, timestamp);
-            return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+            return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
         }
         catch (e) {
             console.log(e);
@@ -44,7 +44,7 @@ class UserManager {
             if (!passwordCheck) {
                 return new Result_1.Failure('Passwords did not match', 401);
             }
-            return new Result_1.Success(new User_1.default(check.id, check.username, check.nickname));
+            return new Result_1.Success(new User_1.default(check.id, check.username, check.nickname, check.wins, check.loses, check.image_id, check.imagename));
         }
         catch (e) {
             return new Result_1.Failure('Server error', 500);
@@ -57,14 +57,14 @@ class UserManager {
                 const timestamp = new Date(Date.now());
                 const user = await db.insertToUsers(username, nickname, null, timestamp);
                 await db.insertFederatedCredentials(user.id, issuer, profile_id);
-                return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+                return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
             }
             else {
                 const user = await db.getUserById(check[0].user_id);
                 if (!user) {
                     return new Result_1.Failure('User was not found', 400);
                 }
-                return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+                return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
             }
         }
         catch (e) {
@@ -77,7 +77,7 @@ class UserManager {
             if (!user) {
                 return new Result_1.Failure('User was not found', 400);
             }
-            return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname));
+            return new Result_1.Success(new User_1.default(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
         }
         catch (e) {
             return new Result_1.Failure('Server error', 500);

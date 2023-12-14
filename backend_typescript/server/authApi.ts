@@ -33,7 +33,7 @@ authRouter.get("/login", (req: Request, res: Response) => {
 authRouter.post("/login",
     passport.authenticate("local", { failureRedirect: "/login" }),
     (req, res) => {
-      res.redirect("/bots");
+        res.redirect("/profile");
     }
 );
 

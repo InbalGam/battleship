@@ -97,27 +97,47 @@ export default class Game {
         }
     }
 
+    private verifyAcceptDecline(reqUserId: number): string {
+        if (reqUserId !== this.user2) {
+            return 'You are not the correct opponent player';
+        }
+        if (this.state !== 'invited') {
+            return 'Cannot accept or delete an active game';
+        }
+        return 'Action can be made';
+    }
+
     private async updateGameState(state: string): Promise<Game> {
         this.state = state;
         const game = await db.updateGameState(this.id, this.state);
         return new Game(game.id, game.user1, game.user2, game.dimension, game.state);
     }
 
-    async deleteGame(): Promise<Result<string>> {
-        try {
-            await db.deleteGame(this.id);
-            return new Success('Game deleted');
-        } catch (e) {
-            return new Failure('Server error', 500);
+    async deleteGame(reqUserId: number): Promise<Result<string>> {
+        const result = this.verifyAcceptDecline(reqUserId);
+        if (result === 'Action can be made') {
+            try {
+                await db.deleteGame(this.id);
+                return new Success('Game deleted');
+            } catch (e) {
+                return new Failure('Server error', 500);
+            }
+        } else {
+            return new Failure(result, 401);
         }
     }
 
-    async acceptGame(): Promise<Result<Game>> {
-        try {
-            const game = await this.updateGameState('accepted');
-            return new Success(game);
-        } catch (e) {
-            return new Failure('Server error', 500);
+    async acceptGame(reqUserId: number): Promise<Result<Game>> {
+        const result = this.verifyAcceptDecline(reqUserId);
+        if (result === 'Action can be made') {
+            try {
+                const game = await this.updateGameState('accepted');
+                return new Success(game);
+            } catch (e) {
+                return new Failure('Server error', 500);
+            }
+        } else {
+            return new Failure(result, 401);
         }
     }
 
