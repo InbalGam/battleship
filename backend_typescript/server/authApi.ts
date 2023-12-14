@@ -20,7 +20,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     } else if (result instanceof Success) {
-        return res.status(201).json(result.result);
+        return res.status(201).json({msg: 'Success creating user'});
     }
 });
 

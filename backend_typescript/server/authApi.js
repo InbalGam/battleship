@@ -13,7 +13,7 @@ authRouter.post('/register', async (req, res) => {
         return res.status(result.status).json({ msg: result.msg });
     }
     else if (result instanceof Result_1.Success) {
-        return res.status(201).json(result.result);
+        return res.status(201).json({ msg: 'Success creating user' });
     }
 });
 // Login a user - local strategy
