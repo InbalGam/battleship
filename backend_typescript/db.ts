@@ -264,8 +264,8 @@ export async function getGameShots(id: number, gameOpponent: number): Promise<Sh
 };
 
 
-export async function insertImage(req): Promise<Img> {
-  const result =  await pool.query('insert into image_files (filename, filepath, mimetype, size) values ($1, $2, $3, $4) returning *', [req.file.filename, req.file.path, req.file.mimetype, req.file.size]);
+export async function insertImage(filename: string, path: string, mimetype: string, size: number): Promise<Img> {
+  const result =  await pool.query('insert into image_files (filename, filepath, mimetype, size) values ($1, $2, $3, $4) returning *', [filename, path, mimetype, size]);
   return result.rows[0];
 };
 

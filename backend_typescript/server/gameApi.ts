@@ -149,8 +149,8 @@ gameRouter.post('/image',
     imageUpload.single('image'),
     async (req, res) => {
         try {
-            const result = await db.insertImage(req);
-            res.status(200).json(result[0]);
+            const result = await db.insertImage(req.file.filename, req.file.path, req.file.mimetype, req.file.size);
+            res.status(200).json(result);
         } catch (e) {
             console.log(e);
             res.status(500).json({ msg: 'Server error' });

@@ -94,9 +94,10 @@ const imageUpload = multer({
 });
 // Image Upload Routes
 gameRouter.post('/image', imageUpload.single('image'), async (req, res) => {
+    console.log(req.file.filename);
     try {
-        const result = await db.insertImage(req);
-        res.status(200).json(result[0]);
+        const result = await db.insertImage(req.file.filename, req.file.path, req.file.mimetype, req.file.size);
+        res.status(200).json(result);
     }
     catch (e) {
         console.log(e);
