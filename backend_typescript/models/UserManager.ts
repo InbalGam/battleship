@@ -28,7 +28,7 @@ export default class UserManager {
             const hashedPassword = await passwordHash(password, 10);
             const timestamp: Date = new Date(Date.now());
             const user = await db.insertToUsers(username, nickname, hashedPassword, timestamp);
-            return new Success(new User(user.id, user.username, user.nickname));
+            return new Success(new User(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
         } catch(e) {
             console.log(e);
             return new Failure('Server error', 500);
@@ -47,7 +47,7 @@ export default class UserManager {
                 return new Failure('Passwords did not match', 401);
             }
 
-            return new Success(new User(check.id, check.username, check.nickname));
+            return new Success(new User(check.id, check.username, check.nickname, check.wins, check.loses, check.image_id, check.imagename));
         } catch (e) {
             return new Failure('Server error', 500);
         }
@@ -60,13 +60,13 @@ export default class UserManager {
                 const timestamp: Date = new Date(Date.now());
                 const user = await db.insertToUsers(username, nickname, null, timestamp);
                 await db.insertFederatedCredentials(user.id, issuer, profile_id);
-                return new Success(new User(user.id, user.username, user.nickname));
+                return new Success(new User(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
             } else {
                 const user = await db.getUserById(check[0].user_id);
                 if (!user) {
                     return new Failure('User was not found', 400);
                 }
-                return new Success(new User(user.id, user.username, user.nickname));
+                return new Success(new User(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
             }
         } catch (e) {
             return new Failure('Server error', 500);
@@ -79,7 +79,7 @@ export default class UserManager {
             if (!user) {
                 return new Failure('User was not found', 400);
             }
-            return new Success(new User(user.id, user.username, user.nickname));
+            return new Success(new User(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
         } catch (e) {
             return new Failure('Server error', 500);
         }

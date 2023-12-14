@@ -6,11 +6,19 @@ export default class User {
     id: number;
     username: string;
     nickname: string;
+    wins: number;
+    loses: number;
+    imgId: number | null;
+    imgName: string | null;
     private gameManager: GameManager;
-    constructor(id: number, username: string, nickname: string) {
+    constructor(id: number, username: string, nickname: string, wins: number, loses: number, imgId: number | null, imgName: string | null) {
         this.id = id;
         this.username = username;
         this.nickname = nickname;
+        this.wins = wins;
+        this.loses = loses;
+        this.imgId = imgId;
+        this.imgName = imgName;
         this.gameManager = new GameManager(this.id);
     }
 
@@ -34,7 +42,7 @@ export default class User {
         const timestamp: Date = new Date(Date.now());
         try {
             const user = await db.updateProfile(this.id, this.nickname, imgId, timestamp);
-            return new Success(new User(user.id, user.username, user.nickname));
+            return new Success(new User(user.id, user.username, user.nickname, user.wins, user.loses, user.image_id, user.imagename));
         } catch(e) {
             return new Failure('Server error', 500);
         }
