@@ -3,7 +3,7 @@ import * as db from '../db';
 
 
 export default class ChatManager {
-    gameId: number;
+    private gameId: number;
     constructor(gameId: number) {
         this.gameId = gameId;
     }

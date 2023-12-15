@@ -12,12 +12,14 @@ export default class Game {
     user2: number;
     dimension: number;
     state: string;
+    private chatManager: ChatManager;
     constructor(id: number, user1: number, user2: number, dimension: number, state: string) {
         this.id = id;
         this.user1 = user1;
         this.user2 = user2;
         this.dimension = dimension;
         this.state = state;
+        this.chatManager = new ChatManager(id);
     }
 
     getGameId(): number {
@@ -40,7 +42,7 @@ export default class Game {
         return this.state;
     }
 
-    getGameShipManager(reqUserId: number): ShipManager | string {
+    getGameShipManager(reqUserId: number): Result<ShipManager> {
         if (this.state === 'accepted' || this.state === 'user1_ready' || this.state === 'user2_ready') {
             return new ShipManager(this.id, reqUserId);
         } else {
@@ -49,7 +51,7 @@ export default class Game {
     }
 
     getGameChatManager(): ChatManager {
-        return new ChatManager(this.id);
+        return this.chatManager;
     }
 
     async getGameInfo(reqUserId: number): Promise<Result<pf.Waiting | pf.Winner | pf.PlacingShips | pf.GamePlay>> {

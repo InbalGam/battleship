@@ -43,7 +43,7 @@ interface FederatedCredentialsInfo {
 };
 
 
-export interface ActiveGames {
+export interface ActiveGame {
   game_id: number;
   opponent: string;
   board_dimension: number;
@@ -52,7 +52,7 @@ export interface ActiveGames {
 }
 
 
-export interface OtherGames {
+export interface OtherGame {
   id: number;
   user1: number;
   user2: number;
@@ -171,7 +171,7 @@ export async function getUserScore(id: number): Promise<UserScore> {
 
 
 
-export async function getActiveGameData(id: number, state1: string, state2: string): Promise<ActiveGames[]> {
+export async function getActiveGameData(id: number, state1: string, state2: string): Promise<ActiveGame[]> {
   const result = await pool.query(`select g.id as game_id, u.nickname as opponent, dimension as board_dimension, sum(case when s.user_id = $1 and s.hit = true then 1 else 0 end) as hits,
         sum(case when s.user_id <> $1 and s.hit = true then 1 else 0 end) as bombed from games g left join shots s on g.id = s.game_id join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 
         where (user1 = $1 or user2 = $1) and (g.state = $2 or g.state = $3) group by 1,2,3`,
@@ -180,7 +180,7 @@ export async function getActiveGameData(id: number, state1: string, state2: stri
 };
 
 
-export async function getOtherGamesData(id: number, state1: string, state2: string, state3: string, state4: string): Promise<OtherGames[]> {
+export async function getOtherGamesData(id: number, state1: string, state2: string, state3: string, state4: string): Promise<OtherGame[]> {
   const result = await pool.query(`select g.id, g.user1, g.user2, u.nickname as opponent, g.dimension, state
         from games g join users u on (u.id = g.user1 or u.id = g.user2) and u.id <> $1 where (user1 = $1 or user2 = $1) and (state = $2 or state = $3 or state = $4 or state = $5) order by g.created_at`,
         [id, state1, state2, state3, state4]);

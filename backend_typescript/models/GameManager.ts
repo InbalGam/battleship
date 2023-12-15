@@ -14,7 +14,7 @@ interface InvitedGames {
 export interface FinalResults {
     user_score: db.UserScore;
     invitations: InvitedGames[];
-    active_games: db.ActiveGames[];
+    active_games: db.ActiveGame[];
 }
 
 
@@ -25,7 +25,7 @@ export default class GameManager {
     }
 
     async getUserGames(): Promise<Result<FinalResults>> {
-        let activeGames: db.ActiveGames[] = [];
+        let activeGames: db.ActiveGame[] = [];
         let gameInvitations: InvitedGames[] = [];
 
         try {
