@@ -142,7 +142,7 @@ export default class Game {
         }
         try {
             const game = await this.updateGameState('accepted');
-            return new Success(game);
+            return game;
         } catch (e) {
             return new Failure('Server error', 500);
         }

@@ -164,7 +164,7 @@ describe('Check GameManager functionality', () => {
 
     it('should NOT get game- wrong id', async () => {
         const gameManager = new GameManager(1);
-        const games = await gameManager.getGameById(100);
+        const games = await gameManager.getGameById(100, 1);
         expect(games).to.be.an.instanceof(Failure);
         expect(games).to.have.property("msg").to.equal('Game does not exists');
         expect(games).to.have.property("status").to.equal(400);
@@ -172,7 +172,7 @@ describe('Check GameManager functionality', () => {
 
     it('should get game by Id', async () => {
         const gameManager = new GameManager(1);
-        const game = await gameManager.getGameById(1);
+        const game = await gameManager.getGameById(1, 1);
         const final = (game as Success<Game>).result;
         expect(final).to.be.an.instanceof(Game);
         expect(final).to.have.property("id").to.equal(1);
@@ -180,7 +180,7 @@ describe('Check GameManager functionality', () => {
 
     it ('should create new game', async () => {
         const gameManager = new GameManager(1);
-        const newGame = await gameManager.createGame('inbalgam@gmail.com', 10);
+        const newGame = await gameManager.createGame('inbalgam@gmail.com', 10, 'inbal@gmail.com');
         const final = (newGame as Success<Game>).result;
         expect(final).to.be.an.instanceof(Game);
         expect(final).to.have.property("id").to.equal(23);
@@ -266,6 +266,7 @@ describe('Check Game update state funcs', () => {
         const game = new Game(18, 8, 5, 10, 'invited');
         const response = await game.acceptGame(5);
         const result = response as Success<Game>;
+        console.log(result);
         expect(response).to.be.an.instanceof(Success);
         expect(result.result).to.have.property("state").to.equal('accepted');
     });
@@ -702,7 +703,7 @@ describe('Update a game', function() {
         .then(() => {
             return agent
             .put('/games/5')
-            .expect(401)
+            .expect(400)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'You are not the correct opponent player'});
             });
@@ -719,7 +720,7 @@ describe('Update a game', function() {
         .then(() => {
             return agent
             .put('/games/4')
-            .expect(401)
+            .expect(400)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'Cannot accept or delete an active game'});
             });
@@ -771,7 +772,7 @@ describe('Delete a game', function() {
         .then(() => {
             return agent
             .delete('/games/6')
-            .expect(401)
+            .expect(400)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'You are not the correct opponent player'});
             });
@@ -788,7 +789,7 @@ describe('Delete a game', function() {
         .then(() => {
             return agent
             .delete('/games/4')
-            .expect(401)
+            .expect(400)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'Cannot accept or delete an active game'});
             });
@@ -1072,7 +1073,7 @@ describe('Performing a shot', function() {
             return agent
             .post('/games/4/shoot')
             .send({row: 3, col: 4})
-            .expect(400)
+            .expect(401)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
             });
@@ -1147,7 +1148,7 @@ describe('Sending a message in chat', function() {
             return agent
             .post('/games/4/chat')
             .send({message: 'hello'})
-            .expect(400)
+            .expect(401)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
             });
@@ -1184,7 +1185,7 @@ describe('Getting game chat messages', function() {
         .then(() => {
             return agent
             .get('/games/4/chat')
-            .expect(400)
+            .expect(401)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
             });
@@ -1217,7 +1218,7 @@ describe('Getting game info', function() {
         .then(() => {
             return agent
             .get('/games/4')
-            .expect(400)
+            .expect(401)
             .then((response) => {
                 expect(response.body).to.be.deep.equal({msg: 'User not part of game'});
             });
