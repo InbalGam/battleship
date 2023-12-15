@@ -9,3 +9,5 @@ public/js/bundle.js.map
 # tests sql files
 test/db.sql
 test/delete_all.sql
+
+*.js
