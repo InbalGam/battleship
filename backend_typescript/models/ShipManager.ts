@@ -83,7 +83,7 @@ export default class ShipManager {
                     await db.placeAShip(this.gameId, reqUserId, ship_size, start_row, start_col, end_row, end_col);
                     return new Success(`Placed a ship of size ${ship_size}`);
                 } else {
-                    const isShipClose = ships.some(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship) === 1);
+                    const isShipClose = ships.some(ship => checkShipPlacement(start_row, end_row, start_col, end_col, ship) === true);
                     if (isShipClose) {
                         return new Failure('Ship cannot be next to another ship', 400);
                     } else {

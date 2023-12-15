@@ -60,19 +60,13 @@ gameRouter.use(['/', '/profile'], (req, res: Response, next: NextFunction) => {
 
 gameRouter.use('/games/:game_id', async (req, res: Response, next: NextFunction) => {
     const user = req.user as User;
+    const userId = user.getUserId();
     const gameManager = await user.getGameManager();
-    const game = await gameManager.getGameById(req.params.game_id);
+    const game = await gameManager.getGameById(req.params.game_id, userId);
     if (game instanceof Failure) {
         return res.status(game.status).json({msg: game.msg});
     }
     const userGame = game as Success<Game>;
-    const player = userGame.result.getPlayerId();
-    const opponent = userGame.result.getOpponentId();
-
-    const userId = user.getUserId();
-    if (player !== userId && opponent !== userId) {
-        return res.status(400).json({ msg: 'User not part of game' });
-    }
 
     req.game = userGame.result;
     req.userId = userId;
@@ -95,22 +89,18 @@ gameRouter.use('/games/:game_id/place', async (req, res: Response, next: NextFun
 
 // Get user profile page
 gameRouter.get("/profile", async (req, res: Response) => {
-    try {
-        const user = req.user as User;
-        const userData = {
-            username: user.getUsername(),
-            nickname: user.getNickname(),
-            user_score: {
-                wins: user.getWins(),
-                loses: user.getLoses()
-            },
-            imageName: user.getImgName(),
-            imgId: user.getImgId()
-        }
-        res.status(200).json(userData);
-    } catch (e) {
-        res.status(500).json({msg: 'Server error'});
+    const user = req.user as User;
+    const userData = {
+        username: user.getUsername(),
+        nickname: user.getNickname(),
+        user_score: {
+            wins: user.getWins(),
+            loses: user.getLoses()
+        },
+        imageName: user.getImgName(),
+        imgId: user.getImgId()
     }
+    res.status(200).json(userData);
 });
 
 
@@ -175,16 +165,8 @@ gameRouter.post('/games', async (req, res: Response) => {
     const {opponent, dimension}: GameBody = req.body;
     const user = req.user as User;
 
-    if (dimension !== 10 && dimension !== 20) {
-        return res.status(400).json({msg: 'Dimension must be 10 or 20'});
-    }
-
-    if (opponent === user.getUsername()) {
-        return res.status(400).json({msg: 'Opponent must not be you'});
-    }
-
     const gameManager = user.getGameManager();
-    const result = await gameManager.createGame(opponent, dimension);
+    const result = await gameManager.createGame(opponent, dimension, user.getUsername());
 
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
@@ -281,9 +263,6 @@ gameRouter.post('/games/:game_id/shoot', async (req, res: Response) => {
 // Chat api
 gameRouter.post('/games/:game_id/chat', async (req, res: Response) => {
     const { message }: ChatMsg = req.body;
-    if (!message) {
-        return res.status(400).json({msg: 'Cannot send an empty message'});
-    }
 
     const game = req.game as Game;
     const chatManager = game.getGameChatManager();

@@ -80,11 +80,14 @@ export default class GameManager {
         }
     }
 
-    async getGameById(gameId: number): Promise<Result<Game>> {
+    async getGameById(gameId: number, reqUserId: number): Promise<Result<Game>> {
         try {
             const game = await db.getGameById(gameId);
             if (!game) {
                 return new Failure('Game does not exists', 400);
+            }
+            if (game.user1 !== reqUserId && game.user2 !== reqUserId) {
+                return new Failure('User not part of game', 401);
             }
             return new Success(new Game(game.id, game.user1, game.user2, game.dimension, game.state));
         } catch (e) {
@@ -92,7 +95,15 @@ export default class GameManager {
         }
     }
  
-    async createGame(opponent: string, dimension: number): Promise<Result<Game>> {
+    async createGame(opponent: string, dimension: number, reqUserUsername: string): Promise<Result<Game>> {
+        if (dimension !== 10 && dimension !== 20) {
+            return new Failure('Dimension must be 10 or 20', 400);
+        }
+    
+        if (opponent === reqUserUsername) {
+            return new Failure('Opponent must not be you', 400);
+        }
+
         try {
             const check = await db.getUserByUsername(opponent);
             if (!check) {

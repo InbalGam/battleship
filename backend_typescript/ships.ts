@@ -31,53 +31,53 @@ export const shipAmountDimension = {
 }
 
 
-export function checkShipPlacement(start_row: number, end_row: number, start_col: number, end_col: number, shipInDb: db.Ship): number {
+export function checkShipPlacement(start_row: number, end_row: number, start_col: number, end_col: number, shipInDb: db.Ship): boolean {
     if (shipInDb.start_row === shipInDb.end_row) {
         if ((start_row === shipInDb.start_row && start_col === shipInDb.start_col) || (start_row === shipInDb.start_row && end_col === shipInDb.end_col)) {
-            return 1;
+            return true;
         }
         if ((start_row === shipInDb.start_row && start_col === (shipInDb.start_col - 1)) || (start_row === shipInDb.start_row && start_col === (shipInDb.end_col + 1))) {
-            return 1;
+            return true;
         }
 
         if (start_row === (shipInDb.start_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return 1;
+            return true;
         }
 
         if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))){
-            return 1;
+            return true;
         }
 
         if (start_row < shipInDb.start_row && end_row > shipInDb.start_row && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.end_col + 1))) {
-            return 1;
+            return true;
         }
 
         if (((start_row === (shipInDb.start_row + 1)) || (start_row === (shipInDb.start_row - 1))) && (end_col >= (shipInDb.start_col - 1) && end_col <= (shipInDb.end_col + 1))) {
-            return 1;
+            return true;
         }
     } else if (shipInDb.start_row !== shipInDb.end_row) {
         if (start_row === shipInDb.start_row && start_col === shipInDb.start_col) {
-            return 1
+            return true;
         }
         if (start_col === (shipInDb.start_col - 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return 1;
+            return true;
         }
 
         if (start_col === (shipInDb.start_col + 1) && (start_row === shipInDb.start_row || start_row === shipInDb.end_row)) {
-            return 1;
+            return true;
         }
 
         if (start_row === (shipInDb.start_row - 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return 1;
+            return true;
         }
 
         if (start_row === (shipInDb.end_row + 1) && (start_col >= (shipInDb.start_col - 1) && start_col <= (shipInDb.start_col + 1))) {
-            return 1;
+            return true;
         }
 
         if (start_col < shipInDb.start_col && end_col > shipInDb.start_col && (start_row >= (shipInDb.start_row - 1) && start_row <= (shipInDb.end_row + 1))) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 };

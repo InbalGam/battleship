@@ -18,6 +18,10 @@ export default class ChatManager {
     }
 
     async postNewGameMsg(reqUserId: number, message: string): Promise<Result<string>> {
+        if (!message) {
+            return new Failure('Cannot send an empty message', 400);
+        }
+        
         try {
             const timestamp = new Date(Date.now());
             await db.postMsgToChat(this.gameId, reqUserId, message, timestamp);
