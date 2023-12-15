@@ -3,13 +3,13 @@ import * as db from '../db';
 import GameManager from "./GameManager";
 
 export default class User {
-    id: number;
-    username: string;
-    nickname: string;
-    wins: number;
-    loses: number;
-    imgId: number | null;
-    imgName: string | null;
+    private id: number;
+    private username: string;
+    private nickname: string;
+    private wins: number;
+    private loses: number;
+    private imgId: number | null;
+    private imgName: string | null;
     private gameManager: GameManager;
     constructor(id: number, username: string, nickname: string, wins: number, loses: number, imgId: number | null, imgName: string | null) {
         this.id = id;
@@ -32,6 +32,22 @@ export default class User {
 
     getNickname(): string {
         return this.nickname;
+    }
+
+    getWins(): number {
+        return this.wins;
+    }
+
+    getLoses(): number {
+        return this.loses;
+    }
+
+    getImgId(): number | null {
+        return this.imgId;
+    }
+
+    getImgName(): string | null {
+        return this.imgName;
     }
 
     async updateProfile(imgId: number | null, nickname: string): Promise<Result<User>> {

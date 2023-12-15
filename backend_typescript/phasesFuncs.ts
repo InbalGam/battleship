@@ -1,7 +1,7 @@
 import * as db from './db';
 
 
-export interface Waiting {
+export interface GameInfo {
     opponent: string;
     opponentImage: string | null;
     player: string;
@@ -11,23 +11,16 @@ export interface Waiting {
 }
 
 
-export interface Winner {
-    opponent: string;
-    opponentImage: string | null;
-    player: string;
-    playerImage: string | null;
-    phase: string;
-    dimension: number;
+export interface Waiting extends GameInfo {
+}
+
+
+export interface Winner extends GameInfo {
     i_won: boolean;
 }
 
 
-export interface PlacingShips {
-    opponent: string;
-    opponentImage: string | null;
-    player: string;
-    playerImage: string | null;
-    phase: string;
+export interface PlacingShips extends GameInfo {
     remaining_ships: string[];
     placed_ships: {
         ship_size: number,
@@ -36,16 +29,10 @@ export interface PlacingShips {
         end_row: number,
         end_col: number
     }[];
-    dimension: number;
 }
 
 
-export interface GamePlay {
-    opponent: string;
-    opponentImage: string | null;
-    player: string;
-    playerImage: string | null;
-    phase: string;
+export interface GamePlay extends GameInfo {
     my_turn: boolean;
     placed_ships: {
         ship_size: number,
@@ -56,7 +43,6 @@ export interface GamePlay {
     }[];
     shots_sent: {row: number, col: number, hit: boolean}[];
     shots_recieved: {row: number, col: number, hit: boolean}[];
-    dimension: number;
 }
 
 

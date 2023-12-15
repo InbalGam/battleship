@@ -4,8 +4,8 @@ import { shipsAmount, checkShipPlacement } from '../ships';
 
 
 export default class ShipManager {
-    gameId: number;
-    userId: number;
+    private gameId: number;
+    private userId: number;
     constructor(gameId: number, userId: number) {
         this.gameId = gameId;
         this.userId = userId;

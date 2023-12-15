@@ -8,7 +8,7 @@ import * as pf from '../phasesFuncs';
 import { NextFunction, Response } from 'express';
 import User from "../models/User";
 import Game from "../models/Game";
-import { FinalResults } from "../models/GameManager";
+import { UserGamesList } from "../models/GameManager";
 import ShipManager from "../models/ShipManager";
 
 
@@ -66,11 +66,16 @@ gameRouter.use('/games/:game_id', async (req, res: Response, next: NextFunction)
         return res.status(game.status).json({msg: game.msg});
     }
     const userGame = game as Success<Game>;
+    const player = userGame.result.getPlayerId();
+    const opponent = userGame.result.getOpponentId();
 
-    if (userGame.result.user1 !== user.id && userGame.result.user2 !== user.id) {
+    const userId = user.getUserId();
+    if (player !== userId && opponent !== userId) {
         return res.status(400).json({ msg: 'User not part of game' });
     }
+
     req.game = userGame.result;
+    req.userId = userId;
     next();
 });
 
@@ -78,7 +83,7 @@ gameRouter.use('/games/:game_id', async (req, res: Response, next: NextFunction)
 gameRouter.use('/games/:game_id/place', async (req, res: Response, next: NextFunction) => {
     const user = req.user as User;
     const game = req.game as Game;
-    const gameShipManager = game.getGameShipManager(user.id);
+    const gameShipManager = game.getGameShipManager(req.userId);
     if (!(gameShipManager instanceof ShipManager)) {
         return res.status(400).json({msg: gameShipManager});
     }
@@ -93,14 +98,14 @@ gameRouter.get("/profile", async (req, res: Response) => {
     try {
         const user = req.user as User;
         const userData = {
-            username: user.username,
-            nickname: user.nickname,
+            username: user.getUsername(),
+            nickname: user.getNickname(),
             user_score: {
-                wins: user.wins,
-                loses: user.loses
+                wins: user.getWins(),
+                loses: user.getLoses()
             },
-            imageName: user.imgName,
-            imgId: user.imgId
+            imageName: user.getImgName(),
+            imgId: user.getImgId()
         }
         res.status(200).json(userData);
     } catch (e) {
@@ -174,7 +179,7 @@ gameRouter.post('/games', async (req, res: Response) => {
         return res.status(400).json({msg: 'Dimension must be 10 or 20'});
     }
 
-    if (opponent === user.username) {
+    if (opponent === user.getUsername()) {
         return res.status(400).json({msg: 'Opponent must not be you'});
     }
 
@@ -196,16 +201,15 @@ gameRouter.get('/games', async (req, res: Response) => {
     if (results instanceof Failure) {
         return res.status(results.status).json({msg: results.msg});
     }
-    const finalResults = results as Success<FinalResults>;
+    const finalResults = results as Success<UserGamesList>;
     return res.status(200).json(finalResults.result);
 });
 
 
 // Update game- accept state
 gameRouter.put('/games/:game_id', async (req, res: Response) => {
-    const user = req.user as User;
     const game = req.game as Game;
-    const result = await game.acceptGame(user.id);
+    const result = await game.acceptGame(req.userId);
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     }
@@ -215,9 +219,8 @@ gameRouter.put('/games/:game_id', async (req, res: Response) => {
 
 // delete a game
 gameRouter.delete('/games/:game_id', async (req, res: Response) => {
-    const user = req.user as User;
     const game = req.game as Game;
-    const result = await game.deleteGame(user.id);
+    const result = await game.deleteGame(req.userId);
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     }
@@ -228,9 +231,8 @@ gameRouter.delete('/games/:game_id', async (req, res: Response) => {
 // Placing ships
 gameRouter.post('/games/:game_id/place', async (req, res: Response) => {
     const { ship_size, start_row, start_col, end_row, end_col }: ShipBody = req.body;
-    const user = req.user as User;
     const shipManager = req.shipManager as ShipManager;
-    const result = await shipManager.placeShip(user.id, ship_size, start_row, end_row, start_col, end_col);
+    const result = await shipManager.placeShip(req.userId, ship_size, start_row, end_row, start_col, end_col);
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     }
@@ -242,9 +244,8 @@ gameRouter.post('/games/:game_id/place', async (req, res: Response) => {
 // Unplace a ship
 gameRouter.delete('/games/:game_id/place', async (req, res: Response) => {
     const { ship_size, start_row, start_col, end_row, end_col }: ShipBody = req.body;
-    const user = req.user as User;
     const shipManager = req.shipManager as ShipManager;
-    const result = await shipManager.unplaceShip(user.id, ship_size, start_row, end_row, start_col, end_col);
+    const result = await shipManager.unplaceShip(req.userId, ship_size, start_row, end_row, start_col, end_col);
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     }
@@ -255,9 +256,8 @@ gameRouter.delete('/games/:game_id/place', async (req, res: Response) => {
 
 // Game state change to ready / turn
 gameRouter.post('/games/:game_id/ready', async (req, res: Response) => {
-    const user = req.user as User;
     const game = req.game as Game;
-    const result = await game.userIsReady(user.id);
+    const result = await game.userIsReady(req.userId);
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     }
@@ -268,9 +268,8 @@ gameRouter.post('/games/:game_id/ready', async (req, res: Response) => {
 // Player performs a shot
 gameRouter.post('/games/:game_id/shoot', async (req, res: Response) => {
     const { row, col }: ShotBody = req.body;
-    const user = req.user as User;
     const game = req.game as Game;
-    const shotResult = await game.userShoot(user.id, row, col);
+    const shotResult = await game.userShoot(req.userId, row, col);
     if (shotResult instanceof Failure) {
         return res.status(shotResult.status).json({msg: shotResult.msg});
     }
@@ -286,10 +285,9 @@ gameRouter.post('/games/:game_id/chat', async (req, res: Response) => {
         return res.status(400).json({msg: 'Cannot send an empty message'});
     }
 
-    const user = req.user as User;
     const game = req.game as Game;
     const chatManager = game.getGameChatManager();
-    const chatResult = await chatManager.postNewGameMsg(user.id, message);
+    const chatResult = await chatManager.postNewGameMsg(req.userId, message);
     if (chatResult instanceof Failure) {
         return res.status(chatResult.status).json({msg: chatResult.msg});
     }
@@ -312,13 +310,12 @@ gameRouter.get('/games/:game_id/chat', async (req, res: Response) => {
 
 // Getting game info
 gameRouter.get('/games/:game_id', async (req, res: Response) => {
-    const user = req.user as User;
     const game = req.game as Game;
-    const result = await game.getGameInfo(user.id);
+    const result = await game.getGameInfo(req.userId);
     if (result instanceof Failure) {
         return res.status(result.status).json({msg: result.msg});
     }
-    const gameInfo = result as Success<pf.Waiting | pf.Winner | pf.PlacingShips | pf.GamePlay>
+    const gameInfo = result as Success<pf.GameInfo>
     return res.status(200).json(gameInfo.result);
 });
 

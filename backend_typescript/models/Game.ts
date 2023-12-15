@@ -7,11 +7,11 @@ import ChatManager from "./ChatManager";
 
 
 export default class Game {
-    id: number;
-    user1: number;
-    user2: number;
-    dimension: number;
-    state: string;
+    private id: number;
+    private user1: number;
+    private user2: number;
+    private dimension: number;
+    private state: string;
     private chatManager: ChatManager;
     constructor(id: number, user1: number, user2: number, dimension: number, state: string) {
         this.id = id;
@@ -54,8 +54,8 @@ export default class Game {
         return this.chatManager;
     }
 
-    async getGameInfo(reqUserId: number): Promise<Result<pf.Waiting | pf.Winner | pf.PlacingShips | pf.GamePlay>> {
-        let result;
+    async getGameInfo(reqUserId: number): Promise<Result<pf.GameInfo>> {
+        let result: pf.GameInfo;
         try {
             const gameDetails = await db.getGameById(this.id);
 
@@ -91,6 +91,9 @@ export default class Game {
             } else if (gameDetails.state === 'user1_turn' || gameDetails.state === 'user2_turn') {
                 // gamePlay phase
                 result = await pf.gamePlay(gameDetails, this.id, reqUserId, gameUser, gameOpponent, opponentsInformation, playersInformation);
+            } else {
+                console.error('Unexpected phase');
+                throw new Error('Unexpected phase');
             };
 
             return new Success(result);
@@ -99,70 +102,75 @@ export default class Game {
         }
     }
 
-    private verifyAcceptDecline(reqUserId: number): string {
+    private verifyAcceptDecline(reqUserId: number): Result<void> {
         if (reqUserId !== this.user2) {
-            return 'You are not the correct opponent player';
+            return new Failure('You are not the correct opponent player', 400);
         }
         if (this.state !== 'invited') {
-            return 'Cannot accept or delete an active game';
+            return new Failure('Cannot accept or delete an active game', 400);
         }
-        return 'Action can be made';
+        return new Success(null);
     }
 
-    private async updateGameState(state: string): Promise<Game> {
-        this.state = state;
-        const game = await db.updateGameState(this.id, this.state);
-        return new Game(game.id, game.user1, game.user2, game.dimension, game.state);
+    private async updateGameState(state: string): Promise<Result<Game>> {
+        try {
+            this.state = state;
+            const game = await db.updateGameState(this.id, this.state);
+            return new Success(new Game(game.id, game.user1, game.user2, game.dimension, game.state));
+        } catch (e) {
+            return new Failure('Server error', 500);
+        }
     }
 
     async deleteGame(reqUserId: number): Promise<Result<string>> {
         const result = this.verifyAcceptDecline(reqUserId);
-        if (result === 'Action can be made') {
-            try {
-                await db.deleteGame(this.id);
-                return new Success('Game deleted');
-            } catch (e) {
-                return new Failure('Server error', 500);
-            }
-        } else {
-            return new Failure(result, 401);
+        if (result instanceof Failure) {
+            return result;
+        }
+        try {
+            await db.deleteGame(this.id);
+            return new Success('Game deleted');
+        } catch (e) {
+            return new Failure('Server error', 500);
         }
     }
 
     async acceptGame(reqUserId: number): Promise<Result<Game>> {
         const result = this.verifyAcceptDecline(reqUserId);
-        if (result === 'Action can be made') {
-            try {
-                const game = await this.updateGameState('accepted');
-                return new Success(game);
-            } catch (e) {
-                return new Failure('Server error', 500);
-            }
-        } else {
-            return new Failure(result, 401);
+        if (result instanceof Failure) {
+            return result;
+        }
+        try {
+            const game = await this.updateGameState('accepted');
+            return new Success(game);
+        } catch (e) {
+            return new Failure('Server error', 500);
         }
     }
 
     async userIsReady(reqUserId: number): Promise<Result<Game>> {
-        let game: Game;
+        let result: Result<Game>;
         try {
             if (this.state === 'accepted' || (this.user1 === reqUserId && this.state === 'user2_ready') || (this.user2 === reqUserId && this.state === 'user1_ready')) {
                 const userShips = await db.getShipsData(this.id, reqUserId);
     
                 if (shipAmountDimension[this.dimension] === userShips.length) {
                     if (this.state === 'accepted' && this.user1 === reqUserId) {
-                        game = await this.updateGameState('user1_ready');    
+                        result = await this.updateGameState('user1_ready');    
                     } else if (this.state === 'accepted' && this.user2 === reqUserId) {
-                        game = await this.updateGameState('user2_ready');  
+                        result = await this.updateGameState('user2_ready');  
                     } else if (this.state === 'user1_ready' || this.state === 'user2_ready') {
                         const gameState = ['user1_turn', 'user2_turn'];
                         const randomChoose = Math.floor(Math.random() * 2);
-                        game = await this.updateGameState(gameState[randomChoose]); 
+                        result = await this.updateGameState(gameState[randomChoose]); 
                     } else {
                         console.error('Unexpected game state or user');
                         throw new Error('Unexpected game state or user');
                     }
-                    return new Success(game);
+                    if (result instanceof Failure) {
+                        return result;
+                    }
+                    return new Success((result as Success<Game>).result);
                 } else {
                     return new Failure('Player did not finish placeing ships', 400);
                 }
@@ -196,7 +204,7 @@ export default class Game {
             if (successfullShots.length + 1 === totalShipsSizes[gameDimension]) { // check winner
                 await this.updateGameState(userWinner);
                 await db.updateUsersScores(player, opponent);
-                return 'Player performed a shot and won game';
+                return new Success('Player performed a shot and won game');
             }
         } else {
             const timestamp = new Date(Date.now());
@@ -204,7 +212,7 @@ export default class Game {
             await this.updateGameState(userTurn);
         }
     
-        return 'Player performed a shot';
+        return new Success('Player performed a shot');
     };
 
     async userShoot(reqUserId: number, row: number, col: number): Promise<Result<string>> {
@@ -222,7 +230,7 @@ export default class Game {
             if (result instanceof Failure) {
                 return result;
             }
-            return new Success(result);
+            return result;
     
         } catch (e) {
             return new Failure('Server error', 500);
